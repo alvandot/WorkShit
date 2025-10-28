@@ -175,7 +175,7 @@ class TicketController extends Controller
 
         // Update ticket status based on activity type
         $statusMap = [
-            'received' => 'Need to Receive',
+            'received' => 'In Progress',
             'on_the_way' => 'In Progress',
             'arrived' => 'In Progress',
             'start_working' => 'In Progress',
