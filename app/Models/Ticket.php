@@ -20,6 +20,7 @@ class Ticket extends Model
             'deadline' => 'datetime',
             'completed_at' => 'datetime',
             'needs_revisit' => 'boolean',
+            'visit_schedules' => 'array',
         ];
     }
 
@@ -39,6 +40,8 @@ class Ticket extends Model
         'ct_good_part',
         'bap_file',
         'needs_revisit',
+        'current_visit',
+        'visit_schedules',
         'completion_notes',
         'completed_at',
     ];

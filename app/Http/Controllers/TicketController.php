@@ -161,6 +161,11 @@ class TicketController extends Controller
      */
     public function addActivity(Request $request, Ticket $ticket)
     {
+        // Prevent adding activity to closed tickets
+        if ($ticket->status === 'Closed') {
+            return back()->withErrors(['error' => 'Cannot add activity to a closed ticket.']);
+        }
+
         $validated = $request->validate([
             'activity_type' => 'required|in:received,on_the_way,arrived,start_working,need_part,completed,revisit,status_change,note',
             'title' => 'required|string|max:255',
@@ -168,10 +173,25 @@ class TicketController extends Controller
             'activity_time' => 'required|date',
         ]);
 
+        // Update ticket status based on activity type
+        $statusMap = [
+            'received' => 'Need to Receive',
+            'on_the_way' => 'In Progress',
+            'arrived' => 'In Progress',
+            'start_working' => 'In Progress',
+            'completed' => 'Resolved',
+        ];
+
+        $newStatus = $statusMap[$validated['activity_type']] ?? $ticket->status;
+
         $ticket->activities()->create([
             ...$validated,
             'user_id' => $request->user()->id,
+            'visit_number' => $ticket->current_visit,
         ]);
+
+        // Update ticket status
+        $ticket->update(['status' => $newStatus]);
 
         return back()->with('success', 'Activity added successfully.');
     }
@@ -181,10 +201,15 @@ class TicketController extends Controller
      */
     public function complete(Request $request, Ticket $ticket)
     {
+        // Prevent completing closed tickets
+        if ($ticket->status === 'Closed') {
+            return back()->withErrors(['error' => 'Cannot complete a closed ticket.']);
+        }
+
         $validated = $request->validate([
             'ct_bad_part' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'ct_good_part' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
-            'bap_file' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'bap_file' => 'nullable|file|mimes:jpg,jpeg,png|max:20480', // Changed to jpg/jpeg/png and 20MB
             'completion_notes' => 'nullable|string',
         ]);
 
@@ -200,10 +225,17 @@ class TicketController extends Controller
             $validated['bap_file'] = $request->file('bap_file')->store('tickets/bap_files', 'public');
         }
 
+        // Update visit schedules status to completed
+        $visitSchedules = $ticket->visit_schedules ?? [];
+        if (isset($visitSchedules[$ticket->current_visit])) {
+            $visitSchedules[$ticket->current_visit]['status'] = 'completed';
+        }
+
         $ticket->update([
             ...$validated,
-            'status' => 'Resolved',
+            'status' => 'In Progress', // Keep status as In Progress instead of Resolved
             'completed_at' => now(),
+            'visit_schedules' => $visitSchedules,
         ]);
 
         // Add completion activity
@@ -213,6 +245,7 @@ class TicketController extends Controller
             'description' => $validated['completion_notes'] ?? 'Ticket work has been completed successfully.',
             'activity_time' => now(),
             'user_id' => $request->user()->id,
+            'visit_number' => $ticket->current_visit,
             'attachments' => array_filter([
                 'ct_bad_part' => $validated['ct_bad_part'] ?? null,
                 'ct_good_part' => $validated['ct_good_part'] ?? null,
@@ -228,24 +261,123 @@ class TicketController extends Controller
      */
     public function revisit(Request $request, Ticket $ticket)
     {
+        // Prevent revisit on closed tickets
+        if ($ticket->status === 'Closed') {
+            return back()->withErrors(['error' => 'Cannot revisit a closed ticket.']);
+        }
+
         $validated = $request->validate([
             'reason' => 'required|string',
         ]);
 
+        // Increment visit number (max 3 visits)
+        $nextVisit = min($ticket->current_visit + 1, 3);
+
+        // Initialize visit schedules if null
+        $visitSchedules = $ticket->visit_schedules ?? [];
+
+        // Set the new visit as pending (waiting for admin to schedule)
+        $visitSchedules[$nextVisit] = [
+            'status' => 'pending_schedule', // pending_schedule, scheduled, in_progress, completed
+            'schedule' => null,
+            'scheduled_by' => null,
+            'scheduled_at' => null,
+            'reason' => $validated['reason'],
+        ];
+
         $ticket->update([
             'needs_revisit' => true,
+            'current_visit' => $nextVisit,
             'status' => 'Need to Receive',
+            'visit_schedules' => $visitSchedules,
         ]);
 
         // Add revisit activity
         $ticket->activities()->create([
             'activity_type' => 'revisit',
-            'title' => 'Revisit Required',
+            'title' => "Revisit Required - Visit {$nextVisit}",
             'description' => $validated['reason'],
             'activity_time' => now(),
             'user_id' => $request->user()->id,
+            'visit_number' => $nextVisit,
         ]);
 
-        return back()->with('success', 'Ticket marked for revisit.');
+        return back()->with('success', "Ticket marked for revisit. Visit #{$nextVisit} is waiting for admin to schedule.");
+    }
+
+    /**
+     * Download ticket file.
+     */
+    public function downloadFile(Ticket $ticket, string $fileType)
+    {
+        // Validate file type
+        if (! in_array($fileType, ['ct_bad_part', 'ct_good_part', 'bap_file'])) {
+            abort(404, 'Invalid file type');
+        }
+
+        // Check if file exists in ticket
+        $filePath = $ticket->{$fileType};
+
+        if (! $filePath) {
+            abort(404, 'File not found');
+        }
+
+        // Get the full path
+        $fullPath = storage_path('app/public/'.$filePath);
+
+        // Check if file exists
+        if (! file_exists($fullPath)) {
+            abort(404, 'File not found on server');
+        }
+
+        // Get original filename
+        $originalName = basename($filePath);
+
+        // Set proper filename based on file type
+        $fileName = match ($fileType) {
+            'ct_bad_part' => "CT_Bad_Part_{$ticket->ticket_number}_{$originalName}",
+            'ct_good_part' => "CT_Good_Part_{$ticket->ticket_number}_{$originalName}",
+            'bap_file' => "BAP_{$ticket->ticket_number}_{$originalName}",
+            default => $originalName,
+        };
+
+        return response()->download($fullPath, $fileName);
+    }
+
+    /**
+     * Schedule a visit (admin only).
+     */
+    public function scheduleVisit(Request $request, Ticket $ticket, int $visitNumber)
+    {
+        $validated = $request->validate([
+            'schedule' => 'required|date',
+        ]);
+
+        $visitSchedules = $ticket->visit_schedules ?? [];
+
+        if (! isset($visitSchedules[$visitNumber])) {
+            return back()->withErrors(['error' => 'Visit not found']);
+        }
+
+        $visitSchedules[$visitNumber]['status'] = 'scheduled';
+        $visitSchedules[$visitNumber]['schedule'] = $validated['schedule'];
+        $visitSchedules[$visitNumber]['scheduled_by'] = $request->user()->id;
+        $visitSchedules[$visitNumber]['scheduled_at'] = now();
+
+        $ticket->update([
+            'visit_schedules' => $visitSchedules,
+        ]);
+
+        // Add activity
+        $ticket->activities()->create([
+            'activity_type' => 'status_change',
+            'title' => "Visit {$visitNumber} Scheduled",
+            'description' => 'Visit scheduled for '.date('d M Y H:i', strtotime($validated['schedule'])),
+            'activity_time' => now(),
+            'user_id' => $request->user()->id,
+            'visit_number' => $visitNumber,
+        ]);
+
+        return back()->with('success', "Visit #{$visitNumber} has been scheduled.");
     }
 }

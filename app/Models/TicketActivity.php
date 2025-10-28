@@ -13,6 +13,7 @@ class TicketActivity extends Model
 
     protected $fillable = [
         'ticket_id',
+        'visit_number',
         'activity_type',
         'title',
         'description',

@@ -119,23 +119,26 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 		<AppLayout>
 			<Head title="Manage Tickets" />
 
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold">MANAGE TICKET</h1>
-						<p className="text-muted-foreground mt-1">
+			<div className="space-y-8">
+				{/* Header Section */}
+				<div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl border border-primary/20">
+					<div className="space-y-2">
+						<h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+							MANAGE TICKET
+						</h1>
+						<p className="text-muted-foreground text-sm">
 							View and manage all support tickets
 						</p>
 					</div>
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-3">
 						<a href="/tickets/export">
-							<Button variant="outline">
+							<Button variant="outline" className="shadow-sm hover:shadow-md transition-shadow">
 								<Download className="mr-2 size-4" />
 								Export Excel
 							</Button>
 						</a>
 						<Link href="/tickets/create">
-							<Button>
+							<Button className="shadow-lg hover:shadow-xl transition-shadow">
 								<Plus className="mr-2 size-4" />
 								Create Ticket
 							</Button>
@@ -143,11 +146,12 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 					</div>
 				</div>
 
-				<div className="flex items-center gap-4">
-					<div className="flex items-center gap-2">
-						<span className="text-sm">Show</span>
+				{/* Filter Section */}
+				<div className="flex items-center gap-6 p-5 bg-card rounded-xl border shadow-sm">
+					<div className="flex items-center gap-3">
+						<span className="text-sm font-medium text-muted-foreground">Show</span>
 						<Select defaultValue="10">
-							<SelectTrigger className="w-20">
+							<SelectTrigger className="w-24 shadow-sm">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -157,146 +161,154 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 								<SelectItem value="100">100</SelectItem>
 							</SelectContent>
 						</Select>
-						<span className="text-sm">entries</span>
+						<span className="text-sm font-medium text-muted-foreground">entries</span>
 					</div>
 
 					<div className="flex-1" />
 
-					<Select value={status} onValueChange={handleStatusFilter}>
-						<SelectTrigger className="w-48">
-							<SelectValue placeholder="Filter by status" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All Status</SelectItem>
-							<SelectItem value="Open">Open</SelectItem>
-							<SelectItem value="Need to Receive">
-								Need to Receive
-							</SelectItem>
-							<SelectItem value="In Progress">
-								In Progress
-							</SelectItem>
-							<SelectItem value="Resolved">Resolved</SelectItem>
-							<SelectItem value="Closed">Closed</SelectItem>
-						</SelectContent>
-					</Select>
+					<div className="flex items-center gap-3">
+						<Filter className="size-4 text-muted-foreground" />
+						<Select value={status} onValueChange={handleStatusFilter}>
+							<SelectTrigger className="w-52 shadow-sm">
+								<SelectValue placeholder="Filter by status" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">All Status</SelectItem>
+								<SelectItem value="Open">Open</SelectItem>
+								<SelectItem value="Need to Receive">
+									Need to Receive
+								</SelectItem>
+								<SelectItem value="In Progress">
+									In Progress
+								</SelectItem>
+								<SelectItem value="Resolved">Resolved</SelectItem>
+								<SelectItem value="Closed">Closed</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 
 					<Input
 						type="search"
-						placeholder="Search..."
+						placeholder="Search tickets..."
 						value={search}
 						onChange={(e) => handleSearch(e.target.value)}
-						className="w-64"
+						className="w-72 shadow-sm"
 					/>
 				</div>
 
-				<div className="rounded-lg border bg-card">
+				{/* Table Section */}
+				<div className="rounded-xl border bg-card shadow-lg overflow-hidden">
 					<Table>
 						<TableHeader>
-							<TableRow>
-								<TableHead className="w-16">NO</TableHead>
-								<TableHead>NO TICKET</TableHead>
-								<TableHead>CASE ID</TableHead>
-								<TableHead>COMPANY</TableHead>
-								<TableHead>SN</TableHead>
-								<TableHead>PROBLEM</TableHead>
-								<TableHead>SCHEDULE</TableHead>
-								<TableHead>DEADLINE</TableHead>
-								<TableHead>STATUS</TableHead>
-								<TableHead className="w-32">OPTION</TableHead>
+							<TableRow className="bg-muted/50 hover:bg-muted/50">
+								<TableHead className="w-20 font-bold text-foreground">NO</TableHead>
+								<TableHead className="font-bold text-foreground">NO TICKET</TableHead>
+								<TableHead className="font-bold text-foreground">CASE ID</TableHead>
+								<TableHead className="font-bold text-foreground">COMPANY</TableHead>
+								<TableHead className="font-bold text-foreground">PROBLEM</TableHead>
+								<TableHead className="font-bold text-foreground">SCHEDULE</TableHead>
+								<TableHead className="font-bold text-foreground">STATUS</TableHead>
+								<TableHead className="w-20 font-bold text-foreground text-center">OPTION</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{tickets.data.length === 0 ? (
 								<TableRow>
 									<TableCell
-										colSpan={10}
-										className="text-center py-8 text-muted-foreground"
+										colSpan={8}
+										className="text-center py-12 text-muted-foreground"
 									>
-										No tickets found
+										<div className="flex flex-col items-center gap-3">
+											<div className="p-4 rounded-full bg-muted">
+												<Filter className="size-8 text-muted-foreground" />
+											</div>
+											<p className="text-lg font-medium">No tickets found</p>
+											<p className="text-sm">Try adjusting your search or filter to find what you're looking for.</p>
+										</div>
 									</TableCell>
 								</TableRow>
 							) : (
 								tickets.data.map((ticket, index) => (
 									<TableRow
 										key={ticket.id}
-										className="cursor-pointer hover:bg-muted/50"
+										className="cursor-pointer hover:bg-primary/5 transition-colors border-b last:border-0"
 										onClick={() => router.visit(`/tickets/${ticket.id}/timeline`)}
 									>
-										<TableCell>
+										<TableCell className="font-medium text-muted-foreground">
 											{(tickets.current_page - 1) *
 												tickets.per_page +
 												index +
 												1}
 										</TableCell>
-										<TableCell className="font-medium">
+										<TableCell className="font-semibold text-primary">
 											{ticket.ticket_number}
 										</TableCell>
-										<TableCell>
-											{ticket.case_id || '-'}
+										<TableCell className="font-medium">
+											{ticket.case_id ? (
+												<span className="px-2 py-1 rounded-md bg-secondary text-secondary-foreground text-xs font-medium">
+													{ticket.case_id}
+												</span>
+											) : (
+												<span className="text-muted-foreground">-</span>
+											)}
 										</TableCell>
-										<TableCell>{ticket.company}</TableCell>
-										<TableCell>
-											{ticket.serial_number || '-'}
-										</TableCell>
-										<TableCell className="max-w-xs truncate">
-											{ticket.problem}
-										</TableCell>
-										<TableCell>
-											{ticket.schedule
-												? format(
-														new Date(
-															ticket.schedule
-														),
-														'yyyy-MM-dd HH:mm'
-													)
-												: '-'}
+										<TableCell className="font-medium">{ticket.company}</TableCell>
+										<TableCell className="max-w-sm">
+											<div className="truncate text-sm" title={ticket.problem}>
+												{ticket.problem}
+											</div>
 										</TableCell>
 										<TableCell>
-											{ticket.deadline
-												? format(
-														new Date(
-															ticket.deadline
-														),
-														'yyyy-MM-dd HH:mm'
-													)
-												: '-'}
+											{ticket.schedule ? (
+												<div className="flex flex-col gap-1">
+													<span className="text-sm font-medium">
+														{format(new Date(ticket.schedule), 'dd MMM yyyy')}
+													</span>
+													<span className="text-xs text-muted-foreground">
+														{format(new Date(ticket.schedule), 'HH:mm')}
+													</span>
+												</div>
+											) : (
+												<span className="text-muted-foreground">-</span>
+											)}
 										</TableCell>
 										<TableCell>
 											<Badge
-												className={
-													statusColors[ticket.status]
-												}
+												className={`${statusColors[ticket.status]} font-semibold px-3 py-1 shadow-sm`}
 												variant="outline"
 											>
 												{ticket.status}
 											</Badge>
 										</TableCell>
 										<TableCell>
-											<div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+											<div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
 														<Button
 															variant="ghost"
 															size="icon"
+															className="hover:bg-primary/10 hover:text-primary transition-colors"
 														>
 															<MoreVertical className="size-4" />
 														</Button>
 													</DropdownMenuTrigger>
-													<DropdownMenuContent align="end">
+													<DropdownMenuContent align="end" className="w-48">
 														<DropdownMenuItem asChild>
 															<Link
 																href={`/tickets/${ticket.id}`}
+																className="cursor-pointer"
 															>
 																<Eye className="mr-2 size-4" />
-																View
+																View Details
 															</Link>
 														</DropdownMenuItem>
 														<DropdownMenuItem asChild>
 															<Link
 																href={`/tickets/${ticket.id}/edit`}
+																className="cursor-pointer"
 															>
 																<Pencil className="mr-2 size-4" />
-																Edit
+																Edit Ticket
 															</Link>
 														</DropdownMenuItem>
 														<DropdownMenuItem
@@ -305,35 +317,13 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 																	ticket.id
 																)
 															}
-															className="text-destructive"
+															className="text-destructive focus:text-destructive cursor-pointer"
 														>
 															<Trash className="mr-2 size-4" />
 															Delete
 														</DropdownMenuItem>
 													</DropdownMenuContent>
 												</DropdownMenu>
-
-												<Link
-													href={`/tickets/${ticket.id}/edit`}
-												>
-													<Button
-														variant="ghost"
-														size="icon"
-													>
-														<Pencil className="size-4" />
-													</Button>
-												</Link>
-
-												<Link
-													href={`/tickets/${ticket.id}`}
-												>
-													<Button
-														variant="ghost"
-														size="icon"
-													>
-														<Eye className="size-4" />
-													</Button>
-												</Link>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -343,15 +333,18 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 					</Table>
 				</div>
 
+				{/* Pagination Section */}
 				{tickets.last_page > 1 && (
-					<div className="flex items-center justify-between">
-						<p className="text-sm text-muted-foreground">
-							Showing {(tickets.current_page - 1) * tickets.per_page + 1} to{' '}
-							{Math.min(
-								tickets.current_page * tickets.per_page,
-								tickets.total
-							)}{' '}
-							of {tickets.total} entries
+					<div className="flex items-center justify-between p-5 bg-card rounded-xl border shadow-sm">
+						<p className="text-sm font-medium text-muted-foreground">
+							Showing <span className="font-bold text-foreground">{(tickets.current_page - 1) * tickets.per_page + 1}</span> to{' '}
+							<span className="font-bold text-foreground">
+								{Math.min(
+									tickets.current_page * tickets.per_page,
+									tickets.total
+								)}
+							</span>{' '}
+							of <span className="font-bold text-foreground">{tickets.total}</span> entries
 						</p>
 
 						<div className="flex items-center gap-2">
@@ -366,6 +359,7 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 											onClick={() =>
 												link.url && router.get(link.url)
 											}
+											className="shadow-sm hover:shadow-md transition-shadow"
 										>
 											Previous
 										</Button>
@@ -382,6 +376,7 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 											onClick={() =>
 												link.url && router.get(link.url)
 											}
+											className="shadow-sm hover:shadow-md transition-shadow"
 										>
 											Next
 										</Button>
@@ -399,6 +394,7 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 										onClick={() =>
 											link.url && router.get(link.url)
 										}
+										className={link.active ? 'shadow-lg' : 'shadow-sm hover:shadow-md transition-shadow'}
 									>
 										{link.label}
 									</Button>

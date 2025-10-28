@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Pencil, Trash, Clock, User, Building2, Calendar } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash, Clock, User, Building2, Calendar, Download, FileText, Image as ImageIcon } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface User {
@@ -44,6 +44,11 @@ interface Ticket {
 	assigned_to: number | null
 	created_by: number | null
 	notes: string | null
+	ct_bad_part: string | null
+	ct_good_part: string | null
+	bap_file: string | null
+	completion_notes: string | null
+	completed_at: string | null
 	created_at: string
 	updated_at: string
 	assigned_to_user?: User
@@ -71,6 +76,23 @@ export default function ShowTicket({ ticket }: Props) {
 		if (confirm('Are you sure you want to delete this ticket?')) {
 			router.delete(`/tickets/${ticket.id}`)
 		}
+	}
+
+	const hasAttachments = ticket.ct_bad_part || ticket.ct_good_part || ticket.bap_file
+
+	const getFileIcon = (fileName: string | null) => {
+		if (!fileName) return <FileText className="size-5" />
+
+		const ext = fileName.split('.').pop()?.toLowerCase()
+		if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) {
+			return <ImageIcon className="size-5" />
+		}
+		return <FileText className="size-5" />
+	}
+
+	const getFileName = (filePath: string | null) => {
+		if (!filePath) return ''
+		return filePath.split('/').pop() || filePath
 	}
 
 	return (
@@ -278,6 +300,103 @@ export default function ShowTicket({ ticket }: Props) {
 												</div>
 											</div>
 										))}
+									</div>
+								</CardContent>
+							</Card>
+						)}
+
+						{hasAttachments && (
+							<Card>
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2">
+										<Download className="size-5" />
+										Uploaded Files
+									</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className="space-y-3">
+										{ticket.ct_bad_part && (
+											<div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
+												<div className="flex items-center gap-3">
+													{getFileIcon(ticket.ct_bad_part)}
+													<div>
+														<p className="font-medium text-sm">CT Bad Part</p>
+														<p className="text-xs text-muted-foreground">
+															{getFileName(ticket.ct_bad_part)}
+														</p>
+													</div>
+												</div>
+												<a
+													href={`/tickets/${ticket.id}/download/ct_bad_part`}
+													className="inline-flex"
+												>
+													<Button size="sm" variant="outline">
+														<Download className="mr-2 size-4" />
+														Download
+													</Button>
+												</a>
+											</div>
+										)}
+
+										{ticket.ct_good_part && (
+											<div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
+												<div className="flex items-center gap-3">
+													{getFileIcon(ticket.ct_good_part)}
+													<div>
+														<p className="font-medium text-sm">CT Good Part</p>
+														<p className="text-xs text-muted-foreground">
+															{getFileName(ticket.ct_good_part)}
+														</p>
+													</div>
+												</div>
+												<a
+													href={`/tickets/${ticket.id}/download/ct_good_part`}
+													className="inline-flex"
+												>
+													<Button size="sm" variant="outline">
+														<Download className="mr-2 size-4" />
+														Download
+													</Button>
+												</a>
+											</div>
+										)}
+
+										{ticket.bap_file && (
+											<div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors">
+												<div className="flex items-center gap-3">
+													{getFileIcon(ticket.bap_file)}
+													<div>
+														<p className="font-medium text-sm">BAP File</p>
+														<p className="text-xs text-muted-foreground">
+															{getFileName(ticket.bap_file)}
+														</p>
+													</div>
+												</div>
+												<a
+													href={`/tickets/${ticket.id}/download/bap_file`}
+													className="inline-flex"
+												>
+													<Button size="sm" variant="outline">
+														<Download className="mr-2 size-4" />
+														Download
+													</Button>
+												</a>
+											</div>
+										)}
+
+										{ticket.completion_notes && (
+											<>
+												<Separator className="my-4" />
+												<div>
+													<p className="text-sm font-medium text-muted-foreground mb-2">
+														Completion Notes
+													</p>
+													<p className="text-sm leading-relaxed">
+														{ticket.completion_notes}
+													</p>
+												</div>
+											</>
+										)}
 									</div>
 								</CardContent>
 							</Card>
