@@ -157,8 +157,21 @@ class TicketController extends Controller
      */
     public function timeline(Ticket $ticket): Response
     {
+        $ticket->load(['assignedTo', 'createdBy', 'activities.user']);
+
+        // Transform the data to match frontend expectations
+        $ticketData = $ticket->toArray();
+        $ticketData['assigned_to_user'] = $ticket->assignedTo;
+        $ticketData['created_by_user'] = $ticket->createdBy;
+        $ticketData['activities'] = $ticket->activities->map(function ($activity) {
+            $activityData = $activity->toArray();
+            $activityData['user'] = $activity->user;
+
+            return $activityData;
+        });
+
         return Inertia::render('tickets/timeline', [
-            'ticket' => $ticket->load(['assignedTo', 'createdBy', 'activities.user']),
+            'ticket' => $ticketData,
         ]);
     }
 

@@ -146,6 +146,12 @@ export default function ShowTicket({ ticket }: Props) {
 					</div>
 
 					<div className="flex items-center gap-2">
+						<Link href={`/tickets/${ticket.id}/timeline`}>
+							<Button variant="default">
+								<Clock className="mr-2 size-4" />
+								View Timeline
+							</Button>
+						</Link>
 						<Link href={`/tickets/${ticket.id}/edit`}>
 							<Button variant="outline">
 								<Pencil className="mr-2 size-4" />
