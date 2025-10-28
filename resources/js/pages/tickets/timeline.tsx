@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Separator } from '@/components/ui/separator'
 import {
 	Dialog,
 	DialogContent,
@@ -357,151 +356,223 @@ export default function Timeline({ ticket }: Props) {
 			<div className="space-y-6">
 				{/* Ticket Header */}
 				<div className="flex items-start justify-between">
-					<div>
-						<div className="flex items-center gap-3 mb-2">
-							<Link href="/tickets">
-								<Button variant="ghost" size="icon">
-									<ArrowLeft className="size-5" />
-								</Button>
-							</Link>
-							<h1 className="text-3xl font-bold">{ticket.company}</h1>
-							<Badge className={statusColors[ticket.status]}>
-								{ticket.status}
-							</Badge>
+					<div className="flex items-start gap-4">
+						<Link href="/tickets">
+							<Button variant="ghost" size="icon" className="mt-1">
+								<ArrowLeft className="size-5" />
+							</Button>
+						</Link>
+						<div>
+							<div className="flex items-center gap-3 mb-3">
+								<h1 className="text-3xl font-bold">{ticket.company}</h1>
+								<Badge className={statusColors[ticket.status]} variant="outline">
+									{ticket.status}
+								</Badge>
+							</div>
+							<div className="flex items-center gap-2">
+								<span className="text-sm text-muted-foreground font-medium">Ticket Number:</span>
+								<div className="badge badge-lg badge-primary badge-outline font-mono font-bold text-base px-4 py-3">
+									#{ticket.ticket_number}
+								</div>
+							</div>
 						</div>
-						<p className="text-muted-foreground mt-1">
-							{ticket.ticket_number}
-						</p>
 					</div>
 				</div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					{/* Ticket Info */}
-					<Card className="lg:col-span-1">
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<FileText className="size-5" />
-								Ticket Information
+					<Card className="lg:col-span-1 border-2 shadow-lg">
+						<CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10 border-b-2">
+							<CardTitle className="flex items-center gap-3 text-xl">
+								<div className="p-2 bg-primary rounded-lg">
+									<FileText className="size-6 text-primary-content" />
+								</div>
+								<span>Ticket Information</span>
 							</CardTitle>
-							<CardDescription>
+							<CardDescription className="text-base mt-2">
 								Details about this support ticket
 							</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="flex items-start gap-3">
-								<Building2 className="size-4 mt-1 text-muted-foreground" />
-								<div className="flex-1">
-									<p className="text-sm text-muted-foreground">Company</p>
-									<p className="font-medium">{ticket.company}</p>
+						<CardContent className="space-y-1 p-0">
+							{/* Company */}
+							<div className="hover:bg-base-200 transition-colors p-4 border-b">
+								<div className="flex items-center gap-3 mb-2">
+									<div className="p-2 bg-secondary/10 rounded-lg">
+										<Building2 className="size-5 text-secondary" />
+									</div>
+									<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Company</p>
+								</div>
+								<p className="font-bold text-lg ml-11">{ticket.company}</p>
+							</div>
+
+							{/* Case ID */}
+							<div className="hover:bg-base-200 transition-colors p-4 border-b">
+								<div className="flex items-center gap-3 mb-2">
+									<div className="p-2 bg-accent/10 rounded-lg">
+										<Hash className="size-5 text-accent" />
+									</div>
+									<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Case ID</p>
+								</div>
+								<div className="ml-11">
+									{ticket.case_id ? (
+										<span className="badge badge-lg badge-outline badge-primary font-mono font-bold">
+											{ticket.case_id}
+										</span>
+									) : (
+										<span className="text-muted-foreground italic">No case ID</span>
+									)}
 								</div>
 							</div>
-							<div className="flex items-start gap-3">
-								<Hash className="size-4 mt-1 text-muted-foreground" />
-								<div className="flex-1">
-									<p className="text-sm text-muted-foreground">Case ID</p>
-									<p className="font-medium">{ticket.case_id || '-'}</p>
+
+							{/* Serial Number */}
+							<div className="hover:bg-base-200 transition-colors p-4 border-b">
+								<div className="flex items-center gap-3 mb-2">
+									<div className="p-2 bg-info/10 rounded-lg">
+										<Hash className="size-5 text-info" />
+									</div>
+									<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Serial Number</p>
+								</div>
+								<div className="ml-11">
+									{ticket.serial_number ? (
+										<span className="badge badge-lg badge-outline badge-info font-mono font-bold">
+											{ticket.serial_number}
+										</span>
+									) : (
+										<span className="text-muted-foreground italic">Not provided</span>
+									)}
 								</div>
 							</div>
-							<div className="flex items-start gap-3">
-								<Hash className="size-4 mt-1 text-muted-foreground" />
-								<div className="flex-1">
-									<p className="text-sm text-muted-foreground">
-										Serial Number
-									</p>
-									<p className="font-medium">
-										{ticket.serial_number || '-'}
-									</p>
+
+							{/* Problem */}
+							<div className="hover:bg-base-200 transition-colors p-4 border-b">
+								<div className="flex items-center gap-3 mb-2">
+									<div className="p-2 bg-warning/10 rounded-lg">
+										<FileText className="size-5 text-warning" />
+									</div>
+									<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Problem</p>
+								</div>
+								<p className="font-medium text-base ml-11 leading-relaxed">{ticket.problem}</p>
+							</div>
+
+							{/* Assigned To */}
+							<div className="hover:bg-base-200 transition-colors p-4 border-b">
+								<div className="flex items-center gap-3 mb-2">
+									<div className="p-2 bg-success/10 rounded-lg">
+										<User className="size-5 text-success" />
+									</div>
+									<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Assigned To</p>
+								</div>
+								<div className="ml-11">
+									{ticket.assigned_to_user?.name ? (
+										<div className="flex items-center gap-2">
+											<div className="avatar placeholder">
+												<div className="bg-primary text-primary-content rounded-full w-8">
+													<span className="text-xs font-bold">
+														{ticket.assigned_to_user.name.charAt(0).toUpperCase()}
+													</span>
+												</div>
+											</div>
+											<span className="font-bold text-base">{ticket.assigned_to_user.name}</span>
+										</div>
+									) : (
+										<span className="badge badge-lg badge-ghost">Unassigned</span>
+									)}
 								</div>
 							</div>
-							<div className="flex items-start gap-3">
-								<FileText className="size-4 mt-1 text-muted-foreground" />
-								<div className="flex-1">
-									<p className="text-sm text-muted-foreground">Problem</p>
-									<p className="font-medium text-sm">{ticket.problem}</p>
-								</div>
-							</div>
-							<div className="flex items-start gap-3">
-								<User className="size-4 mt-1 text-muted-foreground" />
-								<div className="flex-1">
-									<p className="text-sm text-muted-foreground">Assigned To</p>
-									<p className="font-medium">
-										{ticket.assigned_to_user?.name || 'Unassigned'}
-									</p>
-								</div>
-							</div>
+
+							{/* Schedule */}
 							{ticket.schedule && (
-								<div className="flex items-start gap-3">
-									<Calendar className="size-4 mt-1 text-muted-foreground" />
-									<div className="flex-1">
-										<p className="text-sm text-muted-foreground">Schedule</p>
-										<p className="font-medium text-sm">
-											{format(
-												new Date(ticket.schedule),
-												'MMM dd, yyyy HH:mm'
-											)}
-										</p>
+								<div className="hover:bg-base-200 transition-colors p-4 border-b">
+									<div className="flex items-center gap-3 mb-2">
+										<div className="p-2 bg-secondary/10 rounded-lg">
+											<Calendar className="size-5 text-secondary" />
+										</div>
+										<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Schedule</p>
+									</div>
+									<div className="ml-11 flex items-center gap-2">
+										<span className="badge badge-lg badge-secondary font-semibold">
+											{format(new Date(ticket.schedule), 'MMM dd, yyyy')}
+										</span>
+										<span className="badge badge-lg badge-outline">
+											{format(new Date(ticket.schedule), 'HH:mm')}
+										</span>
 									</div>
 								</div>
 							)}
+
+							{/* Deadline */}
 							{ticket.deadline && (
-								<div className="flex items-start gap-3">
-									<Clock className="size-4 mt-1 text-muted-foreground" />
-									<div className="flex-1">
-										<p className="text-sm text-muted-foreground">Deadline</p>
-										<p className="font-medium text-sm">
-											{format(
-												new Date(ticket.deadline),
-												'MMM dd, yyyy HH:mm'
-											)}
-										</p>
+								<div className="hover:bg-base-200 transition-colors p-4">
+									<div className="flex items-center gap-3 mb-2">
+										<div className="p-2 bg-error/10 rounded-lg">
+											<Clock className="size-5 text-error" />
+										</div>
+										<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Deadline</p>
+									</div>
+									<div className="ml-11 flex items-center gap-2">
+										<span className="badge badge-lg badge-error font-semibold">
+											{format(new Date(ticket.deadline), 'MMM dd, yyyy')}
+										</span>
+										<span className="badge badge-lg badge-outline">
+											{format(new Date(ticket.deadline), 'HH:mm')}
+										</span>
 									</div>
 								</div>
 							)}
+
+
 
 							{/* Completion Documents */}
 							{ticket.completed_at &&
 								(ticket.ct_bad_part ||
 									ticket.ct_good_part ||
 									ticket.bap_file) && (
-									<>
-										<Separator className="my-4" />
-										<div className="space-y-3">
-											<p className="font-semibold flex items-center gap-2">
-												<Download className="size-4" />
+									<div className="border-t-2 border-dashed pt-4">
+										<div className="p-4 bg-success/5 rounded-lg">
+											<p className="font-bold text-base flex items-center gap-2 mb-4 text-success">
+												<Download className="size-5" />
 												Completion Documents
 											</p>
-											{ticket.ct_bad_part && (
-												<Link
-													href={`/tickets/${ticket.id}/download/ct_bad_part`}
-													className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-												>
-													<FileText className="size-4 text-muted-foreground" />
-													<span className="text-sm">CT Bad Part</span>
-													<Download className="size-4 ml-auto text-muted-foreground" />
-												</Link>
-											)}
-											{ticket.ct_good_part && (
-												<Link
-													href={`/tickets/${ticket.id}/download/ct_good_part`}
-													className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-												>
-													<FileText className="size-4 text-muted-foreground" />
-													<span className="text-sm">CT Good Part</span>
-													<Download className="size-4 ml-auto text-muted-foreground" />
-												</Link>
-											)}
-											{ticket.bap_file && (
-												<Link
-													href={`/tickets/${ticket.id}/download/bap_file`}
-													className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
-												>
-													<FileText className="size-4 text-muted-foreground" />
-													<span className="text-sm">BAP</span>
-													<Download className="size-4 ml-auto text-muted-foreground" />
-												</Link>
-											)}
+											<div className="space-y-2">
+												{ticket.ct_bad_part && (
+													<Link
+														href={`/tickets/${ticket.id}/download/ct_bad_part`}
+														className="flex items-center gap-3 p-3 rounded-lg bg-base-100 hover:bg-base-200 transition-all hover:shadow-md border border-base-300"
+													>
+														<div className="p-2 bg-primary/10 rounded-lg">
+															<FileText className="size-5 text-primary" />
+														</div>
+														<span className="text-sm font-semibold flex-1">CT Bad Part</span>
+														<Download className="size-5 text-muted-foreground" />
+													</Link>
+												)}
+												{ticket.ct_good_part && (
+													<Link
+														href={`/tickets/${ticket.id}/download/ct_good_part`}
+														className="flex items-center gap-3 p-3 rounded-lg bg-base-100 hover:bg-base-200 transition-all hover:shadow-md border border-base-300"
+													>
+														<div className="p-2 bg-success/10 rounded-lg">
+															<FileText className="size-5 text-success" />
+														</div>
+														<span className="text-sm font-semibold flex-1">CT Good Part</span>
+														<Download className="size-5 text-muted-foreground" />
+													</Link>
+												)}
+												{ticket.bap_file && (
+													<Link
+														href={`/tickets/${ticket.id}/download/bap_file`}
+														className="flex items-center gap-3 p-3 rounded-lg bg-base-100 hover:bg-base-200 transition-all hover:shadow-md border border-base-300"
+													>
+														<div className="p-2 bg-accent/10 rounded-lg">
+															<FileText className="size-5 text-accent" />
+														</div>
+														<span className="text-sm font-semibold flex-1">BAP File</span>
+														<Download className="size-5 text-muted-foreground" />
+													</Link>
+												)}
+											</div>
 										</div>
-									</>
+									</div>
 								)}
 						</CardContent>
 					</Card>
