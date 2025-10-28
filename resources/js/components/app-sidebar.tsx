@@ -1,3 +1,4 @@
+
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
 import {
@@ -38,20 +39,8 @@ const ticketingNavItems: NavItem[] = [
 		icon: Ticket,
 		items: [
 			{
-				title: 'All Tickets',
-				href: '/tickets',
-			},
-			{
 				title: 'Open',
-				href: '/tickets?status=Open',
-			},
-			{
-				title: 'In Progress',
-				href: '/tickets?status=In Progress',
-			},
-			{
-				title: 'Resolved',
-				href: '/tickets?status=Resolved',
+				href: '/tickets?status=open',
 			},
 			{
 				title: 'Closed',

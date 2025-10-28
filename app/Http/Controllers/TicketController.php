@@ -31,7 +31,13 @@ class TicketController extends Controller
 
         // Status filter
         if ($request->has('status') && $request->status) {
-            $query->where('status', $request->status);
+            if (strtolower($request->status) === 'open') {
+                // 'Open' means all tickets except Closed
+                $query->where('status', '!=', 'Closed');
+            } else {
+                // Specific status filter
+                $query->where('status', $request->status);
+            }
         }
 
         $tickets = $query->latest()->paginate(10)->withQueryString();
