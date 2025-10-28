@@ -18,6 +18,8 @@ class Ticket extends Model
         return [
             'schedule' => 'datetime',
             'deadline' => 'datetime',
+            'completed_at' => 'datetime',
+            'needs_revisit' => 'boolean',
         ];
     }
 
@@ -33,6 +35,12 @@ class Ticket extends Model
         'assigned_to',
         'created_by',
         'notes',
+        'ct_bad_part',
+        'ct_good_part',
+        'bap_file',
+        'needs_revisit',
+        'completion_notes',
+        'completed_at',
     ];
 
     public function assignedTo(): BelongsTo
@@ -48,5 +56,10 @@ class Ticket extends Model
     public function statusHistories(): HasMany
     {
         return $this->hasMany(TicketStatusHistory::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(TicketActivity::class)->orderBy('activity_time', 'desc');
     }
 }

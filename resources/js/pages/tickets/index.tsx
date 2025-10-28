@@ -89,7 +89,7 @@ const statusColors: Record<string, string> = {
 
 export default function TicketsIndex({ tickets, filters }: Props) {
 	const [search, setSearch] = useState(filters.search || '')
-	const [status, setStatus] = useState(filters.status || '')
+	const [status, setStatus] = useState(filters.status || 'all')
 
 	const handleSearch = (value: string) => {
 		setSearch(value)
@@ -104,7 +104,7 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 		setStatus(value)
 		router.get(
 			'/tickets',
-			{ search, status: value },
+			{ search, status: value === 'all' ? undefined : value },
 			{ preserveState: true, replace: true }
 		)
 	}
@@ -167,7 +167,7 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 							<SelectValue placeholder="Filter by status" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">All Status</SelectItem>
+							<SelectItem value="all">All Status</SelectItem>
 							<SelectItem value="Open">Open</SelectItem>
 							<SelectItem value="Need to Receive">
 								Need to Receive
@@ -217,7 +217,11 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 								</TableRow>
 							) : (
 								tickets.data.map((ticket, index) => (
-									<TableRow key={ticket.id}>
+									<TableRow
+										key={ticket.id}
+										className="cursor-pointer hover:bg-muted/50"
+										onClick={() => router.visit(`/tickets/${ticket.id}/timeline`)}
+									>
 										<TableCell>
 											{(tickets.current_page - 1) *
 												tickets.per_page +
@@ -268,7 +272,7 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 											</Badge>
 										</TableCell>
 										<TableCell>
-											<div className="flex items-center gap-2">
+											<div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
 														<Button
