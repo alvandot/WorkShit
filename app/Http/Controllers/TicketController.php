@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TicketsExport;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TicketController extends Controller
 {
@@ -45,7 +47,9 @@ class TicketController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Tickets/Create');
+        return Inertia::render('Tickets/Create', [
+            'users' => \App\Models\User::select('id', 'name', 'email')->get(),
+        ]);
     }
 
     /**
@@ -79,7 +83,11 @@ class TicketController extends Controller
     public function show(Ticket $ticket): Response
     {
         return Inertia::render('Tickets/Show', [
-            'ticket' => $ticket->load(['assignedTo', 'createdBy']),
+            'ticket' => $ticket->load([
+                'assignedTo',
+                'createdBy',
+                'statusHistories.changedBy',
+            ]),
         ]);
     }
 
@@ -90,6 +98,7 @@ class TicketController extends Controller
     {
         return Inertia::render('Tickets/Edit', [
             'ticket' => $ticket,
+            'users' => \App\Models\User::select('id', 'name', 'email')->get(),
         ]);
     }
 
@@ -124,5 +133,13 @@ class TicketController extends Controller
         $ticket->delete();
 
         return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully.');
+    }
+
+    /**
+     * Export tickets to Excel.
+     */
+    public function export()
+    {
+        return Excel::download(new TicketsExport, 'tickets-'.now()->format('Y-m-d').'.xlsx');
     }
 }

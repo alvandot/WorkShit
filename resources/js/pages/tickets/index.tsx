@@ -25,7 +25,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { Plus, MoreVertical, Eye, Pencil, Trash } from 'lucide-react'
+import { Plus, MoreVertical, Eye, Pencil, Trash, Download, Filter } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface User {
@@ -127,12 +127,20 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 							View and manage all support tickets
 						</p>
 					</div>
-					<Link href="/tickets/create">
-						<Button>
-							<Plus className="mr-2 size-4" />
-							Create Ticket
-						</Button>
-					</Link>
+					<div className="flex items-center gap-2">
+						<a href="/tickets/export">
+							<Button variant="outline">
+								<Download className="mr-2 size-4" />
+								Export Excel
+							</Button>
+						</a>
+						<Link href="/tickets/create">
+							<Button>
+								<Plus className="mr-2 size-4" />
+								Create Ticket
+							</Button>
+						</Link>
+					</div>
 				</div>
 
 				<div className="flex items-center gap-4">

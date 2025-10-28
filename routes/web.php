@@ -17,6 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Ticket routes
+    Route::get('tickets/export', [TicketController::class, 'export'])->name('tickets.export');
     Route::resource('tickets', TicketController::class);
 });
 
