@@ -36,9 +36,12 @@ class TicketController extends Controller
 
         $tickets = $query->latest()->paginate(10)->withQueryString();
 
-        return Inertia::render('Tickets/Index', [
+        return Inertia::render('tickets/index', [
             'tickets' => $tickets,
-            'filters' => $request->only(['search', 'status']),
+            'filters' => [
+                'search' => $request->search,
+                'status' => $request->status,
+            ],
         ]);
     }
 
@@ -47,7 +50,7 @@ class TicketController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Tickets/Create', [
+        return Inertia::render('tickets/create', [
             'users' => \App\Models\User::select('id', 'name', 'email')->get(),
         ]);
     }
@@ -82,7 +85,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket): Response
     {
-        return Inertia::render('Tickets/Show', [
+        return Inertia::render('tickets/show', [
             'ticket' => $ticket->load([
                 'assignedTo',
                 'createdBy',
@@ -96,7 +99,7 @@ class TicketController extends Controller
      */
     public function edit(Ticket $ticket): Response
     {
-        return Inertia::render('Tickets/Edit', [
+        return Inertia::render('tickets/edit', [
             'ticket' => $ticket,
             'users' => \App\Models\User::select('id', 'name', 'email')->get(),
         ]);

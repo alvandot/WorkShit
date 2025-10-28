@@ -19,14 +19,14 @@ it('can display tickets index page', function () {
     $response = get('/tickets');
 
     $response->assertOk();
-    $response->assertInertia(fn ($page) => $page->component('Tickets/Index'));
+    $response->assertInertia(fn ($page) => $page->component('tickets/index'));
 });
 
 it('can display create ticket page', function () {
     $response = get('/tickets/create');
 
     $response->assertOk();
-    $response->assertInertia(fn ($page) => $page->component('Tickets/Create'));
+    $response->assertInertia(fn ($page) => $page->component('tickets/create'));
 });
 
 it('can create a new ticket', function () {
@@ -65,7 +65,7 @@ it('can display ticket details', function () {
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('Tickets/Show')
+        ->component('tickets/show')
         ->has('ticket')
     );
 });
@@ -76,7 +76,7 @@ it('can display edit ticket page', function () {
     $response = get("/tickets/{$ticket->id}/edit");
 
     $response->assertOk();
-    $response->assertInertia(fn ($page) => $page->component('Tickets/Edit'));
+    $response->assertInertia(fn ($page) => $page->component('tickets/edit'));
 });
 
 it('can update a ticket', function () {
@@ -173,7 +173,7 @@ it('can search tickets by ticket number', function () {
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('Tickets/Index')
+        ->component('tickets/index')
         ->has('tickets.data', 1)
     );
 });
@@ -187,7 +187,7 @@ it('can filter tickets by status', function () {
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('Tickets/Index')
+        ->component('tickets/index')
         ->has('tickets.data', 2)
     );
 });
