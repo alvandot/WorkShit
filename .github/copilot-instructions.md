@@ -422,6 +422,500 @@ $validated = $request->validate([
 - **Model casts**: Use `casts()` method, not `$casts` property (Laravel 12 convention)
 - **Observers**: Registered in `AppServiceProvider::boot()` - check before creating duplicate logic
 - **JSON columns**: `visit_schedules` stores complex visit data as array, accessed directly via Eloquent
+- **Eloquent over Query Builder**: Always prefer Eloquent models and relationships over raw Query Builder (`DB::`) or SQL queries
+- **Collections over arrays**: Use Laravel collections for data manipulation instead of plain arrays when working with model data
+- **Mass assignment**: Use mass assignment with relationships (e.g., `$category->article()->create()`) instead of manually setting properties
+- **Single Responsibility Principle**: Each method/class should have one clear responsibility - extract complex logic into dedicated services
+
+#### Single Responsibility Principle
+
+Controllers should orchestrate application flow, not implement business logic. Extract validation, logging, data transformation, and business rules into dedicated services or actions.
+
+**Bad** (controller doing too much):
+```php
+public function update(Request $request): RedirectResponse
+{
+    // Validation logic
+    $validated = $request->validate([
+        'title' => 'required|max:255',
+        'events' => 'required|array:date,type'
+    ]);
+
+    // Logging logic
+    foreach ($request->events as $event) {
+        $date = Carbon::parse($event['date'])->toString();
+        Log::info('Update event ' . $date . ' :: ' . $event['type']);
+    }
+
+    // Business logic
+    $this->event->updateGeneralEvent($validated);
+
+    return back();
+}
+```
+
+**Good** (single responsibility):
+```php
+public function update(UpdateEventRequest $request): RedirectResponse
+{
+    $this->eventLogService->logEvents($request->events);
+    
+    $this->eventService->updateGeneralEvent($request->validated());
+
+    return back()->with('success', 'Event updated successfully.');
+}
+```
+
+**Real-world AppDesk examples**:
+```php
+// Bad - TicketController doing too much
+public function complete(Request $request, Ticket $ticket): RedirectResponse
+{
+    $validated = $request->validate(['notes' => 'nullable|string']);
+    
+    $visitSchedules = $ticket->visit_schedules ?? [];
+    $visitSchedules[$ticket->current_visit]['status'] = 'completed';
+    $visitSchedules[$ticket->current_visit]['completed_at'] = now();
+    
+    $ticket->update([
+        'visit_schedules' => $visitSchedules,
+        'status' => 'Resolved'
+    ]);
+    
+    TicketActivity::create([
+        'ticket_id' => $ticket->id,
+        'user_id' => $request->user()->id,
+        'activity_type' => 'completed',
+        'title' => 'Visit completed',
+        'description' => $validated['notes'],
+    ]);
+    
+    return redirect()->route('tickets.timeline', $ticket);
+}
+
+// Good - Using service/action classes
+public function complete(CompleteTicketRequest $request, Ticket $ticket): RedirectResponse
+{
+    $this->ticketVisitService->completeCurrentVisit($ticket, $request->validated());
+    
+    return redirect()->route('tickets.timeline', $ticket)
+        ->with('success', 'Visit completed successfully.');
+}
+```
+
+**When to extract into services**:
+- Complex business logic (e.g., visit scheduling, status transitions)
+- Reusable operations (e.g., activity logging, file handling)
+- Third-party integrations (e.g., Excel exports, email notifications)
+- Data transformations (e.g., formatting for frontend, aggregations)
+
+#### Methods Should Do Just One Thing
+
+A function should do just one thing and do it well. Complex conditions and multiple responsibilities within a single method make code hard to read, test, and maintain. Break down complex methods into smaller, focused methods with descriptive names.
+
+**Bad** (method doing too much with complex conditions):
+```php
+public function getFullNameAttribute(): string
+{
+    if (auth()->user() && auth()->user()->hasRole('client') && auth()->user()->isVerified()) {
+        return 'Mr. ' . $this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name;
+    } else {
+        return $this->first_name[0] . '. ' . $this->last_name;
+    }
+}
+```
+
+**Good** (each method has one clear purpose):
+```php
+public function getFullNameAttribute(): string
+{
+    return $this->isVerifiedClient() ? $this->getFullNameLong() : $this->getFullNameShort();
+}
+
+public function isVerifiedClient(): bool
+{
+    return auth()->user() && auth()->user()->hasRole('client') && auth()->user()->isVerified();
+}
+
+public function getFullNameLong(): string
+{
+    return 'Mr. ' . $this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name;
+}
+
+public function getFullNameShort(): string
+{
+    return $this->first_name[0] . '. ' . $this->last_name;
+}
+```
+
+**Real-world AppDesk examples**:
+```php
+// Bad - Complex method with multiple responsibilities
+public function canPerformAction(Ticket $ticket, string $action): bool
+{
+    if ($ticket->status === 'Closed') {
+        return false;
+    }
+    
+    if ($action === 'complete' && $ticket->current_visit > 3) {
+        return false;
+    }
+    
+    if ($action === 'revisit' && $ticket->status !== 'Resolved') {
+        return false;
+    }
+    
+    if (auth()->user()->id !== $ticket->assigned_to && !auth()->user()->hasRole('admin')) {
+        return false;
+    }
+    
+    return true;
+}
+
+// Good - Each method does one thing
+public function canPerformAction(Ticket $ticket, string $action): bool
+{
+    return !$this->isTicketClosed($ticket)
+        && $this->canPerformSpecificAction($ticket, $action)
+        && $this->userHasPermission($ticket);
+}
+
+protected function isTicketClosed(Ticket $ticket): bool
+{
+    return $ticket->status === 'Closed';
+}
+
+protected function canPerformSpecificAction(Ticket $ticket, string $action): bool
+{
+    return match($action) {
+        'complete' => $this->canCompleteVisit($ticket),
+        'revisit' => $this->canRevisitTicket($ticket),
+        default => true,
+    };
+}
+
+protected function canCompleteVisit(Ticket $ticket): bool
+{
+    return $ticket->current_visit <= 3;
+}
+
+protected function canRevisitTicket(Ticket $ticket): bool
+{
+    return $ticket->status === 'Resolved';
+}
+
+protected function userHasPermission(Ticket $ticket): bool
+{
+    return auth()->user()->id === $ticket->assigned_to 
+        || auth()->user()->hasRole('admin');
+}
+```
+
+**Benefits**:
+- ✅ Easier to test (each method can be tested independently)
+- ✅ More readable (descriptive method names explain what they do)
+- ✅ Easier to debug (smaller methods = easier to pinpoint issues)
+- ✅ Better reusability (focused methods can be reused elsewhere)
+- ✅ Simplified maintenance (changes to one aspect don't affect others)
+
+#### Fat Models, Skinny Controllers
+
+Put all database-related logic into Eloquent models or dedicated query classes. Controllers should orchestrate the flow, not build complex queries. This makes code more reusable, testable, and maintainable.
+
+**Bad** (controller with complex query logic):
+```php
+public function index()
+{
+    $clients = Client::verified()
+        ->with(['orders' => function ($q) {
+            $q->where('created_at', '>', Carbon::today()->subWeek());
+        }])
+        ->get();
+
+    return view('index', ['clients' => $clients]);
+}
+```
+
+**Good** (query logic in model):
+```php
+public function index()
+{
+    return view('index', ['clients' => $this->client->getWithNewOrders()]);
+}
+
+// In Client model
+class Client extends Model
+{
+    public function getWithNewOrders(): Collection
+    {
+        return $this->verified()
+            ->with(['orders' => function ($q) {
+                $q->where('created_at', '>', Carbon::today()->subWeek());
+            }])
+            ->get();
+    }
+}
+```
+
+**Real-world AppDesk examples**:
+```php
+// Bad - TicketController with complex queries
+public function index(Request $request)
+{
+    $query = Ticket::query()->with(['assignedTo', 'createdBy']);
+    
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('ticket_number', 'like', "%{$search}%")
+              ->orWhere('company', 'like', "%{$search}%")
+              ->orWhere('problem', 'like', "%{$search}%");
+        });
+    }
+    
+    if ($request->status && $request->status !== 'all') {
+        if ($request->status === 'open') {
+            $query->where('status', '!=', 'Closed');
+        } else {
+            $query->where('status', $request->status);
+        }
+    }
+    
+    $tickets = $query->latest()->paginate(10)->withQueryString();
+    
+    return Inertia::render('tickets/index', ['tickets' => $tickets]);
+}
+
+// Good - Query logic in model using scopes and methods
+public function index(Request $request)
+{
+    $tickets = Ticket::query()
+        ->search($request->search)
+        ->filterByStatus($request->status)
+        ->withRelations()
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+    
+    return Inertia::render('tickets/index', ['tickets' => $tickets]);
+}
+
+// In Ticket model
+public function scopeSearch(Builder $query, ?string $search): void
+{
+    if (!$search) {
+        return;
+    }
+    
+    $query->where(function ($q) use ($search) {
+        $q->where('ticket_number', 'like', "%{$search}%")
+          ->orWhere('company', 'like', "%{$search}%")
+          ->orWhere('problem', 'like', "%{$search}%");
+    });
+}
+
+public function scopeFilterByStatus(Builder $query, ?string $status): void
+{
+    if (!$status || $status === 'all') {
+        return;
+    }
+    
+    if ($status === 'open') {
+        $query->where('status', '!=', 'Closed');
+    } else {
+        $query->where('status', $status);
+    }
+}
+
+public function scopeWithRelations(Builder $query): void
+{
+    $query->with(['assignedTo', 'createdBy']);
+}
+```
+
+**Alternative: Query Builder Classes** (for very complex queries):
+```php
+// In app/Queries/TicketQuery.php
+class TicketQuery
+{
+    public function __construct(private Ticket $ticket) {}
+    
+    public function getFilteredTickets(?string $search, ?string $status): LengthAwarePaginator
+    {
+        return $this->ticket->query()
+            ->search($search)
+            ->filterByStatus($status)
+            ->withRelations()
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+    }
+}
+
+// In controller
+public function index(Request $request, TicketQuery $ticketQuery)
+{
+    $tickets = $ticketQuery->getFilteredTickets($request->search, $request->status);
+    
+    return Inertia::render('tickets/index', ['tickets' => $tickets]);
+}
+```
+
+**Benefits**:
+- ✅ **Reusability**: Query logic dapat digunakan di berbagai controller
+- ✅ **Testability**: Model methods dan scopes mudah di-unit test
+- ✅ **Readability**: Controller tetap clean dan fokus pada orchestration
+- ✅ **Maintainability**: Perubahan query logic hanya di satu tempat
+- ✅ **Discoverability**: Developer lain mudah menemukan query logic di model
+
+#### Don't Repeat Yourself (DRY)
+
+Reuse code when you can. Single Responsibility Principle helps you avoid duplication. Also, reuse Blade/React components, use Eloquent scopes, extract repeated logic into methods, and leverage Laravel's built-in features.
+
+**Bad** (duplicated query logic):
+```php
+public function getActive()
+{
+    return $this->where('verified', 1)->whereNotNull('deleted_at')->get();
+}
+
+public function getArticles()
+{
+    return $this->whereHas('user', function ($q) {
+            $q->where('verified', 1)->whereNotNull('deleted_at');
+        })->get();
+}
+```
+
+**Good** (reusable scope):
+```php
+public function scopeActive($q)
+{
+    return $q->where('verified', true)->whereNotNull('deleted_at');
+}
+
+public function getActive(): Collection
+{
+    return $this->active()->get();
+}
+
+public function getArticles(): Collection
+{
+    return $this->whereHas('user', function ($q) {
+            $q->active();
+        })->get();
+}
+```
+
+**Real-world AppDesk examples**:
+```php
+// Bad - Repeated status checking logic
+public function canComplete(Ticket $ticket): bool
+{
+    if ($ticket->status === 'Closed') {
+        return false;
+    }
+    return $ticket->current_visit <= 3;
+}
+
+public function canRevisit(Ticket $ticket): bool
+{
+    if ($ticket->status === 'Closed') {
+        return false;
+    }
+    return $ticket->status === 'Resolved';
+}
+
+public function canAddActivity(Ticket $ticket): bool
+{
+    if ($ticket->status === 'Closed') {
+        return false;
+    }
+    return true;
+}
+
+// Good - Extract common logic into reusable method
+public function canComplete(Ticket $ticket): bool
+{
+    return !$this->isClosed($ticket) && $ticket->current_visit <= 3;
+}
+
+public function canRevisit(Ticket $ticket): bool
+{
+    return !$this->isClosed($ticket) && $ticket->status === 'Resolved';
+}
+
+public function canAddActivity(Ticket $ticket): bool
+{
+    return !$this->isClosed($ticket);
+}
+
+protected function isClosed(Ticket $ticket): bool
+{
+    return $ticket->status === 'Closed';
+}
+
+// Even better - Use Eloquent scope
+// In Ticket model
+public function scopeNotClosed(Builder $query): void
+{
+    $query->where('status', '!=', 'Closed');
+}
+
+public function scopeResolved(Builder $query): void
+{
+    $query->where('status', 'Resolved');
+}
+
+// Usage in queries
+$openTickets = Ticket::notClosed()->get();
+$resolvedTickets = Ticket::resolved()->get();
+```
+
+**Frontend DRY Example (React Components)**:
+```tsx
+// Bad - Repeated status badge logic
+// In tickets/index.tsx
+<span className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+  {ticket.status}
+</span>
+
+// In tickets/show.tsx
+<span className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+  {ticket.status}
+</span>
+
+// Good - Reusable StatusBadge component
+// In components/status-badge.tsx
+export function StatusBadge({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    Open: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    'In Progress': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+    Resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  }
+  
+  return <Badge className={colors[status]}>{status}</Badge>
+}
+
+// Usage
+<StatusBadge status={ticket.status} />
+```
+
+**Common Patterns to DRY**:
+- ✅ **Query scopes** for repeated where conditions
+- ✅ **Model methods** for common calculations or checks
+- ✅ **Service classes** for repeated business logic
+- ✅ **Blade/React components** for repeated UI patterns
+- ✅ **Traits** for shared model behavior
+- ✅ **Helper functions** for repeated transformations
+- ✅ **Form Requests** for repeated validation rules
+
+**Benefits**:
+- ✅ **Maintainability**: Changes in one place affect all usages
+- ✅ **Consistency**: Same logic produces same results everywhere
+- ✅ **Testability**: Test once, confidence everywhere
+- ✅ **Readability**: Descriptive names make code self-documenting
+- ✅ **Reduced bugs**: Less duplication = fewer places for bugs to hide
 
 ### Testing with Pest
 - **Import style**: Use `function Pest\Laravel\{actingAs, get, post};` for test helpers
@@ -580,6 +1074,109 @@ $ticket->update(['visit_schedules' => $visitSchedules]);
 ```
 
 ### Advanced Patterns
+
+#### Eloquent Best Practices
+
+**Prefer Eloquent Over Query Builder and Raw SQL**:
+Eloquent provides readable, maintainable code with powerful built-in features like soft deletes, events, scopes, and relationships. Always use Eloquent models over `DB::` queries or raw SQL.
+
+**Bad** (using raw SQL):
+```php
+DB::select('SELECT * FROM articles WHERE EXISTS (SELECT * FROM users WHERE articles.user_id = users.id AND EXISTS (SELECT * FROM profiles WHERE profiles.user_id = users.id) AND users.deleted_at IS NULL) AND verified = ? AND active = ? ORDER BY created_at DESC', [1, 1]);
+```
+
+**Good** (using Eloquent with relationships and scopes):
+```php
+Article::has('user.profile')->verified()->latest()->get();
+```
+
+**Mass Assignment Pattern**:
+Use mass assignment with model relationships instead of manually setting properties one by one. This is more concise, less error-prone, and follows Laravel conventions.
+
+**Bad** (manual property assignment):
+```php
+$article = new Article;
+$article->title = $request->title;
+$article->content = $request->content;
+$article->verified = $request->verified;
+$article->category_id = $category->id;
+$article->save();
+```
+
+**Good** (mass assignment with relationship):
+```php
+$category->article()->create($request->validated());
+```
+
+**For updating existing models**:
+```php
+// Bad
+$ticket->ticket_number = $validated['ticket_number'];
+$ticket->company = $validated['company'];
+$ticket->problem = $validated['problem'];
+$ticket->status = $validated['status'];
+$ticket->save();
+
+// Good
+$ticket->update($validated);
+```
+
+**Collections Over Arrays**:
+When working with model data, prefer Laravel collections over plain arrays for their powerful manipulation methods.
+
+**Bad** (using arrays):
+```php
+$activeTickets = [];
+foreach ($tickets as $ticket) {
+    if ($ticket->status !== 'Closed') {
+        $activeTickets[] = $ticket;
+    }
+}
+```
+
+**Good** (using collections):
+```php
+$activeTickets = $tickets->reject(fn($ticket) => $ticket->status === 'Closed');
+```
+
+**Real-world AppDesk examples**:
+```php
+// Use Eloquent relationships instead of manual joins
+// Bad
+$tickets = DB::table('tickets')
+    ->join('users', 'tickets.assigned_to', '=', 'users.id')
+    ->select('tickets.*', 'users.name as assigned_to_name')
+    ->get();
+
+// Good
+$tickets = Ticket::with('assignedTo')->get();
+
+// Use scopes for reusable query logic
+// In Ticket model:
+public function scopeActive(Builder $query): void
+{
+    $query->where('status', '!=', 'Closed');
+}
+
+// Usage:
+$activeTickets = Ticket::active()->get();
+
+// Use relationship creation for better code
+// Bad
+$activity = new TicketActivity;
+$activity->ticket_id = $ticket->id;
+$activity->user_id = $request->user()->id;
+$activity->activity_type = $validated['activity_type'];
+$activity->title = $validated['title'];
+$activity->save();
+
+// Good
+$ticket->activities()->create([
+    ...$validated,
+    'user_id' => $request->user()->id,
+    'visit_number' => $ticket->current_visit,
+]);
+```
 
 #### Eager Loading with Constraints
 ```php
