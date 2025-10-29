@@ -224,3 +224,28 @@ it('prevents unauthorized access to tickets', function () {
 
     $response->assertRedirect('/login');
 });
+
+it('can complete a ticket and updates status to resolved', function () {
+    $ticket = Ticket::factory()->create([
+        'status' => 'In Progress',
+        'completed_at' => null,
+    ]);
+
+    $response = post("/tickets/{$ticket->id}/complete", [
+        'completion_notes' => 'Work completed successfully',
+    ]);
+
+    $response->assertRedirect("/tickets/{$ticket->id}/timeline");
+
+    $ticket->refresh();
+    expect($ticket->status)->toBe('Finish');
+    expect($ticket->completed_at)->not->toBeNull();
+    expect($ticket->completion_notes)->toBe('Work completed successfully');
+
+    // Check that completion activity was created
+    assertDatabaseHas('ticket_activities', [
+        'ticket_id' => $ticket->id,
+        'activity_type' => 'completed',
+        'title' => 'Work Completed',
+    ]);
+});

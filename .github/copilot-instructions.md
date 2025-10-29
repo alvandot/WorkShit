@@ -16,7 +16,7 @@ AppDesk is a Laravel 12 + Inertia.js + React 19 ticket management system for tra
 - `Ticket`: Core entity with soft deletes, tracks multi-visit workflow via `visit_schedules` JSON column
   - `belongsTo` User (assignedTo, createdBy)
   - `hasMany` TicketStatusHistory, TicketActivity
-- Status flow: Open → Need to Receive → In Progress → Resolved → Closed
+- Status flow: Open → Need to Receive → In Progress → Finish → Closed
 - Multi-visit support: up to 3 visits per ticket, tracked in `visit_schedules` array
 
 **Critical Business Rules**:

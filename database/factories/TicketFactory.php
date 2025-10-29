@@ -26,7 +26,7 @@ class TicketFactory extends Factory
             'problem' => fake()->sentence(),
             'schedule' => fake()->dateTimeBetween('now', '+1 week'),
             'deadline' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
-            'status' => fake()->randomElement(['Open', 'Need to Receive', 'In Progress', 'Resolved', 'Closed']),
+            'status' => fake()->randomElement(['Open', 'Need to Receive', 'In Progress', 'Finish', 'Closed']),
             'assigned_to' => null,
             'created_by' => null,
             'notes' => fake()->optional()->paragraph(),

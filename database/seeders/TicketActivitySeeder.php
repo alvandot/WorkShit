@@ -103,7 +103,7 @@ class TicketActivitySeeder extends Seeder
             $newStatus = match ($stagesToComplete) {
                 1 => 'Need to Receive',
                 2, 3, 4 => 'In Progress',
-                5 => 'Resolved',
+                5 => 'Finish',
                 default => 'Open',
             };
 

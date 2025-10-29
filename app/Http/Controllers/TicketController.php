@@ -74,7 +74,7 @@ class TicketController extends Controller
             'problem' => 'required|string',
             'schedule' => 'nullable|date',
             'deadline' => 'nullable|date',
-            'status' => 'required|in:Open,Need to Receive,In Progress,Resolved,Closed',
+            'status' => 'required|in:Open,Need to Receive,In Progress,Finish,Closed',
             'assigned_to' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
         ]);
@@ -141,7 +141,7 @@ class TicketController extends Controller
             'problem' => 'required|string',
             'schedule' => 'nullable|date',
             'deadline' => 'nullable|date',
-            'status' => 'required|in:Open,Need to Receive,In Progress,Resolved,Closed',
+            'status' => 'required|in:Open,Need to Receive,In Progress,Finish,Closed',
             'assigned_to' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
         ]);
@@ -215,7 +215,7 @@ class TicketController extends Controller
             'on_the_way' => 'In Progress',
             'arrived' => 'In Progress',
             'start_working' => 'In Progress',
-            'completed' => 'Resolved',
+            'completed' => 'Finish',
         ];
 
         $newStatus = $statusMap[$validated['activity_type']] ?? $ticket->status;
@@ -278,7 +278,7 @@ class TicketController extends Controller
 
         $ticket->update([
             ...$validated,
-            'status' => 'In Progress', // Keep status as In Progress instead of Resolved
+            'status' => 'Finish', // Update status to Finish when work is completed
             'completed_at' => now(),
             'visit_schedules' => $visitSchedules,
         ]);

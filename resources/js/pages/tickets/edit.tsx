@@ -253,8 +253,8 @@ export default function EditTicket({ ticket, users = [] }: Props) {
                                             <SelectItem value="In Progress">
                                                 In Progress
                                             </SelectItem>
-                                            <SelectItem value="Resolved">
-                                                Resolved
+                                            <SelectItem value="Finish">
+                                                Finish
                                             </SelectItem>
                                             <SelectItem value="Closed">
                                                 Closed

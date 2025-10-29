@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('problem');
             $table->dateTime('schedule')->nullable();
             $table->dateTime('deadline')->nullable();
-            $table->enum('status', ['Open', 'Need to Receive', 'In Progress', 'Resolved', 'Closed'])->default('Open');
+            $table->enum('status', ['Open', 'Need to Receive', 'In Progress', 'Finish', 'Closed'])->default('Open');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('notes')->nullable();
