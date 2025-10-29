@@ -28,7 +28,10 @@ class Ticket extends Model
         'ticket_number',
         'case_id',
         'company',
+        'address',
+        'phone_number',
         'serial_number',
+        'product_number',
         'problem',
         'schedule',
         'deadline',
@@ -64,5 +67,10 @@ class Ticket extends Model
     public function activities(): HasMany
     {
         return $this->hasMany(TicketActivity::class)->orderBy('activity_time', 'asc');
+    }
+
+    public function parts(): HasMany
+    {
+        return $this->hasMany(Part::class);
     }
 }
