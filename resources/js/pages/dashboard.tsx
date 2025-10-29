@@ -1,16 +1,5 @@
-import { UIShowcase } from '@/components/ui-showcase';
-import { UserProfileCard } from '@/components/user-profile-card';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserProfileCard } from '@/components/user-profile-card';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type SharedData } from '@/types';

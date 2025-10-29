@@ -58,6 +58,22 @@ it('validates required fields when creating ticket', function () {
     $response->assertSessionHasErrors(['ticket_number', 'company', 'problem', 'status']);
 });
 
+it('validates ticket creation with precognition for valid data', function () {
+    $response = $this->withPrecognition()
+        ->post('/tickets', [
+            'ticket_number' => '12345678',
+            'company' => 'Test Company',
+            'problem' => 'Test problem',
+            'status' => 'Open',
+        ]);
+
+    // Should return 204 No Content for successful precognitive validation
+    $response->assertNoContent();
+
+    // No ticket should be created for precognitive requests
+    expect(Ticket::count())->toBe(0);
+});
+
 it('can display ticket details', function () {
     $ticket = Ticket::factory()->create();
 

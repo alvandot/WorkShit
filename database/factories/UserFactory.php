@@ -31,9 +31,7 @@ class UserFactory extends Factory
             'two_factor_secret' => Str::random(10),
             'two_factor_recovery_codes' => Str::random(10),
             'two_factor_confirmed_at' => now(),
-            'regency_code' => fake()->optional(0.7)->randomElement([
-                '31.71', '31.72', '32.73', '33.71', '35.78', '12.71', '73.71', '64.71',
-            ]),
+            'regency_code' => null, // Set to null for testing
             'address' => fake()->optional(0.7)->address(),
         ];
     }

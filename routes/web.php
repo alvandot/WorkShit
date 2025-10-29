@@ -25,7 +25,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('tickets/{ticket}/complete', [TicketController::class, 'complete'])->name('tickets.complete');
     Route::post('tickets/{ticket}/revisit', [TicketController::class, 'revisit'])->name('tickets.revisit');
     Route::post('tickets/{ticket}/schedule-visit/{visitNumber}', [TicketController::class, 'scheduleVisit'])->name('tickets.schedule-visit');
-    Route::resource('tickets', TicketController::class);
+
+    // Resource routes
+    Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::get('tickets/create', [TicketController::class, 'create'])->name('tickets.create');
+    Route::post('tickets', [TicketController::class, 'store'])->name('tickets.store')->middleware('precognitive');
+    Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::get('tickets/{ticket}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
+    Route::put('tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update')->middleware('precognitive');
+    Route::patch('tickets/{ticket}', [TicketController::class, 'update'])->middleware('precognitive');
+    Route::delete('tickets/{ticket}', [TicketController::class, 'destroy'])->name('tickets.destroy');
 });
 
 require __DIR__.'/settings.php';
