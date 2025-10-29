@@ -20,6 +20,7 @@ class TicketFactory extends Factory
             'ticket_number' => fake()->unique()->numerify('########'),
             'case_id' => fake()->numerify('##########'),
             'company' => fake()->company(),
+            'address' => fake()->address(),
             'phone_number' => fake()->phoneNumber(),
             'serial_number' => fake()->bothify('??##??####??'),
             'problem' => fake()->sentence(),

@@ -38,6 +38,7 @@ import {
 	CheckCircle2,
 	Lock,
 	CalendarClock,
+	Phone,
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -78,6 +79,8 @@ interface Ticket {
 	ticket_number: string
 	case_id: string | null
 	company: string
+	address: string | null
+	phone_number: string | null
 	serial_number: string | null
 	problem: string
 	schedule: string | null
@@ -369,13 +372,31 @@ export default function Timeline({ ticket }: Props) {
 									{ticket.status}
 								</Badge>
 							</div>
-							<div className="flex items-center gap-2">
-								<span className="text-sm text-muted-foreground font-medium">Ticket Number:</span>
-								<div className="badge badge-lg badge-primary badge-outline font-mono font-bold text-base px-4 py-3">
-									#{ticket.ticket_number}
+							<div className="space-y-2">
+								<div className="flex items-center gap-2">
+									<span className="text-sm text-muted-foreground font-medium">Ticket Number:</span>
+									<div className="badge badge-lg badge-primary badge-outline font-mono font-bold text-base px-4 py-3">
+										#{ticket.ticket_number}
+									</div>
 								</div>
+								{ticket.case_id && (
+									<div className="flex items-center gap-2">
+										<span className="text-sm text-muted-foreground font-medium">Case ID:</span>
+										<div className="badge badge-lg badge-accent badge-outline font-mono font-bold text-base px-4 py-3">
+											{ticket.case_id}
+										</div>
+									</div>
+								)}
 							</div>
 						</div>
+					</div>
+					<div className="flex gap-2">
+						<Link href={`/tickets/${ticket.id}/detail`}>
+							<Button variant="outline">
+								<FileText className="mr-2 size-4" />
+								Detail Lengkap
+							</Button>
+						</Link>
 					</div>
 				</div>
 
@@ -405,24 +426,51 @@ export default function Timeline({ ticket }: Props) {
 								<p className="font-bold text-lg ml-11">{ticket.company}</p>
 							</div>
 
-							{/* Case ID */}
-							<div className="hover:bg-base-200 transition-colors p-4 border-b">
-								<div className="flex items-center gap-3 mb-2">
-									<div className="p-2 bg-accent/10 rounded-lg">
-										<Hash className="size-5 text-accent" />
+							{/* Address */}
+							{ticket.address && (
+								<div className="hover:bg-base-200 transition-colors p-4 border-b">
+									<div className="flex items-center gap-3 mb-2">
+										<div className="p-2 bg-blue-500/10 rounded-lg">
+											<MapPin className="size-5 text-blue-500" />
+										</div>
+										<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Address</p>
 									</div>
-									<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Case ID</p>
-								</div>
-								<div className="ml-11">
-									{ticket.case_id ? (
-										<span className="badge badge-lg badge-outline badge-primary font-mono font-bold">
-											{ticket.case_id}
+									<a
+										href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ticket.address)}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="font-medium text-base ml-11 leading-relaxed text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline flex items-start gap-2 transition-colors"
+									>
+										<span className="flex-1">{ticket.address}</span>
+										<span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full whitespace-nowrap">
+											Google Maps
 										</span>
-									) : (
-										<span className="text-muted-foreground italic">No case ID</span>
-									)}
+									</a>
 								</div>
-							</div>
+							)}
+
+							{/* Phone Number */}
+							{ticket.phone_number && (
+								<div className="hover:bg-base-200 transition-colors p-4 border-b">
+									<div className="flex items-center gap-3 mb-2">
+										<div className="p-2 bg-green-500/10 rounded-lg">
+											<Phone className="size-5 text-green-500" />
+										</div>
+										<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone Number</p>
+									</div>
+									<a
+										href={`https://wa.me/62${ticket.phone_number.replace(/[^0-9]/g, '').replace(/^0+/, '')}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="font-bold text-lg ml-11 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 hover:underline flex items-center gap-2 w-fit transition-colors"
+									>
+										+62{ticket.phone_number.replace(/[^0-9]/g, '').replace(/^0+/, '')}
+										<span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
+											WhatsApp
+										</span>
+									</a>
+								</div>
+							)}
 
 							{/* Serial Number */}
 							<div className="hover:bg-base-200 transition-colors p-4 border-b">
@@ -434,9 +482,15 @@ export default function Timeline({ ticket }: Props) {
 								</div>
 								<div className="ml-11">
 									{ticket.serial_number ? (
-										<span className="badge badge-lg badge-outline badge-info font-mono font-bold">
+										<a
+											href={`https://partsurfer.hp.com/?searchtext=${ticket.serial_number}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-blue-500 bg-blue-50 dark:bg-blue-950 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 transition-all font-mono font-bold text-blue-700 dark:text-blue-300 hover:shadow-lg"
+										>
 											{ticket.serial_number}
-										</span>
+											<span className="text-xs opacity-75">→ HP PartSurfer</span>
+										</a>
 									) : (
 										<span className="text-muted-foreground italic">Not provided</span>
 									)}
@@ -628,6 +682,7 @@ export default function Timeline({ ticket }: Props) {
 													const completedStages = new Set(
 														visitActivities.map((a) => a.activity_type)
 													)
+													const progressPercentage = (completedStages.size / TIMELINE_STAGES.length) * 100
 
 													// Priority: visit_schedules status > actual progress
 													if (visitStatus === 'pending_schedule') {
@@ -647,63 +702,37 @@ export default function Timeline({ ticket }: Props) {
 														return <Badge variant="default">Scheduled</Badge>
 													}
 
-													// Find the last completed stage based on TIMELINE_STAGES order
-													let lastCompletedStageIndex = -1
-													for (let i = TIMELINE_STAGES.length - 1; i >= 0; i--) {
-														if (completedStages.has(TIMELINE_STAGES[i].key)) {
-															lastCompletedStageIndex = i
-															break
-														}
-													}
-
-													// Show status based on the last completed stage
-													if (lastCompletedStageIndex >= 0) {
-														const lastStage = TIMELINE_STAGES[lastCompletedStageIndex]
-
-														switch (lastStage.key) {
-															case 'completed':
-																// Check if this visit was revisited
-																if (visitNumber < ticket.current_visit) {
-																	return (
-																		<Badge variant="default" className="bg-orange-500">
-																			Revisit
-																		</Badge>
-																	)
-																}
-																return (
-																	<Badge variant="default" className="bg-green-500">
-																		End Case
-																	</Badge>
-																)
-															case 'start_working':
-																return (
-																	<Badge variant="default" className="bg-purple-500">
-																		On Progress
-																	</Badge>
-																)
-															case 'arrived':
-																return (
-																	<Badge variant="default" className="bg-indigo-500">
-																		Ready To Work
-																	</Badge>
-																)
-															case 'on_the_way':
-																return (
-																	<Badge variant="default" className="bg-orange-500">
-																		Go To Site
-																	</Badge>
-																)
-															case 'received':
-																return (
-																	<Badge variant="default" className="bg-yellow-500">
-																		Need To Received
-																	</Badge>
-																)
-														}
-													}
-
-													// Not started
-													return <Badge variant="outline">Not Started</Badge>
+													// Show progress bar instead of badge
+													return (
+														<div className="flex items-center gap-3 min-w-[200px]">
+															<div className="flex-1">
+																<div className="flex items-center justify-between mb-1">
+																	<span className="text-xs font-medium text-muted-foreground">
+																		Progress
+																	</span>
+																	<span className="text-xs font-bold">
+																		{completedStages.size}/{TIMELINE_STAGES.length}
+																	</span>
+																</div>
+																<div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+																	<div
+																		className={`h-full transition-all duration-500 ${
+																			progressPercentage === 100
+																				? 'bg-green-500'
+																				: progressPercentage >= 80
+																					? 'bg-purple-500'
+																					: progressPercentage >= 60
+																						? 'bg-indigo-500'
+																						: progressPercentage >= 40
+																							? 'bg-orange-500'
+																							: 'bg-yellow-500'
+																		}`}
+																		style={{ width: `${progressPercentage}%` }}
+																	/>
+																</div>
+															</div>
+														</div>
+													)
 												})()}
 											</div>
 										</div>

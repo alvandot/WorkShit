@@ -25,7 +25,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { Plus, MoreVertical, Eye, Pencil, Trash, Download, Filter } from 'lucide-react'
+import { Plus, MoreVertical, Eye, Pencil, Trash, Download, Filter, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface User {
@@ -295,11 +295,20 @@ export default function TicketsIndex({ tickets, filters }: Props) {
 													<DropdownMenuContent align="end" className="w-48">
 														<DropdownMenuItem asChild>
 															<Link
+																href={`/tickets/${ticket.id}/detail`}
+																className="cursor-pointer"
+															>
+																<FileText className="mr-2 size-4" />
+																Detail Lengkap
+															</Link>
+														</DropdownMenuItem>
+														<DropdownMenuItem asChild>
+															<Link
 																href={`/tickets/${ticket.id}`}
 																className="cursor-pointer"
 															>
 																<Eye className="mr-2 size-4" />
-																View Details
+																View Ticket
 															</Link>
 														</DropdownMenuItem>
 														<DropdownMenuItem asChild>
