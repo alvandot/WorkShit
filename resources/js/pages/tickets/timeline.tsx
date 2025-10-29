@@ -255,6 +255,37 @@ export default function Timeline({ ticket }: Props) {
         );
     };
 
+    const totalStageSlots = useMemo(
+        () => TIMELINE_STAGES.length * totalVisits,
+        [totalVisits],
+    );
+
+    const completedStageCount = useMemo(
+        () =>
+            ticket.activities.filter((activity) =>
+                TIMELINE_STAGES.some(
+                    (stage) => stage.key === activity.activity_type,
+                ),
+            ).length,
+        [ticket.activities],
+    );
+
+    const overallProgress = totalStageSlots
+        ? Math.min(
+              100,
+              Math.round((completedStageCount / totalStageSlots) * 100),
+          )
+        : 0;
+
+    const currentVisitStageIndex = getCurrentStageIndex(ticket.current_visit);
+
+    const upcomingStage =
+        currentVisitStageIndex >= TIMELINE_STAGES.length
+            ? null
+            : TIMELINE_STAGES[currentVisitStageIndex];
+
+    const UpcomingStageIcon = upcomingStage?.icon;
+
     // Form for regular activities
     const activityForm = useForm({
         activity_type: '',
@@ -366,61 +397,178 @@ export default function Timeline({ ticket }: Props) {
             <Head title={`Timeline - ${ticket.ticket_number}`} />
 
             <div className="space-y-6">
-                {/* Ticket Header */}
-                <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                        <Link href="/tickets">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="mt-1"
-                            >
-                                <ArrowLeft className="size-5" />
-                            </Button>
-                        </Link>
-                        <div>
-                            <div className="mb-3 flex items-center gap-3">
-                                <h1 className="text-3xl font-bold">
-                                    {ticket.company}
-                                </h1>
-                                <Badge
-                                    className={statusColors[ticket.status]}
-                                    variant="outline"
-                                >
-                                    {ticket.status}
-                                </Badge>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-muted-foreground">
-                                        Ticket Number:
-                                    </span>
-                                    <div className="badge badge-lg badge-primary badge-outline px-4 py-3 font-mono text-base font-bold">
-                                        #{ticket.ticket_number}
+                <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 shadow-lg starting:translate-y-4 starting:opacity-0">
+                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_theme(colors.primary/15),_transparent_60%)]" />
+                    <div className="flex flex-col gap-6">
+                        <div className="flex flex-wrap items-start justify-between gap-5">
+                            <div className="flex items-start gap-4">
+                                <Link href="/tickets">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full border border-white/30 bg-white/20 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/40"
+                                    >
+                                        <ArrowLeft className="size-5" />
+                                    </Button>
+                                </Link>
+                                <div className="space-y-4">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <Badge
+                                            className={statusColors[ticket.status]}
+                                            variant="outline"
+                                        >
+                                            {ticket.status}
+                                        </Badge>
+                                        {ticket.needs_revisit && (
+                                            <Badge variant="destructive" className="rounded-full">
+                                                Needs Revisit
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h1 className="text-balance text-3xl font-bold sm:text-4xl">
+                                            {ticket.company}
+                                        </h1>
+                                        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+                                            Track every visit milestone, capture supporting documents, and ensure the ticket closes with confidence.
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-sm">
+                                        <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 font-mono text-xs uppercase tracking-[0.3em]">
+                                            #{ticket.ticket_number}
+                                        </span>
+                                        {ticket.case_id && (
+                                            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">
+                                                Case ID: {ticket.case_id}
+                                            </span>
+                                        )}
+                                        <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">
+                                            Current Visit: {ticket.current_visit}
+                                        </span>
                                     </div>
                                 </div>
-                                {ticket.case_id && (
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">
-                                            Case ID:
-                                        </span>
-                                        <div className="badge badge-lg badge-accent badge-outline px-4 py-3 font-mono text-base font-bold">
-                                            {ticket.case_id}
+                            </div>
+                            <div className="flex flex-col gap-2 sm:flex-row">
+                                <Link href={`/tickets/${ticket.id}/detail`}>
+                                    <Button
+                                        variant="outline"
+                                        className="h-11 min-w-36 gap-2 rounded-full border-white/40 bg-white/20 text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/40 dark:text-foreground"
+                                    >
+                                        <FileText className="size-4" />
+                                        Detail Lengkap
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            <div className="rounded-2xl border border-white/20 bg-background/70 p-4 shadow-sm backdrop-blur">
+                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                    Overall Progress
+                                </p>
+                                <div className="mt-3 flex items-end justify-between">
+                                    <span className="text-3xl font-bold">
+                                        {overallProgress}%
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        {completedStageCount} of {totalStageSlots} stages
+                                    </span>
+                                </div>
+                                <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                                    <div
+                                        className="h-full rounded-full bg-primary transition-all duration-500"
+                                        style={{ width: `${overallProgress}%` }}
+                                    />
+                                </div>
+                                <p className="mt-3 text-xs text-muted-foreground">
+                                    Updated with every activity submission
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-white/20 bg-background/70 p-4 shadow-sm backdrop-blur">
+                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                    Upcoming Milestone
+                                </p>
+                                {upcomingStage ? (
+                                    <div className="mt-3 space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`rounded-full p-2 ${upcomingStage.color}`}>
+                                                {UpcomingStageIcon && (
+                                                    <UpcomingStageIcon className="size-5 text-white" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="text-base font-semibold">
+                                                    {upcomingStage.title}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {upcomingStage.description}
+                                                </p>
+                                            </div>
                                         </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Complete current step to unlock the next action.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="mt-3 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-green-600 dark:text-green-400">
+                                        <p className="text-base font-semibold">
+                                            All visits completed
+                                        </p>
+                                        <p className="text-xs">
+                                            Finalize documents or request revisit if additional work is needed.
+                                        </p>
                                     </div>
                                 )}
                             </div>
+
+                            <div className="rounded-2xl border border-white/20 bg-background/70 p-4 shadow-sm backdrop-blur">
+                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                    Scheduling
+                                </p>
+                                <div className="mt-3 space-y-3 text-sm">
+                                    {ticket.schedule ? (
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground">
+                                                Scheduled Visit
+                                            </span>
+                                            <span className="font-semibold">
+                                                {format(new Date(ticket.schedule), 'MMM dd, yyyy HH:mm')}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                                            No schedule registered for the current visit yet.
+                                        </div>
+                                    )}
+                                    {ticket.deadline && (
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground">
+                                                Deadline
+                                            </span>
+                                            <span className="font-semibold text-amber-600 dark:text-amber-400">
+                                                {format(new Date(ticket.deadline), 'MMM dd, yyyy HH:mm')}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {ticket.assigned_to_user?.name ? (
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <User className="size-4" />
+                                            <span>
+                                                Assigned to {ticket.assigned_to_user.name}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <User className="size-4" />
+                                            <span>Unassigned technician</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Link href={`/tickets/${ticket.id}/detail`}>
-                            <Button variant="outline">
-                                <FileText className="mr-2 size-4" />
-                                Detail Lengkap
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
+                </section>
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Ticket Info */}

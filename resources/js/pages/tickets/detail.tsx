@@ -38,6 +38,7 @@ import {
     Phone,
     User,
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 interface User {
     id: number;
@@ -137,46 +138,171 @@ const activityTypeColors: Record<string, string> = {
 };
 
 export default function Detail({ ticket }: Props) {
+    const visitCount = useMemo(() => {
+        if (!ticket.visit_schedules) {
+            return ticket.current_visit;
+        }
+
+        return Math.max(
+            ticket.current_visit,
+            Object.keys(ticket.visit_schedules).length,
+        );
+    }, [ticket.current_visit, ticket.visit_schedules]);
+
+    const overviewMetrics = useMemo(
+        () => [
+            {
+                label: 'Activities logged',
+                value: ticket.activities.length.toString(),
+                description: 'Workflow touchpoints recorded',
+                icon: Activity,
+                accent: 'bg-primary/10 text-primary',
+            },
+            {
+                label: 'Status changes',
+                value: ticket.status_histories.length.toString(),
+                description: 'Timeline updates tracked',
+                icon: History,
+                accent: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+            },
+            {
+                label: 'Visit cycles',
+                value: visitCount.toString(),
+                description: 'Scheduled or completed visits',
+                icon: CalendarClock,
+                accent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+            },
+            {
+                label: 'Needs revisit',
+                value: ticket.needs_revisit ? 'Yes' : 'No',
+                description: ticket.needs_revisit
+                    ? 'Technician follow-up required'
+                    : 'Ready for finalization',
+                icon: AlertCircle,
+                accent: ticket.needs_revisit
+                    ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300'
+                    : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300',
+            },
+        ],
+        [
+            ticket.activities.length,
+            ticket.needs_revisit,
+            ticket.status_histories.length,
+            visitCount,
+        ],
+    );
+
     return (
         <AppLayout>
             <Head title={`Detail - ${ticket.ticket_number}`} />
 
             <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-start gap-4">
-                        <Link href="/tickets">
-                            <Button variant="ghost" size="icon">
-                                <ArrowLeft className="size-5" />
-                            </Button>
-                        </Link>
-                        <div>
-                            <div className="mb-2 flex items-center gap-3">
-                                <h1 className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-4xl font-bold text-transparent">
-                                    Ticket Detail
-                                </h1>
-                                <Badge className={statusColors[ticket.status]}>
-                                    {ticket.status}
-                                </Badge>
+                <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 shadow-lg starting:translate-y-4 starting:opacity-0">
+                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_theme(colors.primary/18),_transparent_65%)]" />
+                    <div className="flex flex-col gap-6">
+                        <div className="flex flex-wrap items-start justify-between gap-5">
+                            <div className="flex items-start gap-4">
+                                <Link href="/tickets">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full border border-white/30 bg-white/20 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/40"
+                                    >
+                                        <ArrowLeft className="size-5" />
+                                    </Button>
+                                </Link>
+                                <div className="space-y-4">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <Badge className={statusColors[ticket.status]}>
+                                            {ticket.status}
+                                        </Badge>
+                                        {ticket.needs_revisit && (
+                                            <Badge variant="destructive" className="rounded-full">
+                                                Needs Revisit
+                                            </Badge>
+                                        )}
+                                        {ticket.deleted_at && (
+                                            <Badge variant="outline" className="rounded-full border-white/40 bg-white/10 text-white dark:text-foreground">
+                                                Archived
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h1 className="text-balance text-3xl font-bold sm:text-4xl">
+                                            Ticket Detail Overview
+                                        </h1>
+                                        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+                                            Review every activity, scheduling decision, and document linked to this ticket to keep stakeholders aligned.
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
+                                        <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 font-mono uppercase tracking-[0.3em]">
+                                            #{ticket.ticket_number}
+                                        </span>
+                                        {ticket.case_id && (
+                                            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1">
+                                                Case ID: {ticket.case_id}
+                                            </span>
+                                        )}
+                                        {ticket.serial_number && (
+                                            <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1">
+                                                Serial: {ticket.serial_number}
+                                            </span>
+                                        )}
+                                        <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1">
+                                            Current Visit: {ticket.current_visit}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="text-muted-foreground">
-                                Complete information and history for ticket #
-                                {ticket.ticket_number}
-                            </p>
+                            <div className="flex flex-col gap-2 sm:flex-row">
+                                <Link href={`/tickets/${ticket.id}/timeline`}>
+                                    <Button
+                                        variant="outline"
+                                        className="h-11 min-w-36 gap-2 rounded-full border-white/40 bg-white/20 text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/40 dark:text-foreground"
+                                    >
+                                        <Activity className="size-4" />
+                                        View Timeline
+                                    </Button>
+                                </Link>
+                                <Link href={`/tickets/${ticket.id}/edit`}>
+                                    <Button className="h-11 min-w-36 gap-2 rounded-full bg-primary shadow-lg shadow-primary/30 transition hover:-translate-y-0.5 hover:shadow-xl">
+                                        Edit Ticket
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                            {overviewMetrics.map((metric) => {
+                                const Icon = metric.icon;
+                                return (
+                                    <div
+                                        key={metric.label}
+                                        className="rounded-2xl border border-white/20 bg-background/70 p-4 shadow-sm backdrop-blur"
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                                    {metric.label}
+                                                </p>
+                                                <p className="mt-3 text-2xl font-bold">
+                                                    {metric.value}
+                                                </p>
+                                            </div>
+                                            <div className={`rounded-full p-2 ${metric.accent}`}>
+                                                <Icon className="size-5" />
+                                            </div>
+                                        </div>
+                                        <p className="mt-3 text-xs text-muted-foreground">
+                                            {metric.description}
+                                        </p>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Link href={`/tickets/${ticket.id}/timeline`}>
-                            <Button variant="outline">
-                                <Activity className="mr-2 size-4" />
-                                View Timeline
-                            </Button>
-                        </Link>
-                        <Link href={`/tickets/${ticket.id}/edit`}>
-                            <Button>Edit Ticket</Button>
-                        </Link>
-                    </div>
-                </div>
+                </section>
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Left Column - Main Info */}
