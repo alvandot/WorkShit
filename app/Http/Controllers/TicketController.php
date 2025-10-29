@@ -250,15 +250,24 @@ class TicketController extends Controller
         ]);
 
         if ($request->hasFile('ct_bad_part')) {
-            $validated['ct_bad_part'] = $request->file('ct_bad_part')->store('tickets/ct_bad_parts', 'public');
+            $file = $request->file('ct_bad_part');
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'CTBAD_' . $ticket->ticket_number . '_' . now()->format('Y-m-d') . '.' . $extension;
+            $validated['ct_bad_part'] = $file->storeAs('tickets/ct_bad_parts', $filename, 'public');
         }
 
         if ($request->hasFile('ct_good_part')) {
-            $validated['ct_good_part'] = $request->file('ct_good_part')->store('tickets/ct_good_parts', 'public');
+            $file = $request->file('ct_good_part');
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'CTGOOD_' . $ticket->ticket_number . '_' . now()->format('Y-m-d') . '.' . $extension;
+            $validated['ct_good_part'] = $file->storeAs('tickets/ct_good_parts', $filename, 'public');
         }
 
         if ($request->hasFile('bap_file')) {
-            $validated['bap_file'] = $request->file('bap_file')->store('tickets/bap_files', 'public');
+            $file = $request->file('bap_file');
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'BAP_' . $ticket->ticket_number . '_' . now()->format('Y-m-d') . '.' . $extension;
+            $validated['bap_file'] = $file->storeAs('tickets/bap_files', $filename, 'public');
         }
 
         // Update visit schedules status to completed
@@ -366,16 +375,8 @@ class TicketController extends Controller
             abort(404, 'File not found on server');
         }
 
-        // Get original filename
-        $originalName = basename($filePath);
-
-        // Set proper filename based on file type
-        $fileName = match ($fileType) {
-            'ct_bad_part' => "CT_Bad_Part_{$ticket->ticket_number}_{$originalName}",
-            'ct_good_part' => "CT_Good_Part_{$ticket->ticket_number}_{$originalName}",
-            'bap_file' => "BAP_{$ticket->ticket_number}_{$originalName}",
-            default => $originalName,
-        };
+        // Use the stored filename for download
+        $fileName = basename($filePath);
 
         return response()->download($fullPath, $fileName);
     }

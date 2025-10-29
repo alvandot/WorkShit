@@ -656,7 +656,7 @@ export default function Timeline({ ticket }: Props) {
                                             </p>
                                             <div className="space-y-2">
                                                 {ticket.ct_bad_part && (
-                                                    <Link
+                                                    <a
                                                         href={`/tickets/${ticket.id}/download/ct_bad_part`}
                                                         className="bg-base-100 hover:bg-base-200 border-base-300 flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-md"
                                                     >
@@ -667,10 +667,10 @@ export default function Timeline({ ticket }: Props) {
                                                             CT Bad Part
                                                         </span>
                                                         <Download className="size-5 text-muted-foreground" />
-                                                    </Link>
+                                                    </a>
                                                 )}
                                                 {ticket.ct_good_part && (
-                                                    <Link
+                                                    <a
                                                         href={`/tickets/${ticket.id}/download/ct_good_part`}
                                                         className="bg-base-100 hover:bg-base-200 border-base-300 flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-md"
                                                     >
@@ -681,10 +681,10 @@ export default function Timeline({ ticket }: Props) {
                                                             CT Good Part
                                                         </span>
                                                         <Download className="size-5 text-muted-foreground" />
-                                                    </Link>
+                                                    </a>
                                                 )}
                                                 {ticket.bap_file && (
-                                                    <Link
+                                                    <a
                                                         href={`/tickets/${ticket.id}/download/bap_file`}
                                                         className="bg-base-100 hover:bg-base-200 border-base-300 flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-md"
                                                     >
@@ -695,7 +695,7 @@ export default function Timeline({ ticket }: Props) {
                                                             BAP File
                                                         </span>
                                                         <Download className="size-5 text-muted-foreground" />
-                                                    </Link>
+                                                    </a>
                                                 )}
                                             </div>
                                         </div>
