@@ -101,6 +101,23 @@ class TicketController extends Controller
     }
 
     /**
+     * Display complete details of the ticket with all relations and history.
+     */
+    public function detail(Ticket $ticket): Response
+    {
+        $ticket->load([
+            'assignedTo',
+            'createdBy',
+            'activities.user',
+            'statusHistories.changedBy',
+        ]);
+
+        return Inertia::render('tickets/detail', [
+            'ticket' => $ticket,
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Ticket $ticket): Response

@@ -18,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Ticket routes
     Route::get('tickets/export', [TicketController::class, 'export'])->name('tickets.export');
+    Route::get('tickets/{ticket}/detail', [TicketController::class, 'detail'])->name('tickets.detail');
     Route::get('tickets/{ticket}/timeline', [TicketController::class, 'timeline'])->name('tickets.timeline');
     Route::get('tickets/{ticket}/download/{fileType}', [TicketController::class, 'downloadFile'])->name('tickets.download');
     Route::post('tickets/{ticket}/activities', [TicketController::class, 'addActivity'])->name('tickets.activities.add');

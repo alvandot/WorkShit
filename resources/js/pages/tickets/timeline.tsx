@@ -620,36 +620,91 @@ export default function Timeline({ ticket }: Props) {
 													</CardDescription>
 												</div>
 											<div className="flex items-center gap-2">
-												<Badge
-													variant={
-														visitStatus === 'scheduled'
-															? 'default'
-															: visitStatus ===
-																  'pending_schedule'
-																? 'secondary'
-																: visitStatus === 'completed'
-																	? 'default'
-																	: 'outline'
+												{(() => {
+													// Determine actual badge based on visit progress
+													const visitActivities = ticket.activities.filter(
+														(a) => a.visit_number === visitNumber
+													)
+													const completedStages = new Set(
+														visitActivities.map((a) => a.activity_type)
+													)
+
+													// Priority: visit_schedules status > actual progress
+													if (visitStatus === 'pending_schedule') {
+														return (
+															<>
+																<Badge variant="secondary">
+																	Pending Schedule
+																</Badge>
+																<Badge variant="destructive" className="animate-pulse">
+																	Needs Schedule
+																</Badge>
+															</>
+														)
 													}
-													className={
-														visitStatus === 'completed'
-															? 'bg-green-500'
-															: ''
+
+													if (visitStatus === 'scheduled') {
+														return <Badge variant="default">Scheduled</Badge>
 													}
-												>
-													{visitStatus === 'pending_schedule' &&
-														'Pending Schedule'}
-													{visitStatus === 'scheduled' && 'Scheduled'}
-													{visitStatus === 'in_progress' &&
-														'In Progress'}
-													{visitStatus === 'completed' && 'Completed'}
-													{!visitStatus && 'Active'}
-												</Badge>
-												{visitStatus === 'pending_schedule' && (
-													<Badge variant="destructive" className="animate-pulse">
-														Needs Schedule
-													</Badge>
-												)}
+
+													// Find the last completed stage based on TIMELINE_STAGES order
+													let lastCompletedStageIndex = -1
+													for (let i = TIMELINE_STAGES.length - 1; i >= 0; i--) {
+														if (completedStages.has(TIMELINE_STAGES[i].key)) {
+															lastCompletedStageIndex = i
+															break
+														}
+													}
+
+													// Show status based on the last completed stage
+													if (lastCompletedStageIndex >= 0) {
+														const lastStage = TIMELINE_STAGES[lastCompletedStageIndex]
+
+														switch (lastStage.key) {
+															case 'completed':
+																// Check if this visit was revisited
+																if (visitNumber < ticket.current_visit) {
+																	return (
+																		<Badge variant="default" className="bg-orange-500">
+																			Revisit
+																		</Badge>
+																	)
+																}
+																return (
+																	<Badge variant="default" className="bg-green-500">
+																		End Case
+																	</Badge>
+																)
+															case 'start_working':
+																return (
+																	<Badge variant="default" className="bg-purple-500">
+																		On Progress
+																	</Badge>
+																)
+															case 'arrived':
+																return (
+																	<Badge variant="default" className="bg-indigo-500">
+																		Ready To Work
+																	</Badge>
+																)
+															case 'on_the_way':
+																return (
+																	<Badge variant="default" className="bg-orange-500">
+																		Go To Site
+																	</Badge>
+																)
+															case 'received':
+																return (
+																	<Badge variant="default" className="bg-yellow-500">
+																		Need To Received
+																	</Badge>
+																)
+														}
+													}
+
+													// Not started
+													return <Badge variant="outline">Not Started</Badge>
+												})()}
 											</div>
 										</div>
 											{visitSchedule?.reason && (
