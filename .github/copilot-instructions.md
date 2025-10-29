@@ -1,3 +1,881 @@
+# AppDesk - Ticket Management System
+
+AppDesk is a Laravel 12 + Inertia.js + React 19 ticket management system for tracking technical service requests with multi-visit workflow support.
+
+## Architecture Overview
+
+**Core Domain**: Ticket lifecycle management with status tracking, activity timeline, multi-visit scheduling, and file attachments.
+
+**Tech Stack**:
+- Backend: Laravel 12 + Fortify (auth) + Maatwebsite Excel (exports)
+- Frontend: React 19 + Inertia.js v2 + shadcn/ui + Tailwind CSS v4
+- Testing: Pest v4 with browser testing support
+- Build: Vite 7 with React Compiler + Wayfinder for type-safe routing
+
+**Key Models & Relationships**:
+- `Ticket`: Core entity with soft deletes, tracks multi-visit workflow via `visit_schedules` JSON column
+  - `belongsTo` User (assignedTo, createdBy)
+  - `hasMany` TicketStatusHistory, TicketActivity
+- Status flow: Open → Need to Receive → In Progress → Resolved → Closed
+- Multi-visit support: up to 3 visits per ticket, tracked in `visit_schedules` array
+
+**Critical Business Rules**:
+1. **Closed tickets are immutable** - cannot add activities, complete, or revisit closed tickets
+2. **TicketObserver** auto-creates status history entries on create/update
+3. **Visit workflow**: pending_schedule → scheduled → in_progress → completed
+4. **File uploads**: stored in `storage/app/public/tickets/{type}` (ct_bad_part, ct_good_part, bap_file)
+
+## Project-Specific Conventions
+
+### Frontend (React + TypeScript)
+- **Component structure**: `resources/js/pages/` for Inertia pages (lowercase folder names like `tickets/index.tsx`)
+- **Path aliases**: Use `@/` prefix for imports (`@/components`, `@/lib/utils`, `@/hooks`)
+- **UI components**: Located in `resources/js/components/ui/` (shadcn/ui), use existing components before creating new ones
+- **Theme system**: Custom dark/light mode via `use-appearance` hook, initialized in `app.tsx`
+- **Page naming**: Lowercase folders + lowercase file names (e.g., `tickets/show.tsx` → Inertia component `tickets/show`)
+
+#### UI Component Library (shadcn/ui)
+**Available Components** (in `resources/js/components/ui/`):
+- Form controls: `button`, `input`, `select`, `textarea`, `checkbox`, `switch`, `label`
+- Layout: `card`, `table`, `separator`, `tabs`, `collapsible`, `scroll-area`
+- Feedback: `alert`, `badge`, `skeleton`, `spinner`, `tooltip`, `dialog`, `sheet`
+- Navigation: `dropdown-menu`, `navigation-menu`, `sidebar`, `breadcrumb`
+- Special: `avatar`, `icon`, `input-otp`, `toggle`, `toggle-group`
+
+**Component Usage Patterns**:
+```tsx
+// Always use cn() utility for className merging
+import { cn } from '@/lib/utils'
+<div className={cn('base-classes', conditionalClass && 'conditional-classes')} />
+
+// Button with variants (from class-variance-authority)
+import { Button } from '@/components/ui/button'
+<Button variant="outline" size="sm">Click me</Button>
+// Variants: default, destructive, outline, secondary, ghost, link
+// Sizes: default, sm, lg, icon
+
+// Table pattern (see tickets/index.tsx)
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+<Table>
+  <TableHeader>
+    <TableRow><TableHead>Header</TableHead></TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow><TableCell>Data</TableCell></TableRow>
+  </TableBody>
+</Table>
+
+// Dialog/Modal pattern
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
+// Dropdown menu pattern (for action menus)
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+```
+
+#### Custom Hooks
+- **`useAppearance()`**: Theme management (light/dark/system)
+  - Returns `{ appearance, updateAppearance }`
+  - Syncs with localStorage and cookies for SSR
+  - Auto-responds to system theme changes
+- **`useMobile()`**: Responsive breakpoint detection
+- **`useClipboard()`**: Copy to clipboard functionality
+- **`useInitials()`**: Generate user initials from name
+
+#### Common UI Patterns
+
+**Status Badge Colors** (consistent across app):
+```tsx
+const statusColors: Record<string, string> = {
+  Open: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  'Need to Receive': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  'In Progress': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+  Resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  Closed: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
+}
+```
+
+**Gradient Headers** (consistent design pattern):
+```tsx
+<div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl border border-primary/20">
+  <div className="space-y-2">
+    <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+      PAGE TITLE
+    </h1>
+    <p className="text-muted-foreground text-sm">Subtitle description</p>
+  </div>
+</div>
+```
+
+**Empty States**:
+```tsx
+<TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+  <div className="flex flex-col items-center gap-3">
+    <div className="p-4 rounded-full bg-muted">
+      <Icon className="size-8 text-muted-foreground" />
+    </div>
+    <p className="text-lg font-medium">No items found</p>
+    <p className="text-sm">Helpful message here</p>
+  </div>
+</TableCell>
+```
+
+**Icon Integration** (lucide-react):
+```tsx
+import { Plus, MoreVertical, Eye, Pencil, Trash, Download, Filter } from 'lucide-react'
+// Use size-4 for inline icons, size-8 for feature icons
+<Button><Plus className="mr-2 size-4" />Create</Button>
+```
+
+#### Inertia.js Patterns
+
+**Page Component Structure**:
+```tsx
+import { Head, Link, router } from '@inertiajs/react'
+import AppLayout from '@/layouts/app-layout'
+import type { PageProps } from '@/types'
+
+interface Props extends PageProps {
+  tickets: PaginatedTickets
+  filters: { search?: string; status?: string }
+}
+
+export default function TicketsIndex({ tickets, filters }: Props) {
+  return (
+    <AppLayout>
+      <Head title="Page Title" />
+      {/* Page content */}
+    </AppLayout>
+  )
+}
+```
+
+**Navigation & Links**:
+```tsx
+// Use Link for internal navigation (preserves Inertia state)
+import { Link } from '@inertiajs/react'
+<Link href="/tickets/create">Create Ticket</Link>
+
+// Use router for programmatic navigation
+import { router } from '@inertiajs/react'
+router.visit('/tickets/123')
+router.get('/tickets', { search: 'value' }, { preserveState: true, replace: true })
+router.delete('/tickets/123')
+```
+
+**Real-time Search/Filter Pattern** (from tickets/index.tsx):
+```tsx
+const [search, setSearch] = useState(filters.search || '')
+const [status, setStatus] = useState(filters.status || 'all')
+
+const handleSearch = (value: string) => {
+  setSearch(value)
+  router.get(
+    '/tickets',
+    { search: value, status },
+    { preserveState: true, replace: true }
+  )
+}
+```
+
+**Table Row Click Pattern**:
+```tsx
+<TableRow
+  className="cursor-pointer hover:bg-primary/5 transition-colors"
+  onClick={() => router.visit(`/tickets/${ticket.id}/timeline`)}
+>
+  {/* Prevent event bubbling for action buttons */}
+  <TableCell onClick={(e) => e.stopPropagation()}>
+    <DropdownMenu>{/* Actions */}</DropdownMenu>
+  </TableCell>
+</TableRow>
+```
+
+**Pagination Pattern**:
+```tsx
+// Backend returns Laravel pagination with links array
+{tickets.links.map((link, index) => (
+  <Button
+    variant={link.active ? 'default' : 'outline'}
+    disabled={!link.url}
+    onClick={() => link.url && router.get(link.url)}
+  >
+    {link.label}
+  </Button>
+))}
+```
+
+#### Layout System
+- **AppLayout**: Main layout wrapper with sidebar (at `layouts/app-layout.tsx`)
+- **Breadcrumbs**: Pass as prop to AppLayout: `<AppLayout breadcrumbs={[...]}>`
+- **AppShell**: Base shell with `variant="header"` or `variant="sidebar"`
+
+#### TypeScript Conventions
+- Define interfaces for props at top of file
+- Use `PageProps` type from `@/types` for shared Inertia props
+- Type pagination data as `PaginatedTickets` or similar
+- Always type component props and state
+
+#### Form Validation & Error Handling
+
+**Inertia Form Pattern** (Recommended - using `useForm` hook):
+```tsx
+import { useForm } from '@inertiajs/react'
+import InputError from '@/components/input-error'
+
+const { data, setData, post, processing, errors } = useForm({
+  ticket_number: '',
+  company: '',
+  problem: '',
+})
+
+const submit: FormEventHandler = (e) => {
+  e.preventDefault()
+  post('/tickets') // Automatically handles errors from backend validation
+}
+
+// In JSX:
+<Input
+  value={data.ticket_number}
+  onChange={(e) => setData('ticket_number', e.target.value)}
+  required
+/>
+<InputError message={errors.ticket_number} />
+```
+
+**Inertia Form Component Pattern** (Alternative - newer API):
+```tsx
+import { Form } from '@inertiajs/react'
+
+<Form action="/login" method="post" resetOnSuccess={['password']}>
+  {({ processing, errors, recentlySuccessful }) => (
+    <>
+      <Input type="email" name="email" required />
+      <InputError message={errors.email} />
+      
+      <Button type="submit" disabled={processing}>
+        {processing && <Spinner />}
+        Log in
+      </Button>
+      
+      {recentlySuccessful && <p className="text-sm text-green-600">Saved!</p>}
+    </>
+  )}
+</Form>
+```
+
+**Error Display Patterns**:
+```tsx
+// Individual field error (use InputError component)
+<InputError message={errors.field_name} />
+
+// Multiple errors (use AlertError component)
+import AlertError from '@/components/alert-error'
+<AlertError 
+  errors={Object.values(errors)} 
+  title="Please fix the following errors:" 
+/>
+
+// Flash messages from backend
+const { flash } = usePage<SharedData>().props
+{flash?.success && <div className="text-green-600">{flash.success}</div>}
+{flash?.error && <div className="text-red-600">{flash.error}</div>}
+```
+
+**Backend Validation Error Response**:
+```php
+// Controller returns errors automatically to Inertia
+return back()->withErrors(['error' => 'Cannot complete a closed ticket.']);
+
+// Redirect with success message
+return redirect()->route('tickets.index')->with('success', 'Ticket created successfully.');
+```
+
+#### Loading & Skeleton States
+
+**Processing State** (button disabled during form submission):
+```tsx
+const { processing } = useForm()
+
+<Button type="submit" disabled={processing}>
+  {processing ? 'Creating...' : 'Create Ticket'}
+</Button>
+
+// With spinner
+<Button disabled={processing}>
+  {processing && <Spinner />}
+  Log in
+</Button>
+```
+
+**Skeleton Loading Pattern**:
+```tsx
+import { Skeleton } from '@/components/ui/skeleton'
+
+// Card skeleton
+<Card>
+  <CardHeader>
+    <Skeleton className="h-6 w-1/3" />
+  </CardHeader>
+  <CardContent className="space-y-3">
+    <Skeleton className="h-4 w-full" />
+    <Skeleton className="h-4 w-5/6" />
+    <Skeleton className="h-4 w-4/6" />
+  </CardContent>
+</Card>
+
+// Table skeleton
+<TableRow>
+  <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+</TableRow>
+
+// Menu skeleton (sidebar)
+import { SidebarMenuSkeleton } from '@/components/ui/sidebar'
+<SidebarMenuSkeleton showIcon />
+```
+
+**Conditional Loading**:
+```tsx
+{isLoading ? (
+  <Skeleton className="h-8 w-full" />
+) : (
+  <div>{content}</div>
+)}
+```
+
+#### Animation & Transition Patterns
+
+**Headless UI Transitions** (for success messages, modals):
+```tsx
+import { Transition } from '@headlessui/react'
+
+<Transition
+  show={recentlySuccessful}
+  enter="transition ease-in-out"
+  enterFrom="opacity-0"
+  leave="transition ease-in-out"
+  leaveTo="opacity-0"
+>
+  <p className="text-sm text-neutral-600">Saved</p>
+</Transition>
+```
+
+**Tailwind Transition Classes** (for hover, focus states):
+```tsx
+// Button hover
+<Button className="shadow-sm hover:shadow-md transition-shadow">
+  Click me
+</Button>
+
+// Table row hover
+<TableRow className="cursor-pointer hover:bg-primary/5 transition-colors">
+
+// Smooth color transitions
+<div className="transition-colors duration-300 ease-out hover:bg-accent">
+
+// Multiple properties
+<div className="transition-[color,box-shadow] duration-200">
+```
+
+**CSS Starting State** (initial page load animations - Tailwind v4):
+```tsx
+// Fade in on page load
+<div className="opacity-100 transition-opacity duration-750 starting:opacity-0">
+
+// Slide up on page load
+<div className="translate-y-0 opacity-100 transition-all duration-750 starting:translate-y-6 starting:opacity-0">
+
+// With delay
+<g className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0">
+```
+
+**Common Animation Classes**:
+```tsx
+// Pulse animation (for skeletons)
+<div className="animate-pulse" />
+
+// Spin animation (for loaders)
+<div className="animate-spin" />
+
+// Smooth entrance
+<div className="animate-in fade-in slide-in-from-bottom-4 duration-300" />
+```
+
+#### Form Validation Rules (Backend)
+
+**Inline Validation Pattern** (no Form Request classes):
+```php
+$validated = $request->validate([
+  'ticket_number' => 'required|string|unique:tickets,ticket_number',
+  'company' => 'required|string|max:255',
+  'problem' => 'required|string',
+  'status' => 'required|in:Open,Need to Receive,In Progress,Resolved,Closed',
+  'assigned_to' => 'nullable|exists:users,id',
+  'schedule' => 'nullable|date',
+  'ct_bad_part' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+]);
+```
+
+### Backend (Laravel)
+- **No Form Request classes**: Validation is inline in controllers (see `TicketController::store()`)
+- **Inline validation pattern**: Use `$request->validate([...])` directly in controller methods
+- **Model casts**: Use `casts()` method, not `$casts` property (Laravel 12 convention)
+- **Observers**: Registered in `AppServiceProvider::boot()` - check before creating duplicate logic
+- **JSON columns**: `visit_schedules` stores complex visit data as array, accessed directly via Eloquent
+
+### Testing with Pest
+- **Import style**: Use `function Pest\Laravel\{actingAs, get, post};` for test helpers
+- **beforeEach pattern**: Set up authenticated user in `beforeEach(fn() => $this->user = ...)` 
+- **Inertia assertions**: `$response->assertInertia(fn($page) => $page->component('tickets/index'))`
+- **Database assertions**: Use `assertDatabaseHas()` for data verification
+- **Test coverage**: Each controller action has corresponding test in `tests/Feature/`
+
+### Routing & Navigation
+- **Route file**: `routes/web.php` for main routes, `routes/settings.php` for settings group
+- **Named routes**: Always use `route('tickets.index')` in redirects, not hardcoded paths
+- **Resource routes**: Ticket uses standard resourceful routing + custom actions (timeline, export, complete, revisit)
+- **Frontend navigation**: Use Inertia `<Link>` component, not `<a>` tags
+
+## Development Workflows
+
+### Running the Application
+```bash
+# Single dev command (concurrent server + queue + vite)
+composer run dev
+
+# Production build
+npm run build && php artisan serve
+
+# SSR mode (if needed)
+composer run dev:ssr
+```
+
+### Testing Workflow
+```bash
+# Run specific test file
+php artisan test tests/Feature/TicketTest.php
+
+# Run with filter
+php artisan test --filter="can create a new ticket"
+
+# All tests
+php artisan test
+
+# Run with coverage
+php artisan test --coverage
+
+# Parallel testing (faster)
+php artisan test --parallel
+```
+
+### Code Quality
+```bash
+# Auto-fix PHP formatting (REQUIRED before committing)
+vendor/bin/pint --dirty
+
+# Frontend linting & formatting
+npm run lint       # ESLint with auto-fix
+npm run format     # Prettier
+npm run types      # TypeScript check
+```
+
+### Database & Models
+```bash
+# Always use artisan make commands
+php artisan make:model Ticket -mfs  # model + migration + factory + seeder
+
+# Fresh database with seed data
+php artisan migrate:fresh --seed
+
+# Rollback last migration
+php artisan migrate:rollback
+
+# Check migration status
+php artisan migrate:status
+```
+
+### Common Development Tasks
+
+**Creating a New Feature**:
+```bash
+# 1. Create model with migration, factory, seeder
+php artisan make:model Feature -mfs
+
+# 2. Create controller
+php artisan make:controller FeatureController --resource
+
+# 3. Create test
+php artisan make:test FeatureTest --pest
+
+# 4. Run migration
+php artisan migrate
+
+# 5. Run tests
+php artisan test --filter=FeatureTest
+```
+
+**Debugging Tips**:
+```bash
+# Clear all caches
+php artisan optimize:clear
+
+# View routes
+php artisan route:list
+
+# Tinker (interactive PHP REPL)
+php artisan tinker
+
+# Check logs
+php artisan pail  # Real-time log viewer (dev only)
+tail -f storage/logs/laravel.log  # Traditional approach
+```
+
+**Frontend Development**:
+```bash
+# Install new UI component from shadcn
+npx shadcn@latest add dialog
+
+# Check TypeScript errors
+npm run types
+
+# Format all code
+npm run format
+
+# Build for production
+npm run build
+```
+
+## Common Patterns
+
+### Controller Action Pattern (Ticket Timeline Example)
+```php
+public function timeline(Ticket $ticket): Response
+{
+    $ticket->load(['assignedTo', 'createdBy', 'activities.user']);
+    
+    // Transform data for frontend expectations
+    $ticketData = $ticket->toArray();
+    $ticketData['assigned_to_user'] = $ticket->assignedTo;
+    $ticketData['activities'] = $ticket->activities->map(fn($a) => [
+        ...$a->toArray(),
+        'user' => $a->user
+    ]);
+    
+    return Inertia::render('tickets/timeline', ['ticket' => $ticketData]);
+}
+```
+
+### Preventing Operations on Closed Tickets
+```php
+if ($ticket->status === 'Closed') {
+    return back()->withErrors(['error' => 'Cannot {action} a closed ticket.']);
+}
+```
+
+### Working with Visit Schedules
+```php
+$visitSchedules = $ticket->visit_schedules ?? [];
+$visitSchedules[$ticket->current_visit]['status'] = 'completed';
+$ticket->update(['visit_schedules' => $visitSchedules]);
+```
+
+### Advanced Patterns
+
+#### Eager Loading with Constraints
+```php
+// Load only latest 5 activities per ticket
+$tickets = Ticket::with(['activities' => fn($query) => $query->latest()->limit(5)])
+    ->get();
+
+// Load specific columns from relationships
+$tickets = Ticket::with('assignedTo:id,name,email')->get();
+```
+
+#### Search & Filter Pattern
+```php
+$query = Ticket::query()->with(['assignedTo', 'createdBy']);
+
+// Multi-column search
+if ($request->has('search') && $request->search) {
+    $search = $request->search;
+    $query->where(function ($q) use ($search) {
+        $q->where('ticket_number', 'like', "%{$search}%")
+          ->orWhere('company', 'like', "%{$search}%")
+          ->orWhere('problem', 'like', "%{$search}%");
+    });
+}
+
+// Status filter with special handling
+if ($request->status === 'open') {
+    $query->where('status', '!=', 'Closed'); // "Open" = all except closed
+} else {
+    $query->where('status', $request->status);
+}
+
+// Preserve filters in pagination
+$tickets = $query->latest()->paginate(10)->withQueryString();
+```
+
+#### Activity Logging Pattern
+```php
+public function addActivity(Request $request, Ticket $ticket)
+{
+    $validated = $request->validate([
+        'activity_type' => 'required|in:received,on_the_way,arrived,start_working,completed',
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'activity_time' => 'required|date',
+    ]);
+
+    // Auto-update ticket status based on activity type
+    $statusMap = [
+        'received' => 'In Progress',
+        'completed' => 'Resolved',
+    ];
+
+    $ticket->activities()->create([
+        ...$validated,
+        'user_id' => $request->user()->id,
+        'visit_number' => $ticket->current_visit,
+    ]);
+
+    if (isset($statusMap[$validated['activity_type']])) {
+        $ticket->update(['status' => $statusMap[$validated['activity_type']]]);
+    }
+
+    return back()->with('success', 'Activity added successfully.');
+}
+```
+
+#### File Upload with Validation
+```php
+$validated = $request->validate([
+    'ct_bad_part' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240', // 10MB
+    'bap_file' => 'nullable|file|mimes:jpg,jpeg,png|max:20480', // 20MB, images only
+]);
+
+if ($request->hasFile('ct_bad_part')) {
+    // Store and get path
+    $path = $request->file('ct_bad_part')->store('tickets/ct_bad_parts', 'public');
+    $validated['ct_bad_part'] = $path;
+    
+    // Optional: Delete old file
+    if ($ticket->ct_bad_part) {
+        Storage::disk('public')->delete($ticket->ct_bad_part);
+    }
+}
+
+$ticket->update($validated);
+```
+
+#### Soft Delete Recovery
+```php
+// Include soft deleted records
+$allTickets = Ticket::withTrashed()->get();
+
+// Only soft deleted records
+$deletedTickets = Ticket::onlyTrashed()->get();
+
+// Restore soft deleted ticket
+$ticket = Ticket::withTrashed()->find($id);
+$ticket->restore();
+
+// Permanently delete
+$ticket->forceDelete();
+```
+
+#### Observer Pattern (Auto Status History)
+```php
+// In TicketObserver::created
+public function created(Ticket $ticket): void
+{
+    TicketStatusHistory::create([
+        'ticket_id' => $ticket->id,
+        'old_status' => null,
+        'new_status' => $ticket->status,
+        'changed_by' => $ticket->created_by,
+        'notes' => 'Ticket created',
+    ]);
+}
+
+// In TicketObserver::updated
+public function updated(Ticket $ticket): void
+{
+    if ($ticket->isDirty('status')) {
+        TicketStatusHistory::create([
+            'ticket_id' => $ticket->id,
+            'old_status' => $ticket->getOriginal('status'),
+            'new_status' => $ticket->status,
+            'changed_by' => request()->user()?->id,
+            'notes' => 'Status updated',
+        ]);
+    }
+}
+```
+
+## Integration Points
+
+### Excel Export with Maatwebsite\Excel
+
+**Export Class Pattern** (see `app/Exports/TicketsExport.php`):
+```php
+namespace App\Exports;
+
+use App\Models\Ticket;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+
+class TicketsExport implements FromCollection, WithHeadings, WithMapping
+{
+    public function collection()
+    {
+        // Always eager load relationships to prevent N+1
+        return Ticket::with(['assignedTo', 'createdBy'])->get();
+    }
+
+    public function headings(): array
+    {
+        return ['Ticket Number', 'Case ID', 'Company', 'Status', ...];
+    }
+
+    public function map($ticket): array
+    {
+        return [
+            $ticket->ticket_number,
+            $ticket->case_id,
+            $ticket->company,
+            $ticket->status,
+            $ticket->assignedTo?->name, // Use null-safe operator
+            $ticket->schedule?->format('Y-m-d H:i:s'), // Format dates
+        ];
+    }
+}
+```
+
+**Controller Export Action**:
+```php
+use Maatwebsite\Excel\Facades\Excel;
+
+public function export()
+{
+    return Excel::download(new TicketsExport, 'tickets-'.now()->format('Y-m-d').'.xlsx');
+}
+```
+
+**Frontend Download Link**:
+```tsx
+<a href="/tickets/export">
+  <Button variant="outline">
+    <Download className="mr-2 size-4" />
+    Export Excel
+  </Button>
+</a>
+```
+
+### Authentication with Laravel Fortify
+
+**Configuration** (`config/fortify.php`):
+- Features enabled: registration, reset passwords, update profile, update passwords, two-factor auth
+- Custom views registered in `FortifyServiceProvider`
+- Routes: `/login`, `/register`, `/two-factor-challenge`, `/user/two-factor-authentication`
+
+**Two-Factor Authentication Flow**:
+1. Enable 2FA: POST `/user/two-factor-authentication`
+2. Show QR code: GET `/user/two-factor-qr-code`
+3. Confirm with OTP: POST `/user/confirmed-two-factor-authentication`
+4. Recovery codes: GET `/user/two-factor-recovery-codes`
+5. Challenge login: POST `/two-factor-challenge`
+
+**Middleware Pattern** (`routes/web.php`, `routes/settings.php`):
+```php
+// Require authentication + email verification
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('tickets', TicketController::class);
+});
+
+// Rate limiting for sensitive actions
+Route::put('settings/password', [PasswordController::class, 'update'])
+    ->middleware('throttle:6,1') // 6 attempts per minute
+    ->name('user-password.update');
+```
+
+### File Storage & Downloads
+
+**File Upload Pattern**:
+```php
+// Store with automatic path generation
+$validated['ct_bad_part'] = $request->file('ct_bad_part')
+    ->store('tickets/ct_bad_parts', 'public');
+
+// Multiple file types
+if ($request->hasFile('bap_file')) {
+    $validated['bap_file'] = $request->file('bap_file')
+        ->store('tickets/bap_files', 'public');
+}
+```
+
+**File Download Pattern**:
+```php
+public function downloadFile(Ticket $ticket, string $fileType)
+{
+    // Validate file type
+    if (!in_array($fileType, ['ct_bad_part', 'ct_good_part', 'bap_file'])) {
+        abort(404, 'Invalid file type');
+    }
+
+    $filePath = $ticket->{$fileType};
+    if (!$filePath) {
+        abort(404, 'File not found');
+    }
+
+    $fullPath = storage_path('app/public/'.$filePath);
+    $fileName = "CT_Bad_Part_{$ticket->ticket_number}_".basename($filePath);
+
+    return response()->download($fullPath, $fileName);
+}
+```
+
+**Storage Setup**:
+- Public disk configured in `config/filesystems.php`
+- Symlink: `php artisan storage:link` (links `storage/app/public` to `public/storage`)
+- Access files: `asset('storage/tickets/file.pdf')`
+
+### SSR Support (Optional)
+
+**When to Enable SSR**:
+- SEO requirements for public pages
+- Faster initial page load
+- Social media preview cards
+
+**SSR Configuration**:
+```bash
+# Build SSR bundle
+npm run build:ssr
+
+# Start SSR server
+php artisan inertia:start-ssr
+
+# Run with SSR in dev
+composer run dev:ssr
+```
+
+**SSR Considerations**:
+- Server-side hooks: `useAppearance()` checks for window/document
+- Initial theme: Synced via cookie for SSR hydration
+- Build time: Slightly longer due to dual builds
+
+## Gotchas & Important Notes
+
+1. **Wayfinder**: Type-safe routing plugin generates route helpers, check `routes/` for generated TypeScript
+2. **React Compiler**: Babel plugin enabled in Vite - avoid manual memoization, compiler handles it
+3. **shadcn/ui**: Components in `components.json` with `@acme` registry configured - install via `npx shadcn@latest add`
+4. **Tailwind v4**: Uses `@import` in CSS, not `@tailwind` directives - see `resources/css/app.css`
+5. **Pagination**: Use `.withQueryString()` on paginated results to preserve filters
+6. **N+1 Prevention**: Always eager load relationships in index/show actions (e.g., `with(['assignedTo', 'createdBy'])`)
+
+---
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
