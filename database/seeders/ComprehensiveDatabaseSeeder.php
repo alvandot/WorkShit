@@ -20,11 +20,13 @@ class ComprehensiveDatabaseSeeder extends Seeder
 
         // 1. Create Users (Engineers & Admins)
         $this->command->info('👥 Creating users...');
-        $admin = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@appdesk.test',
-            'password' => 'password',
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@appdesk.test'],
+            [
+                'name' => 'Admin User',
+                'password' => 'password',
+            ]
+        );
 
         $engineers = User::factory(10)
             ->withoutTwoFactor()
@@ -97,7 +99,6 @@ class ComprehensiveDatabaseSeeder extends Seeder
             TicketActivity::factory($numActivities)->create([
                 'ticket_id' => $ticket->id,
                 'user_id' => $ticket->assigned_to ?? $admin->id,
-                'visit_number' => $ticket->current_visit,
             ]);
 
             $activityCount += $numActivities;

@@ -49,7 +49,6 @@ class TicketActivityFactory extends Factory
             'description' => fake()->optional(0.7)->paragraph(),
             'activity_time' => fake()->dateTimeBetween('-30 days', 'now'),
             'user_id' => \App\Models\User::factory(),
-            'visit_number' => fake()->numberBetween(1, 3),
             'attachments' => fake()->optional(0.3)->randomElements(
                 ['photo1.jpg', 'photo2.jpg', 'document.pdf'],
                 fake()->numberBetween(1, 2)
