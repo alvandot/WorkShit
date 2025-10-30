@@ -301,7 +301,7 @@ export default function FileUploadWithPreview({
                 key={index}
                 className="group relative aspect-square rounded-lg border overflow-hidden bg-muted/50 hover:bg-muted transition-colors duration-200"
               >
-                {fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                {fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                   <img
                     src={`/storage/${fileUrl}`}
                     alt={`Existing file ${index + 1}`}

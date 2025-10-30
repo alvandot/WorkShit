@@ -26,7 +26,9 @@ export default function Create() {
 
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
-    post(route('tickets.store'));
+    post(route('tickets.store'), {
+      forceFormData: true,
+    });
   };
 
   return (

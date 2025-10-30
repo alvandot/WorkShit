@@ -357,6 +357,7 @@ export default function Timeline({ ticket }: Props) {
     const handleCompleteSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         completeForm.post(`/tickets/${ticket.id}/complete`, {
+            forceFormData: true,
             onSuccess: () => {
                 setCurrentStageDialog(null);
                 completeForm.reset();
