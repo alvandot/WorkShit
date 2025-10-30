@@ -1327,6 +1327,7 @@ export default function Timeline({ ticket }: Props) {
                                     error={completeForm.errors.ct_bad_part}
                                     description="Upload images of faulty components (will be converted to WebP)"
                                     existingFiles={ticket.ct_bad_part || []}
+                                    required={true}
                                 />
 
                                 <FileUploadWithPreview
@@ -1342,6 +1343,7 @@ export default function Timeline({ ticket }: Props) {
                                     error={completeForm.errors.ct_good_part}
                                     description="Upload images of replacement components (will be converted to WebP)"
                                     existingFiles={ticket.ct_good_part || []}
+                                    required={true}
                                 />
 
                                 <FileUploadWithPreview
@@ -1358,6 +1360,7 @@ export default function Timeline({ ticket }: Props) {
                                     description="Upload BAP image (original format, tidak di-convert ke WebP)"
                                     existingFiles={ticket.bap_file || []}
                                     disableWebpConversion={true}
+                                    required={true}
                                 />
 
                                 {/* Consolidated Preview Section */}

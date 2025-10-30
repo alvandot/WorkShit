@@ -21,6 +21,7 @@ interface FileUploadWithPreviewProps {
   description?: string;
   existingFiles?: string[]; // URLs of existing uploaded files
   disableWebpConversion?: boolean; // If true, do not convert to WebP
+  required?: boolean; // Show required indicator
 }
 
 // Convert image to WebP format with compression
@@ -102,6 +103,7 @@ export default function FileUploadWithPreview({
   description,
   existingFiles = [],
   disableWebpConversion = false,
+  required = false,
 }: FileUploadWithPreviewProps) {
   const [filesWithPreview, setFilesWithPreview] = useState<FileWithPreview[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -218,6 +220,7 @@ export default function FileUploadWithPreview({
       <div className="space-y-1">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
         </label>
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
