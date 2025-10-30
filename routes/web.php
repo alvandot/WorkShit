@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -12,9 +13,16 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', \App\Http\Controllers\DashboardController::class)->name('dashboard');
+
+    // Analytics routes
+    Route::prefix('analytics')->group(function () {
+        Route::get('overview', [AnalyticsController::class, 'overview'])->name('analytics.overview');
+        Route::get('trends', [AnalyticsController::class, 'trends'])->name('analytics.trends');
+        Route::get('performance', [AnalyticsController::class, 'performance'])->name('analytics.performance');
+        Route::get('realtime', [AnalyticsController::class, 'realtime'])->name('analytics.realtime');
+        Route::get('export', [AnalyticsController::class, 'export'])->name('analytics.export');
+    });
 
     // Ticket routes
     Route::get('tickets/export', [TicketController::class, 'export'])->name('tickets.export');

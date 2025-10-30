@@ -1,101 +1,31 @@
+# AppDesk - Ticket Management System
 
-# AppDesk – AI Agent Coding Guide
+AppDesk is a Laravel 12 + Inertia.js + React 19 ticket management system for tracking technical service requests with multi-visit workflow support.
 
-AppDesk is a Laravel 12 + Inertia.js + React 19 ticket management system for technical service requests, with multi-visit workflow and robust status tracking.
+## Architecture Overview
 
-## Big Picture Architecture
+**Core Domain**: Ticket lifecycle management with status tracking, activity timeline, multi-visit scheduling, and file attachments.
 
-- **Backend**: Laravel 12 (see `app/`, `routes/`, `database/`).
-    - Core domain: Ticket lifecycle, multi-visit scheduling, status history, file attachments.
-    - Models: `Ticket` (soft deletes, `visit_schedules` JSON), `TicketActivity`, `TicketStatusHistory`, `User`.
-    - Status flow: Open → Need to Receive → In Progress → Finish → Closed. **Closed tickets are immutable.**
-    - Observers: `TicketObserver` (auto status history on create/update).
-    - File uploads: `storage/app/public/tickets/{type}`.
-- **Frontend**: React 19 + Inertia.js v2 (see `resources/js/pages/`).
-    - UI: shadcn/ui, Tailwind v4, Lucide icons. Use `@/` path alias for imports.
-    - Page structure: Lowercase folders/files, e.g. `tickets/index.tsx`.
-    - Layout: `AppLayout` (sidebar, breadcrumbs), reusable UI patterns (see below).
-- **Testing**: Pest v4 (feature/browser tests in `tests/`).
-- **Build**: Vite 7, React Compiler, Wayfinder for type-safe routing.
+**Tech Stack**:
+- Backend: Laravel 12 + Fortify (auth) + Maatwebsite Excel (exports)
+- Frontend: React 19 + Inertia.js v2 + shadcn/ui + Tailwind CSS v4
+- Testing: Pest v4 with browser testing support
+- Build: Vite 7 with React Compiler + Wayfinder for type-safe routing
 
-## Essential Developer Workflows
+**Key Models & Relationships**:
+- `Ticket`: Core entity with soft deletes, tracks multi-visit workflow via `visit_schedules` JSON column
+  - `belongsTo` User (assignedTo, createdBy)
+  - `hasMany` TicketStatusHistory, TicketActivity
+- Status flow: Open → Need to Receive → In Progress → Finish → Closed
+- Multi-visit support: up to 3 visits per ticket, tracked in `visit_schedules` array
 
-- **Run dev environment**: `composer run dev` (concurrent server, queue, vite)
-- **Production build**: `npm run build && php artisan serve`
-- **Lint/format**: `npm run lint`, `npm run format`, `npm run types`, `vendor/bin/pint --dirty`
-- **Run tests**: `php artisan test` (all), `php artisan test tests/Feature/TicketTest.php` (file), `php artisan test --filter=TestName` (filter)
-- **Database**: `php artisan migrate:fresh --seed`, `php artisan make:model Ticket -mfs`
-- **Debug**: `php artisan optimize:clear`, `php artisan route:list`, `php artisan tinker`, `php artisan pail`
+**Critical Business Rules**:
+1. **Closed tickets are immutable** - cannot add activities, complete, or revisit closed tickets
+2. **TicketObserver** auto-creates status history entries on create/update
+3. **Visit workflow**: pending_schedule → scheduled → in_progress → completed
+4. **File uploads**: stored in `storage/app/public/tickets/{type}` (ct_bad_part, ct_good_part, bap_file)
 
-## Project-Specific Conventions & Patterns
-
-- **Frontend**:
-    - Pages: `resources/js/pages/` (lowercase, e.g. `tickets/index.tsx`).
-    - UI: Use shadcn/ui components from `resources/js/components/ui/` before creating new ones.
-    - Status badge colors: Use the `statusColors` pattern for consistency.
-    - Use `useForm` or `<Form>` from Inertia for forms; display errors with `InputError` or `AlertError`.
-    - Navigation: Use `<Link>` and `router.visit` from Inertia, not `<a>`.
-    - Real-time/polling: Use `useEffect` with interval for live updates (see `dashboard.tsx`).
-    - Skeletons: Use `<Skeleton>` for loading states.
-    - Theme: Managed by `useAppearance()` hook.
-    - TypeScript: Always type props/state, use `PageProps` from `@/types`.
-
-- **Backend**:
-    - Validation: Inline in controllers (`$request->validate([...])`), no Form Request classes.
-    - Eloquent: Use relationships, scopes, and collections over arrays. Avoid raw queries.
-    - Observers: Register in `AppServiceProvider`.
-    - Query logic: Use model scopes for search/filter (see `Ticket` model).
-    - File uploads: Store in `storage/app/public/tickets/{type}`; use `Storage::disk('public')`.
-    - Exports: Use Maatwebsite\Excel (see `app/Exports/TicketsExport.php`).
-    - SSR: Supported, see SSR section if needed.
-
-- **Testing**:
-    - Pest v4 for all tests. Use `beforeEach` for setup, `assertInertia` for Inertia pages.
-    - Feature tests in `tests/Feature/`, browser tests in `tests/Browser/`.
-    - Use factories for model setup.
-
-## Integration Points
-
-- **Excel export**: `app/Exports/TicketsExport.php`, controller returns `Excel::download(...)`.
-- **Auth**: Laravel Fortify, config in `config/fortify.php`, custom views in `FortifyServiceProvider`.
-- **File storage**: Public disk, symlink with `php artisan storage:link`.
-- **Wayfinder**: Type-safe routing, see `routes/` and generated TypeScript.
-
-## Key UI/Code Patterns
-
-- **Status badge**:
-    ```tsx
-    <Badge className={statusColors[ticket.status]}>{ticket.status}</Badge>
-    ```
-- **Gradient header**:
-    ```tsx
-    <div className="flex items-center justify-between p-6 bg-gradient-to-r ...">
-        <h1 className="text-4xl font-bold ...">PAGE TITLE</h1>
-    </div>
-    ```
-- **Table row click**:
-    ```tsx
-    <TableRow onClick={() => router.visit(`/tickets/${ticket.id}/timeline`)} ... />
-    ```
-- **Polling for live updates**:
-    ```tsx
-    useEffect(() => {
-        const interval = setInterval(fetchKpis, 10000);
-        return () => clearInterval(interval);
-    }, []);
-    ```
-
-## Gotchas & Notes
-
-- Always eager load relationships in index/show actions to prevent N+1.
-- Use `.withQueryString()` on paginated results to preserve filters.
-- Tailwind v4: Use `@import "tailwindcss";` in CSS, not `@tailwind`.
-- If frontend changes don't show, run `npm run build` or `composer run dev`.
-- Do not create new base folders or change dependencies without approval.
-
----
-
-For more, see code comments, sibling files, and the full instructions below. If anything is unclear or missing, ask for feedback to iterate.
+## Project-Specific Conventions
 
 ### Frontend (React + TypeScript)
 - **Component structure**: `resources/js/pages/` for Inertia pages (lowercase folder names like `tickets/index.tsx`)

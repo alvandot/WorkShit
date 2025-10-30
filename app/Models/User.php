@@ -56,4 +56,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Regency::class, 'regency_code', 'code');
     }
+
+    public function assignedTickets()
+    {
+        return $this->hasMany(Ticket::class, 'assigned_to');
+    }
+
+    public function createdTickets()
+    {
+        return $this->hasMany(Ticket::class, 'created_by');
+    }
 }

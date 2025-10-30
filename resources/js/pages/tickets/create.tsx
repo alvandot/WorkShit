@@ -389,7 +389,7 @@ export default function CreateTicket({ users = [] }: Props) {
                                             <SelectValue placeholder="Select user..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">
+                                            <SelectItem value="unassigned">
                                                 Unassigned
                                             </SelectItem>
                                             {users.map((user) => (
