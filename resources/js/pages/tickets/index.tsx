@@ -1,6 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -23,19 +30,25 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/react';
-import { format } from 'date-fns';
+import { format, isToday, isWithinInterval, parseISO } from 'date-fns';
 import {
     Download,
     Eye,
     FileText,
     Filter,
+    Layers,
+    LineChart,
+    ListChecks,
     MoreVertical,
     Pencil,
     Plus,
+    Radar,
+    RefreshCcw,
     Trash,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface User {
     id: number;
@@ -100,6 +113,101 @@ export default function TicketsIndex({ tickets, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || 'all');
 
+    const now = useMemo(() => new Date(), []);
+
+    const metrics = useMemo(() => {
+        const activeStatuses = ['Open', 'Need to Receive', 'In Progress', 'Finish'];
+
+        const base = {
+            total: tickets.data.length,
+            active: 0,
+            scheduledToday: 0,
+            dueSoon: 0,
+        };
+
+        tickets.data.forEach((ticket) => {
+            if (activeStatuses.includes(ticket.status)) {
+                base.active += 1;
+            }
+
+            if (ticket.schedule) {
+                const scheduleDate = parseISO(ticket.schedule);
+                if (isToday(scheduleDate)) {
+                    base.scheduledToday += 1;
+                }
+
+                if (
+                    isWithinInterval(scheduleDate, {
+                        start: now,
+                        end: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2),
+                    })
+                ) {
+                    base.dueSoon += 1;
+                }
+            } else if (ticket.deadline) {
+                const deadlineDate = parseISO(ticket.deadline);
+                if (
+                    isWithinInterval(deadlineDate, {
+                        start: now,
+                        end: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2),
+                    })
+                ) {
+                    base.dueSoon += 1;
+                }
+            }
+        });
+
+        return base;
+    }, [now, tickets.data]);
+
+    const upcomingTicket = useMemo(() => {
+        const scheduledTickets = tickets.data
+            .filter((ticket) => ticket.schedule)
+            .map((ticket) => ({
+                ...ticket,
+                scheduleDate: parseISO(ticket.schedule as string),
+            }))
+            .sort((a, b) => a.scheduleDate.getTime() - b.scheduleDate.getTime());
+
+        return scheduledTickets[0];
+    }, [tickets.data]);
+
+    const quickStatusFilters = useMemo(
+        () => [
+            {
+                label: 'All Tickets',
+                value: 'all',
+                description: 'Every ticket in the system',
+                icon: Layers,
+            },
+            {
+                label: 'Active',
+                value: 'open',
+                description: 'Anything not marked closed',
+                icon: RefreshCcw,
+            },
+            {
+                label: 'Need to Receive',
+                value: 'Need to Receive',
+                description: 'Awaiting onsite acknowledgement',
+                icon: Radar,
+            },
+            {
+                label: 'In Progress',
+                value: 'In Progress',
+                description: 'Technicians currently working',
+                icon: LineChart,
+            },
+            {
+                label: 'Finish',
+                value: 'Finish',
+                description: 'Visits completed, awaiting closure',
+                icon: ListChecks,
+            },
+        ],
+        [],
+    );
+
     const handleSearch = (value: string) => {
         setSearch(value);
         router.get(
@@ -129,97 +237,231 @@ export default function TicketsIndex({ tickets, filters }: Props) {
             <Head title="Manage Tickets" />
 
             <div className="space-y-8">
-                {/* Header Section */}
-                <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
-                    <div className="space-y-2">
-                        <h1 className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-4xl font-bold text-transparent">
-                            MANAGE TICKET
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            View and manage all support tickets
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <a href="/tickets/export">
-                            <Button
-                                variant="outline"
-                                className="shadow-sm transition-shadow hover:shadow-md"
-                            >
-                                <Download className="mr-2 size-4" />
-                                Export Excel
-                            </Button>
-                        </a>
-                        <Link href="/tickets/create">
-                            <Button className="shadow-lg transition-shadow hover:shadow-xl">
-                                <Plus className="mr-2 size-4" />
-                                Create Ticket
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
+                <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 shadow-lg transition-[transform,shadow] duration-300 hover:-translate-y-1 hover:shadow-2xl starting:translate-y-4 starting:opacity-0">
+                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_theme(colors.primary/20),_transparent_65%)]" />
+                    <div className="grid gap-6 xl:grid-cols-[1.6fr,1fr]">
+                        <div className="space-y-6">
+                            <div className="flex flex-wrap items-start justify-between gap-4">
+                                <div className="space-y-3">
+                                    <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                                        Ticket Operations
+                                    </span>
+                                    <h1 className="text-balance bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
+                                        Ticket Command Center
+                                    </h1>
+                                    <p className="max-w-xl text-sm text-muted-foreground sm:text-base">
+                                        Monitor real-time progress, move quickly between statuses, and keep every customer request on track.
+                                    </p>
+                                </div>
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                    <a href="/tickets/export">
+                                        <Button variant="outline" className="h-11 min-w-36 gap-2 rounded-full border-primary/40 bg-background/80 backdrop-blur">
+                                            <Download className="size-4" />
+                                            Export Excel
+                                        </Button>
+                                    </a>
+                                    <Link href="/tickets/create">
+                                        <Button className="h-11 min-w-36 gap-2 rounded-full bg-primary shadow-lg shadow-primary/30 transition-all hover:-translate-y-0.5 hover:shadow-xl">
+                                            <Plus className="size-4" />
+                                            Create Ticket
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
 
-                {/* Filter Section */}
-                <div className="flex items-center gap-6 rounded-xl border bg-card p-5 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-muted-foreground">
-                            Show
-                        </span>
-                        <Select defaultValue="10">
-                            <SelectTrigger className="w-24 shadow-sm">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="10">10</SelectItem>
-                                <SelectItem value="25">25</SelectItem>
-                                <SelectItem value="50">50</SelectItem>
-                                <SelectItem value="100">100</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <span className="text-sm font-medium text-muted-foreground">
-                            entries
-                        </span>
+                            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                                <Card className="border-none bg-background/80 shadow-sm backdrop-blur">
+                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                                            Tickets on this page
+                                        </CardTitle>
+                                        <Layers className="size-4 text-primary" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-3xl font-bold">
+                                            {metrics.total}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Paginated view of latest activity
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-none bg-background/80 shadow-sm backdrop-blur">
+                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                                            Active right now
+                                        </CardTitle>
+                                        <RefreshCcw className="size-4 text-blue-500" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-3xl font-bold text-blue-600 dark:text-blue-300">
+                                            {metrics.active}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Open, in progress, or awaiting visit
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-none bg-background/80 shadow-sm backdrop-blur">
+                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                                            Scheduled today
+                                        </CardTitle>
+                                        <LineChart className="size-4 text-emerald-500" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-300">
+                                            {metrics.scheduledToday}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Visits happening during today
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-none bg-background/80 shadow-sm backdrop-blur">
+                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                                            Due in 48h
+                                        </CardTitle>
+                                        <ListChecks className="size-4 text-amber-500" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-3xl font-bold text-amber-600 dark:text-amber-300">
+                                            {metrics.dueSoon}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Either scheduled or deadlines approaching
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            <div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-background/70 p-4 shadow-sm backdrop-blur">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                            Quick Filters
+                                        </p>
+                                        <h2 className="text-base font-semibold text-foreground sm:text-lg">
+                                            Snap to the queue segment you need
+                                        </h2>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Filter className="size-4" />
+                                        <span>Server-side filters preserved on navigation</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {quickStatusFilters.map((filterOption) => {
+                                        const Icon = filterOption.icon;
+                                        const isActive = status === filterOption.value;
+                                        return (
+                                            <Button
+                                                key={filterOption.value}
+                                                type="button"
+                                                variant={isActive ? 'default' : 'outline'}
+                                                size="sm"
+                                                className={cn(
+                                                    'h-9 gap-2 rounded-full border-muted-foreground/10 px-4 transition-all',
+                                                    isActive
+                                                        ? 'shadow-lg shadow-primary/20'
+                                                        : 'bg-background/80 hover:-translate-y-0.5 hover:shadow-md',
+                                                )}
+                                                onClick={() => handleStatusFilter(filterOption.value)}
+                                            >
+                                                <Icon className="size-4" />
+                                                <div className="flex flex-col items-start">
+                                                    <span className="text-xs font-semibold leading-none">
+                                                        {filterOption.label}
+                                                    </span>
+                                                    <span className="text-[10px] font-medium text-muted-foreground">
+                                                        {filterOption.description}
+                                                    </span>
+                                                </div>
+                                            </Button>
+                                        );
+                                    })}
+                                </div>
+                                {upcomingTicket && (
+                                    <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm text-primary">
+                                        <LineChart className="size-4" />
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="font-semibold">
+                                                Next scheduled visit:
+                                            </span>
+                                            <span>
+                                                {format(upcomingTicket.scheduleDate, 'MMM dd, yyyy HH:mm')}
+                                            </span>
+                                            <span className="hidden text-muted-foreground sm:inline">
+                                                • {upcomingTicket.company}
+                                            </span>
+                                            <Badge variant="outline" className="rounded-full border-primary/40 bg-white/60 text-xs text-primary">
+                                                #{upcomingTicket.ticket_number}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <Card className="border-none bg-background/70 shadow-sm backdrop-blur">
+                            <CardHeader>
+                                <CardTitle className="text-base font-semibold">
+                                    Smart Search
+                                </CardTitle>
+                                <CardDescription>
+                                    Type to instantly filter results, switch status, and navigate with keyboard.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Input
+                                    type="search"
+                                    placeholder="Search by ticket, company, or problem..."
+                                    value={search}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    className="h-11 rounded-xl border-muted-foreground/20 bg-background/90 px-4 text-sm shadow-inner shadow-primary/5 focus-visible:ring-2 focus-visible:ring-primary/50"
+                                />
+                                <div className="space-y-2 text-xs text-muted-foreground">
+                                    <p className="font-semibold uppercase tracking-[0.2em] text-foreground/60">
+                                        Tips
+                                    </p>
+                                    <ul className="space-y-2">
+                                        <li>
+                                            • Use keywords like <span className="font-semibold text-foreground">"BAP"</span> or <span className="font-semibold text-foreground">"Printer"</span>
+                                        </li>
+                                        <li>
+                                            • Hit <kbd className="rounded border bg-muted px-2 py-0.5 text-[10px] uppercase">Enter</kbd> to commit filters
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div className="rounded-xl border border-dashed border-muted-foreground/30 p-3 text-xs text-muted-foreground">
+                                    <p className="font-semibold text-foreground">
+                                        Show entries
+                                    </p>
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <Select defaultValue="10">
+                                            <SelectTrigger className="h-9 w-24 rounded-lg border-muted-foreground/20 bg-background/80 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="10">10</SelectItem>
+                                                <SelectItem value="25">25</SelectItem>
+                                                <SelectItem value="50">50</SelectItem>
+                                                <SelectItem value="100">100</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <span>per page</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
-
-                    <div className="flex-1" />
-
-                    <div className="flex items-center gap-3">
-                        <Filter className="size-4 text-muted-foreground" />
-                        <Select
-                            value={status}
-                            onValueChange={handleStatusFilter}
-                        >
-                            <SelectTrigger className="w-52 shadow-sm">
-                                <SelectValue placeholder="Filter by status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="Open">Open</SelectItem>
-                                <SelectItem value="Need to Receive">
-                                    Need to Receive
-                                </SelectItem>
-                                <SelectItem value="In Progress">
-                                    In Progress
-                                </SelectItem>
-                                <SelectItem value="Finish">
-                                    Finish
-                                </SelectItem>
-                                <SelectItem value="Closed">Closed</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <Input
-                        type="search"
-                        placeholder="Search tickets..."
-                        value={search}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        className="w-72 shadow-sm"
-                    />
-                </div>
+                </section>
 
                 {/* Table Section */}
-                <div className="overflow-hidden rounded-xl border bg-card shadow-lg">
-                    <Table>
+                <div className="rounded-xl border bg-card shadow-lg">
+                    <div className="w-full overflow-x-auto rounded-xl">
+                        <Table className="min-w-[720px]">
                         <TableHeader>
                             <TableRow className="bg-muted/50 hover:bg-muted/50">
                                 <TableHead className="w-20 font-bold text-foreground">
@@ -421,7 +663,8 @@ export default function TicketsIndex({ tickets, filters }: Props) {
                                 ))
                             )}
                         </TableBody>
-                    </Table>
+                        </Table>
+                    </div>
                 </div>
 
                 {/* Pagination Section */}

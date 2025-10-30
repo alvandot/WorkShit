@@ -6,15 +6,23 @@
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
-            (function() {
+            (function () {
                 const appearance = '{{ $appearance ?? "system" }}';
 
-                if (appearance === 'system') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (appearance !== 'system') {
+                    return;
+                }
 
-                    if (prefersDark) {
-                        document.documentElement.classList.add('dark');
-                    }
+                const canMatchMedia =
+                    typeof window !== 'undefined' &&
+                    typeof window.matchMedia === 'function';
+
+                if (!canMatchMedia) {
+                    return;
+                }
+
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
                 }
             })();
         </script>

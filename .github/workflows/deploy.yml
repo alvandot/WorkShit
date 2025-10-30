@@ -1,0 +1,102 @@
+name: Deploy to Shared Hosting
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  APP_ENV: production
+  APP_DEBUG: false
+  DEPLOY_TARGET_DIR: /public_html
+  DEPLOY_FTP_SERVER: ${{ secrets.DEPLOY_FTP_SERVER }}
+  DEPLOY_FTP_USERNAME: ${{ secrets.DEPLOY_FTP_USERNAME }}
+  DEPLOY_FTP_PASSWORD: ${{ secrets.DEPLOY_FTP_PASSWORD }}
+  DEPLOY_FTP_PORT: 22
+  DEPLOY_FTP_PROTOCOL: sftp
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: bcmath, intl, mbstring, fileinfo, pdo_mysql, zip
+          coverage: none
+
+      - name: Validate Composer manifest
+        run: composer validate --no-interaction
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-dev --no-interaction --no-progress --optimize-autoloader
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Prune dev dependencies
+        run: |
+          rm -rf node_modules
+          find storage -name "*.log" -delete
+
+      - name: Prepare deployment bundle
+        run: |
+          rm -rf deployment
+          mkdir deployment
+          rsync -a \
+            --delete \
+            --exclude ".git/" \
+            --exclude ".github/" \
+            --exclude "deployment/" \
+            --exclude "node_modules/" \
+            --exclude "tests/" \
+            --exclude "storage/framework/cache/data/*" \
+            --exclude "storage/logs/*" \
+            --exclude ".env" \
+            --exclude ".env.*" \
+            ./ deployment/
+          mkdir -p deployment/storage/framework/cache/data \
+                   deployment/storage/framework/sessions \
+                   deployment/storage/framework/testing \
+                   deployment/storage/framework/views \
+                   deployment/storage/logs
+
+      - name: Deploy over FTP/SFTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ env.DEPLOY_FTP_SERVER }}
+          username: ${{ env.DEPLOY_FTP_USERNAME }}
+          password: ${{ env.DEPLOY_FTP_PASSWORD }}
+          server-dir: ${{ env.DEPLOY_TARGET_DIR }}
+          port: ${{ env.DEPLOY_FTP_PORT }}
+          protocol: ${{ env.DEPLOY_FTP_PROTOCOL }}
+          local-dir: deployment
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.github*
+            **/.DS_Store
+            **/node_modules

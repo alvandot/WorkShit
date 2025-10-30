@@ -68,9 +68,12 @@ class TicketController extends Controller
     {
         $validated = $request->validate([
             'ticket_number' => 'required|string|unique:tickets,ticket_number',
-            'case_id' => 'nullable|string',
+            'case_id' => 'nullable|string|max:255',
             'company' => 'required|string|max:255',
+            'address' => 'nullable|string',
+            'phone_number' => 'nullable|string|max:50',
             'serial_number' => 'nullable|string|max:255',
+            'product_number' => 'nullable|string|max:255',
             'problem' => 'required|string',
             'schedule' => 'nullable|date',
             'deadline' => 'nullable|date',
@@ -135,9 +138,12 @@ class TicketController extends Controller
     {
         $validated = $request->validate([
             'ticket_number' => 'required|string|unique:tickets,ticket_number,'.$ticket->id,
-            'case_id' => 'nullable|string',
+            'case_id' => 'nullable|string|max:255',
             'company' => 'required|string|max:255',
+            'address' => 'nullable|string',
+            'phone_number' => 'nullable|string|max:50',
             'serial_number' => 'nullable|string|max:255',
+            'product_number' => 'nullable|string|max:255',
             'problem' => 'required|string',
             'schedule' => 'nullable|date',
             'deadline' => 'nullable|date',
