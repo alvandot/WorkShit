@@ -1,7 +1,14 @@
+// TypeScript: declare global for window.__APPDESK_DASHBOARD_PROPS__
+declare global {
+    interface Window {
+        __APPDESK_DASHBOARD_PROPS__?: any;
+    }
+}
 // --- Neon Fusion Dashboard Section (from neon-fusion-dashboard.tsx) ---
 
-import { Globe as GlobeNeon, BookOpen as BookOpenNeon, Palette as PaletteNeon } from 'lucide-react';
-import { useState as useStateNeon } from 'react';
+import { Globe as GlobeNeon, BookOpen as BookOpenNeon, Palette as PaletteNeon, Users, TrendingUp as TrendingUpDemo, Users as UsersDemo, Activity, Zap, Globe as GlobeSplit, BookOpen as BookOpenSplit, Palette as PaletteSplit } from 'lucide-react';
+import { KpiCard } from '@/components/kpi-card';
+import React, { useState, Suspense, lazy } from 'react';
 
 const neonKpis = [
     {
@@ -34,8 +41,9 @@ const neonKpis = [
     },
 ];
 
-export function NeonFusionDashboard() {
-    const [hovered, setHovered] = useStateNeon<number | null>(null);
+// For code splitting, export as default for lazy loading
+const NeonFusionDashboard = React.memo(function NeonFusionDashboard() {
+    const [hovered, setHovered] = useState<number | null>(null);
     return (
         <AppLayout>
             <div className="min-h-screen bg-gradient-to-br from-black via-blue-950 to-cyan-900 py-10 px-2 md:px-8 font-sans">
@@ -44,30 +52,29 @@ export function NeonFusionDashboard() {
                     <p className="text-base md:text-lg text-purple-200 font-normal max-w-2xl leading-relaxed">A futuristic dashboard blending neon colors, geometric grid layouts, and Orbitron headings for a cyberpunk-inspired experience.</p>
                 </header>
                 <section className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-                    {neonKpis.map((kpi, idx) => (
-                        <Card
-                            key={kpi.label}
-                            className={`group relative bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-transform duration-300 hover:scale-105 hover:shadow-neon focus-within:ring-2 focus-within:ring-pink-400 ${hovered === idx ? 'ring-2 ring-cyan-400' : ''}`}
-                            onMouseEnter={() => setHovered(idx)}
-                            onMouseLeave={() => setHovered(null)}
-                            tabIndex={0}
-                        >
-                            <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                                <div className="p-3 rounded-full bg-gradient-to-br from-cyan-700 to-purple-800 shadow-md group-hover:scale-110 transition-transform duration-300">
-                                    {kpi.icon}
-                                </div>
-                                <div>
-                                    <CardTitle className="text-2xl md:text-3xl font-orbitron text-cyan-200 font-bold tracking-widest mb-1 uppercase">{kpi.value}</CardTitle>
-                                    <CardDescription className="text-purple-200 text-xs md:text-sm font-medium uppercase tracking-wide">{kpi.label}</CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex flex-col gap-2">
-                                <span className="text-pink-400 font-semibold text-lg">{kpi.trend}</span>
-                                <span className="text-cyan-300 text-xs">{kpi.description}</span>
-                            </CardContent>
-                            <div className="absolute inset-0 rounded-xl pointer-events-none group-hover:bg-cyan-400/10 transition-colors duration-300" />
-                        </Card>
-                    ))}
+                        {neonKpis.map((kpi, idx) => (
+                            <KpiCard
+                                key={kpi.label}
+                                label={kpi.label}
+                                value={kpi.value}
+                                icon={kpi.icon}
+                                trend={kpi.trend}
+                                description={kpi.description}
+                                hovered={hovered === idx}
+                                onMouseEnter={() => setHovered(idx)}
+                                onMouseLeave={() => setHovered(null)}
+                                className={
+                                    'bg-black/80 border border-cyan-700 shadow-2xl rounded-xl hover:scale-105 hover:shadow-neon focus-within:ring-2 focus-within:ring-pink-400 font-orbitron text-cyan-200 uppercase' +
+                                    (hovered === idx ? ' ring-2 ring-cyan-400' : '')
+                                }
+                                colorClass={
+                                    idx === 0 ? 'bg-gradient-to-br from-cyan-700 to-purple-800' :
+                                    idx === 1 ? 'bg-gradient-to-br from-cyan-700 to-purple-800' :
+                                    idx === 2 ? 'bg-gradient-to-br from-cyan-700 to-purple-800' :
+                                    'bg-gradient-to-br from-cyan-700 to-purple-800'
+                                }
+                            />
+                        ))}
                 </section>
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
                     <Card className="bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-shadow duration-300 hover:shadow-neon">
@@ -102,11 +109,11 @@ export function NeonFusionDashboard() {
             </div>
         </AppLayout>
     );
-}
+});
+export { NeonFusionDashboard };
+// End NeonFusionDashboard
 // --- Minimalist Split Dashboard Section (from minimalist-split-dashboard.tsx) ---
 
-import { Globe as GlobeSplit, BookOpen as BookOpenSplit, Palette as PaletteSplit } from 'lucide-react';
-import { useState as useStateSplit } from 'react';
 
 const splitKpis = [
     {
@@ -139,8 +146,8 @@ const splitKpis = [
     },
 ];
 
-export function MinimalistSplitDashboard() {
-    const [hovered, setHovered] = useStateSplit<number | null>(null);
+const MinimalistSplitDashboard = React.memo(function MinimalistSplitDashboard() {
+    const [hovered, setHovered] = useState<number | null>(null);
     return (
         <AppLayout>
             <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 font-mono">
@@ -150,28 +157,22 @@ export function MinimalistSplitDashboard() {
                         <p className="text-base md:text-lg text-slate-200 font-normal max-w-md leading-relaxed mb-8">A dashboard with a strong left-right split, slate and white contrast, and mono body for a clean, modern, and focused look.</p>
                         <div className="space-y-6">
                             {splitKpis.map((kpi, idx) => (
-                                <Card
+                                <KpiCard
                                     key={kpi.label}
-                                    className={`group relative bg-slate-800/80 border-none shadow-lg rounded-lg transition-transform duration-300 hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-accent-400 ${hovered === idx ? 'ring-2 ring-accent-400' : ''}`}
+                                    label={kpi.label}
+                                    value={kpi.value}
+                                    icon={kpi.icon}
+                                    trend={kpi.trend}
+                                    description={kpi.description}
+                                    hovered={hovered === idx}
                                     onMouseEnter={() => setHovered(idx)}
                                     onMouseLeave={() => setHovered(null)}
-                                    tabIndex={0}
-                                >
-                                    <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                                        <div className="p-3 rounded-full bg-gradient-to-br from-accent-400 to-slate-700 shadow-md group-hover:scale-110 transition-transform duration-300">
-                                            {kpi.icon}
-                                        </div>
-                                        <div>
-                                            <CardTitle className="text-2xl font-bold text-accent-200 mb-1">{kpi.value}</CardTitle>
-                                            <CardDescription className="text-slate-200 text-xs font-medium">{kpi.label}</CardDescription>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="flex flex-col gap-2">
-                                        <span className="text-accent-400 font-semibold text-lg">{kpi.trend}</span>
-                                        <span className="text-slate-300 text-xs">{kpi.description}</span>
-                                    </CardContent>
-                                    <div className="absolute inset-0 rounded-lg pointer-events-none group-hover:bg-accent-400/10 transition-colors duration-300" />
-                                </Card>
+                                    className={
+                                        'bg-slate-800/80 border-none shadow-lg rounded-lg hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-accent-400 font-mono text-accent-200' +
+                                        (hovered === idx ? ' ring-2 ring-accent-400' : '')
+                                    }
+                                    colorClass={'bg-gradient-to-br from-accent-400 to-slate-700'}
+                                />
                             ))}
                         </div>
                     </div>
@@ -201,11 +202,10 @@ export function MinimalistSplitDashboard() {
             </div>
         </AppLayout>
     );
-}
+});
+export { MinimalistSplitDashboard };
 // --- KPI Demo Dashboard Section (from demo-dashboard.tsx) ---
 
-import { TrendingUp as TrendingUpDemo, Users as UsersDemo, Activity, Zap } from 'lucide-react';
-import { useState as useStateDemo } from 'react';
 
 const kpis = [
     {
@@ -238,8 +238,8 @@ const kpis = [
     },
 ];
 
-export function DemoKpiDashboard() {
-    const [hovered, setHovered] = useStateDemo<number | null>(null);
+const DemoKpiDashboard = React.memo(function DemoKpiDashboard() {
+    const [hovered, setHovered] = useState<number | null>(null);
 
     return (
         <AppLayout>
@@ -250,28 +250,22 @@ export function DemoKpiDashboard() {
                 </header>
                 <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                     {kpis.map((kpi, idx) => (
-                        <Card
+                        <KpiCard
                             key={kpi.label}
-                            className={`group relative bg-blue-950/80 border-none shadow-xl rounded-2xl transition-transform duration-300 hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-cyan-400 ${hovered === idx ? 'ring-2 ring-cyan-400' : ''}`}
+                            label={kpi.label}
+                            value={kpi.value}
+                            icon={kpi.icon}
+                            trend={kpi.trend}
+                            description={kpi.description}
+                            hovered={hovered === idx}
                             onMouseEnter={() => setHovered(idx)}
                             onMouseLeave={() => setHovered(null)}
-                            tabIndex={0}
-                        >
-                            <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                                <div className="p-3 rounded-full bg-gradient-to-br from-cyan-700 to-blue-800 shadow-md group-hover:scale-110 transition-transform duration-300">
-                                    {kpi.icon}
-                                </div>
-                                <div>
-                                    <CardTitle className="text-3xl font-inter text-cyan-200 font-bold tracking-tight mb-1">{kpi.value}</CardTitle>
-                                    <CardDescription className="text-blue-200 text-sm font-medium">{kpi.label}</CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex flex-col gap-2">
-                                <span className="text-cyan-400 font-semibold text-lg">{kpi.trend}</span>
-                                <span className="text-blue-300 text-xs">{kpi.description}</span>
-                            </CardContent>
-                            <div className="absolute inset-0 rounded-2xl pointer-events-none group-hover:bg-cyan-400/5 transition-colors duration-300" />
-                        </Card>
+                            className={
+                                'bg-blue-950/80 border-none shadow-xl rounded-2xl hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-cyan-400 font-inter text-cyan-200' +
+                                (hovered === idx ? ' ring-2 ring-cyan-400' : '')
+                            }
+                            colorClass={'bg-gradient-to-br from-cyan-700 to-blue-800'}
+                        />
                     ))}
                 </section>
                 <section className="flex flex-col md:flex-row gap-8 items-stretch">
@@ -298,42 +292,49 @@ export function DemoKpiDashboard() {
             </div>
         </AppLayout>
     );
+});
+export { DemoKpiDashboard };
+// Lazy load dashboard variants
+const LazyNeonFusionDashboard = lazy(() => Promise.resolve({ default: NeonFusionDashboard }));
+const LazyMinimalistSplitDashboard = lazy(() => Promise.resolve({ default: MinimalistSplitDashboard }));
+const LazyDemoKpiDashboard = lazy(() => Promise.resolve({ default: DemoKpiDashboard }));
+
+function DashboardSwitcher() {
+    const [selected, setSelected] = useState('appdesk');
+    return (
+        <AppLayout>
+            <div className="max-w-4xl mx-auto py-8">
+                <div className="flex gap-4 mb-8">
+                    <button onClick={() => setSelected('appdesk')} className={`px-4 py-2 rounded ${selected === 'appdesk' ? 'bg-primary text-white' : 'bg-muted'}`}>AppDesk</button>
+                    <button onClick={() => setSelected('neon')} className={`px-4 py-2 rounded ${selected === 'neon' ? 'bg-primary text-white' : 'bg-muted'}`}>Neon Fusion</button>
+                    <button onClick={() => setSelected('split')} className={`px-4 py-2 rounded ${selected === 'split' ? 'bg-primary text-white' : 'bg-muted'}`}>Minimalist Split</button>
+                    <button onClick={() => setSelected('demo')} className={`px-4 py-2 rounded ${selected === 'demo' ? 'bg-primary text-white' : 'bg-muted'}`}>Demo KPI</button>
+                </div>
+                <Suspense fallback={<div className="text-center py-12">Loading dashboard...</div>}>
+                    {selected === 'appdesk' && <Dashboard {...(window.__APPDESK_DASHBOARD_PROPS__ || {})} />}
+                    {selected === 'neon' && <LazyNeonFusionDashboard />}
+                    {selected === 'split' && <LazyMinimalistSplitDashboard />}
+                    {selected === 'demo' && <LazyDemoKpiDashboard />}
+                </Suspense>
+            </div>
+        </AppLayout>
+    );
 }
+
+export { DashboardSwitcher };
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import tickets from '@/routes/tickets';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import {
-    CalendarDays,
-    CircleCheck,
-    MapPin,
-    Sparkles,
-    Ticket as TicketIcon,
-    TimerReset,
-    TrendingUp,
-    Users,
-} from 'lucide-react';
+import { CalendarDays, CircleCheck, MapPin, Sparkles, Ticket as TicketIcon, TimerReset, TrendingUp } from 'lucide-react';
 
 interface DashboardMetrics {
     tickets_total: number;
