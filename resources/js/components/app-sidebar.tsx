@@ -15,11 +15,13 @@ import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
+    BarChart3,
     FileText,
     HelpCircle,
     LayoutDashboard,
     Settings,
     Ticket,
+    Users,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -28,6 +30,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutDashboard,
+    },
+    {
+        title: 'Analytics',
+        href: '/analytics',
+        icon: BarChart3,
     },
 ];
 
@@ -51,6 +58,11 @@ const ticketingNavItems: NavItem[] = [
         title: 'Create Ticket',
         href: '/tickets/create',
         icon: FileText,
+    },
+    {
+        title: 'Assignments',
+        href: '/assignments',
+        icon: Users,
     },
 ];
 

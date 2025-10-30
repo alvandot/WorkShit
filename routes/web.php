@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EngineerController;
 use App\Http\Controllers\SpecialPlaceController;
+use App\Http\Controllers\TicketAssignmentController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,8 +19,28 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Analytics routes
+    Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('analytics/overview', [AnalyticsController::class, 'overview'])->name('analytics.overview');
+    Route::get('analytics/trends', [AnalyticsController::class, 'trends'])->name('analytics.trends');
+    Route::get('analytics/performance', [AnalyticsController::class, 'performance'])->name('analytics.performance');
+    Route::get('analytics/realtime', [AnalyticsController::class, 'realtime'])->name('analytics.realtime');
+    Route::get('analytics/tickets', [AnalyticsController::class, 'tickets'])->name('analytics.tickets');
+    Route::get('analytics/engineers', [AnalyticsController::class, 'engineers'])->name('analytics.engineers');
+    Route::get('analytics/parts', [AnalyticsController::class, 'parts'])->name('analytics.parts');
+    Route::get('analytics/comparisons', [AnalyticsController::class, 'comparisons'])->name('analytics.comparisons');
+    Route::get('analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
+
     Route::resource('engineers', EngineerController::class)->except(['show']);
     Route::resource('special-places', SpecialPlaceController::class)->except(['show']);
+
+    // Assignment routes
+    Route::get('assignments', [TicketAssignmentController::class, 'index'])->name('assignments.index');
+    Route::post('assignments', [TicketAssignmentController::class, 'store'])->name('assignments.store');
+    Route::post('assignments/bulk', [TicketAssignmentController::class, 'bulkAssign'])->name('assignments.bulk');
+    Route::post('tickets/{ticket}/assign', [TicketAssignmentController::class, 'reassign'])->name('tickets.assign');
+    Route::delete('tickets/{ticket}/assignment', [TicketAssignmentController::class, 'destroy'])->name('tickets.unassign');
+    Route::get('tickets/{ticket}/assignment-history', [TicketAssignmentController::class, 'history'])->name('tickets.assignment-history');
 
     // Ticket routes
     Route::get('tickets/export', [TicketController::class, 'export'])->name('tickets.export');

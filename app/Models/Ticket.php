@@ -19,6 +19,7 @@ class Ticket extends Model
             'schedule' => 'datetime',
             'deadline' => 'datetime',
             'completed_at' => 'datetime',
+            'assigned_at' => 'datetime',
             'needs_revisit' => 'boolean',
             'visit_schedules' => 'array',
         ];
@@ -37,6 +38,8 @@ class Ticket extends Model
         'deadline',
         'status',
         'assigned_to',
+        'assigned_at',
+        'assigned_by',
         'created_by',
         'notes',
         'ct_bad_part',
@@ -72,5 +75,35 @@ class Ticket extends Model
     public function parts(): HasMany
     {
         return $this->hasMany(Part::class);
+    }
+
+    public function assignedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(TicketAssignment::class);
+    }
+
+    public function activeAssignment(): HasMany
+    {
+        return $this->hasMany(TicketAssignment::class)->where('is_active', true);
+    }
+
+    public function scopeAssignedTo($query, int $userId)
+    {
+        return $query->where('assigned_to', $userId);
+    }
+
+    public function scopeUnassigned($query)
+    {
+        return $query->whereNull('assigned_to');
+    }
+
+    public function scopeWithAssignmentDetails($query)
+    {
+        return $query->with(['assignedTo', 'assignedBy', 'activeAssignment.assignedBy']);
     }
 }

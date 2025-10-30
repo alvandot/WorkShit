@@ -1,327 +1,3 @@
-// TypeScript: declare global for window.__APPDESK_DASHBOARD_PROPS__
-declare global {
-    interface Window {
-        __APPDESK_DASHBOARD_PROPS__?: any;
-    }
-}
-// --- Neon Fusion Dashboard Section (from neon-fusion-dashboard.tsx) ---
-
-import { Globe as GlobeNeon, BookOpen as BookOpenNeon, Palette as PaletteNeon, Users, TrendingUp as TrendingUpDemo, Users as UsersDemo, Activity, Zap, Globe as GlobeSplit, BookOpen as BookOpenSplit, Palette as PaletteSplit } from 'lucide-react';
-import { KpiCard } from '@/components/kpi-card';
-import React, { useState, Suspense, lazy } from 'react';
-
-const neonKpis = [
-    {
-        label: 'Global Reach',
-        value: '72 Countries',
-        icon: <GlobeNeon className="size-7 text-cyan-400" />,
-        trend: '+3',
-        description: 'new countries this month',
-    },
-    {
-        label: 'Knowledge Base',
-        value: '1,204',
-        icon: <BookOpenNeon className="size-7 text-purple-400" />,
-        trend: '+120',
-        description: 'articles published',
-    },
-    {
-        label: 'Design Variants',
-        value: '18',
-        icon: <PaletteNeon className="size-7 text-pink-400" />,
-        trend: '+2',
-        description: 'new themes',
-    },
-    {
-        label: 'Active Users',
-        value: 1287,
-        icon: <Users className="size-7 text-cyan-400" />,
-        trend: '+4.2%',
-        description: 'in the last 24 hours',
-    },
-];
-
-// For code splitting, export as default for lazy loading
-const NeonFusionDashboard = React.memo(function NeonFusionDashboard() {
-    const [hovered, setHovered] = useState<number | null>(null);
-    return (
-        <AppLayout>
-            <div className="min-h-screen bg-gradient-to-br from-black via-blue-950 to-cyan-900 py-10 px-2 md:px-8 font-sans">
-                <header className="mb-8">
-                    <h1 className="text-4xl md:text-6xl font-extrabold tracking-widest text-cyan-300 font-orbitron drop-shadow-neon mb-2 uppercase transition-colors duration-500">Neon Fusion Dashboard</h1>
-                    <p className="text-base md:text-lg text-purple-200 font-normal max-w-2xl leading-relaxed">A futuristic dashboard blending neon colors, geometric grid layouts, and Orbitron headings for a cyberpunk-inspired experience.</p>
-                </header>
-                <section className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-                        {neonKpis.map((kpi, idx) => (
-                            <KpiCard
-                                key={kpi.label}
-                                label={kpi.label}
-                                value={kpi.value}
-                                icon={kpi.icon}
-                                trend={kpi.trend}
-                                description={kpi.description}
-                                hovered={hovered === idx}
-                                onMouseEnter={() => setHovered(idx)}
-                                onMouseLeave={() => setHovered(null)}
-                                className={
-                                    'bg-black/80 border border-cyan-700 shadow-2xl rounded-xl hover:scale-105 hover:shadow-neon focus-within:ring-2 focus-within:ring-pink-400 font-orbitron text-cyan-200 uppercase' +
-                                    (hovered === idx ? ' ring-2 ring-cyan-400' : '')
-                                }
-                                colorClass={
-                                    idx === 0 ? 'bg-gradient-to-br from-cyan-700 to-purple-800' :
-                                    idx === 1 ? 'bg-gradient-to-br from-cyan-700 to-purple-800' :
-                                    idx === 2 ? 'bg-gradient-to-br from-cyan-700 to-purple-800' :
-                                    'bg-gradient-to-br from-cyan-700 to-purple-800'
-                                }
-                            />
-                        ))}
-                </section>
-                <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                    <Card className="bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-shadow duration-300 hover:shadow-neon">
-                        <CardHeader>
-                            <CardTitle className="text-xl md:text-2xl font-orbitron text-cyan-200 font-bold uppercase">Live Activity</CardTitle>
-                            <CardDescription className="text-purple-200">Real-time updates and micro-interactions</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Button variant="outline" className="bg-cyan-900/40 text-cyan-200 border-cyan-400 hover:bg-cyan-800/60 hover:text-white transition-all duration-300 shadow-md font-orbitron">Trigger Action</Button>
-                            <div className="mt-6 h-24 flex items-center justify-center text-pink-400 animate-pulse font-orbitron text-lg">Live data coming soon...</div>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-shadow duration-300 hover:shadow-neon">
-                        <CardHeader>
-                            <CardTitle className="text-xl md:text-2xl font-orbitron text-cyan-200 font-bold uppercase">Analytics</CardTitle>
-                            <CardDescription className="text-purple-200">Charts, trends, and more</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-24 flex items-center justify-center text-cyan-400 font-orbitron text-lg">Chart coming soon...</div>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-shadow duration-300 hover:shadow-neon">
-                        <CardHeader>
-                            <CardTitle className="text-xl md:text-2xl font-orbitron text-cyan-200 font-bold uppercase">Design Gallery</CardTitle>
-                            <CardDescription className="text-purple-200">Explore fusion themes</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-24 flex items-center justify-center text-pink-400 font-orbitron text-lg">Gallery coming soon...</div>
-                        </CardContent>
-                    </Card>
-                </section>
-            </div>
-        </AppLayout>
-    );
-});
-export { NeonFusionDashboard };
-// End NeonFusionDashboard
-// --- Minimalist Split Dashboard Section (from minimalist-split-dashboard.tsx) ---
-
-
-const splitKpis = [
-    {
-        label: 'Collaborators',
-        value: 19,
-        icon: <Users className="size-7 text-slate-600" />,
-        trend: '+2',
-        description: 'joined this week',
-    },
-    {
-        label: 'Docs',
-        value: '312',
-        icon: <BookOpenSplit className="size-7 text-accent-500" />,
-        trend: '+8',
-        description: 'pages updated',
-    },
-    {
-        label: 'Continents',
-        value: '5',
-        icon: <GlobeSplit className="size-7 text-slate-400" />,
-        trend: 'stable',
-        description: 'coverage',
-    },
-    {
-        label: 'Palettes',
-        value: '4',
-        icon: <PaletteSplit className="size-7 text-accent-400" />,
-        trend: '+1',
-        description: 'added',
-    },
-];
-
-const MinimalistSplitDashboard = React.memo(function MinimalistSplitDashboard() {
-    const [hovered, setHovered] = useState<number | null>(null);
-    return (
-        <AppLayout>
-            <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 font-mono">
-                <aside className="md:w-1/3 bg-slate-900 text-white flex flex-col justify-between py-12 px-6 md:px-10 shadow-2xl">
-                    <div>
-                        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-accent-400">Minimalist Split</h1>
-                        <p className="text-base md:text-lg text-slate-200 font-normal max-w-md leading-relaxed mb-8">A dashboard with a strong left-right split, slate and white contrast, and mono body for a clean, modern, and focused look.</p>
-                        <div className="space-y-6">
-                            {splitKpis.map((kpi, idx) => (
-                                <KpiCard
-                                    key={kpi.label}
-                                    label={kpi.label}
-                                    value={kpi.value}
-                                    icon={kpi.icon}
-                                    trend={kpi.trend}
-                                    description={kpi.description}
-                                    hovered={hovered === idx}
-                                    onMouseEnter={() => setHovered(idx)}
-                                    onMouseLeave={() => setHovered(null)}
-                                    className={
-                                        'bg-slate-800/80 border-none shadow-lg rounded-lg hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-accent-400 font-mono text-accent-200' +
-                                        (hovered === idx ? ' ring-2 ring-accent-400' : '')
-                                    }
-                                    colorClass={'bg-gradient-to-br from-accent-400 to-slate-700'}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                    <footer className="mt-12 text-slate-400 text-xs">&copy; 2025 Minimalist Split Demo</footer>
-                </aside>
-                <main className="flex-1 flex flex-col justify-center items-center py-16 px-4 md:px-12">
-                    <Card className="w-full max-w-2xl bg-white border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl mb-8">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-slate-900">Live Collaboration</CardTitle>
-                            <CardDescription className="text-slate-500">Real-time updates and mono micro-interactions</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Button variant="outline" className="bg-accent-50 text-accent-600 border-accent-400 hover:bg-accent-100 hover:text-accent-900 transition-all duration-300 shadow-md font-mono">Trigger Collaboration</Button>
-                            <div className="mt-6 h-24 flex items-center justify-center text-accent-400 animate-pulse font-mono text-lg">Collaboration data coming soon...</div>
-                        </CardContent>
-                    </Card>
-                    <Card className="w-full max-w-2xl bg-white border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-slate-900">Docs Analytics</CardTitle>
-                            <CardDescription className="text-slate-500">Docs trends and more</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-24 flex items-center justify-center text-accent-400 font-mono text-lg">Chart coming soon...</div>
-                        </CardContent>
-                    </Card>
-                </main>
-            </div>
-        </AppLayout>
-    );
-});
-export { MinimalistSplitDashboard };
-// --- KPI Demo Dashboard Section (from demo-dashboard.tsx) ---
-
-
-const kpis = [
-    {
-        label: 'Active Users',
-        value: 1287,
-        icon: <UsersDemo className="size-7 text-cyan-400" />,
-        trend: '+4.2%',
-        description: 'in the last 24 hours',
-    },
-    {
-        label: 'Engagement',
-        value: '87%',
-        icon: <Activity className="size-7 text-blue-400" />,
-        trend: '+2.1%',
-        description: 'vs last week',
-    },
-    {
-        label: 'Performance',
-        value: '99.9%',
-        icon: <Zap className="size-7 text-cyan-300" />,
-        trend: 'stable',
-        description: 'system uptime',
-    },
-    {
-        label: 'Growth',
-        value: '+312',
-        icon: <TrendingUpDemo className="size-7 text-blue-300" />,
-        trend: '+8.7%',
-        description: 'new signups',
-    },
-];
-
-const DemoKpiDashboard = React.memo(function DemoKpiDashboard() {
-    const [hovered, setHovered] = useState<number | null>(null);
-
-    return (
-        <AppLayout>
-            <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-cyan-900 py-12 px-4 sm:px-8 font-sans">
-                <header className="mb-10">
-                    <h1 className="text-5xl font-extrabold tracking-tight text-cyan-300 font-inter drop-shadow-lg mb-2 transition-colors duration-500">Professional Dashboard</h1>
-                    <p className="text-lg text-blue-100 font-normal max-w-2xl leading-relaxed">A modern, interactive dashboard built with React, Tailwind CSS, and shadcn/ui. Experience a dark blue and cyan palette, Inter headings, and micro-interactions throughout.</p>
-                </header>
-                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                    {kpis.map((kpi, idx) => (
-                        <KpiCard
-                            key={kpi.label}
-                            label={kpi.label}
-                            value={kpi.value}
-                            icon={kpi.icon}
-                            trend={kpi.trend}
-                            description={kpi.description}
-                            hovered={hovered === idx}
-                            onMouseEnter={() => setHovered(idx)}
-                            onMouseLeave={() => setHovered(null)}
-                            className={
-                                'bg-blue-950/80 border-none shadow-xl rounded-2xl hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-cyan-400 font-inter text-cyan-200' +
-                                (hovered === idx ? ' ring-2 ring-cyan-400' : '')
-                            }
-                            colorClass={'bg-gradient-to-br from-cyan-700 to-blue-800'}
-                        />
-                    ))}
-                </section>
-                <section className="flex flex-col md:flex-row gap-8 items-stretch">
-                    <Card className="flex-1 bg-blue-950/80 border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-inter text-cyan-200 font-bold">Live Activity</CardTitle>
-                            <CardDescription className="text-blue-200">Real-time updates and micro-interactions</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Button variant="outline" className="bg-cyan-900/40 text-cyan-200 border-cyan-400 hover:bg-cyan-800/60 hover:text-white transition-all duration-300 shadow-md font-inter">Trigger Action</Button>
-                            <div className="mt-6 h-32 flex items-center justify-center text-cyan-400 animate-pulse font-inter text-xl">Live data coming soon...</div>
-                        </CardContent>
-                    </Card>
-                    <Card className="flex-1 bg-blue-950/80 border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-inter text-cyan-200 font-bold">Analytics</CardTitle>
-                            <CardDescription className="text-blue-200">Charts, trends, and more</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-40 flex items-center justify-center text-cyan-400 font-inter text-xl">Chart coming soon...</div>
-                        </CardContent>
-                    </Card>
-                </section>
-            </div>
-        </AppLayout>
-    );
-});
-export { DemoKpiDashboard };
-// Lazy load dashboard variants
-const LazyNeonFusionDashboard = lazy(() => Promise.resolve({ default: NeonFusionDashboard }));
-const LazyMinimalistSplitDashboard = lazy(() => Promise.resolve({ default: MinimalistSplitDashboard }));
-const LazyDemoKpiDashboard = lazy(() => Promise.resolve({ default: DemoKpiDashboard }));
-
-function DashboardSwitcher() {
-    const [selected, setSelected] = useState('appdesk');
-    return (
-        <AppLayout>
-            <div className="max-w-4xl mx-auto py-8">
-                <div className="flex gap-4 mb-8">
-                    <button onClick={() => setSelected('appdesk')} className={`px-4 py-2 rounded ${selected === 'appdesk' ? 'bg-primary text-white' : 'bg-muted'}`}>AppDesk</button>
-                    <button onClick={() => setSelected('neon')} className={`px-4 py-2 rounded ${selected === 'neon' ? 'bg-primary text-white' : 'bg-muted'}`}>Neon Fusion</button>
-                    <button onClick={() => setSelected('split')} className={`px-4 py-2 rounded ${selected === 'split' ? 'bg-primary text-white' : 'bg-muted'}`}>Minimalist Split</button>
-                    <button onClick={() => setSelected('demo')} className={`px-4 py-2 rounded ${selected === 'demo' ? 'bg-primary text-white' : 'bg-muted'}`}>Demo KPI</button>
-                </div>
-                <Suspense fallback={<div className="text-center py-12">Loading dashboard...</div>}>
-                    {selected === 'appdesk' && <Dashboard {...(window.__APPDESK_DASHBOARD_PROPS__ || {})} />}
-                    {selected === 'neon' && <LazyNeonFusionDashboard />}
-                    {selected === 'split' && <LazyMinimalistSplitDashboard />}
-                    {selected === 'demo' && <LazyDemoKpiDashboard />}
-                </Suspense>
-            </div>
-        </AppLayout>
-    );
-}
-
-export { DashboardSwitcher };
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -334,7 +10,8 @@ import { dashboard } from '@/routes';
 import tickets from '@/routes/tickets';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { CalendarDays, CircleCheck, MapPin, Sparkles, Ticket as TicketIcon, TimerReset, TrendingUp } from 'lucide-react';
+import { CalendarDays, CircleCheck, MapPin, Sparkles, Ticket as TicketIcon, TimerReset, TrendingUp, Users } from 'lucide-react';
+import { useState } from 'react';
 
 interface DashboardMetrics {
     tickets_total: number;
@@ -451,7 +128,7 @@ function initialsFromName(name: string): string {
     return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('');
 }
 
-export default function Dashboard({
+function AppDeskDashboard({
     auth,
     metrics,
     recentTickets,
@@ -460,38 +137,36 @@ export default function Dashboard({
     specialPlaceDistribution,
     weeklyTicketTrend,
 }: DashboardProps) {
-    const trendMax = Math.max(...weeklyTicketTrend.map((point) => point.total), 5);
+    const [hovered, setHovered] = useState<number | null>(null);
 
     const metricCards = [
         {
-            key: 'tickets_open',
-            label: 'Open Tickets',
+            key: 'open',
+            label: 'Open',
             value: metrics.tickets_open,
-            description: 'Awaiting first response',
             icon: TicketIcon,
         },
         {
-            key: 'tickets_in_progress',
-            label: 'In Progress',
-            value: metrics.tickets_in_progress,
-            description: 'Active onsite activity',
+            key: 'need_receive',
+            label: 'Need to Receive',
+            value: metrics.tickets_need_receive,
             icon: TimerReset,
         },
         {
-            key: 'tickets_need_receive',
-            label: 'Need to Receive',
-            value: metrics.tickets_need_receive,
-            description: 'Queued for next action',
+            key: 'in_progress',
+            label: 'In Progress',
+            value: metrics.tickets_in_progress,
             icon: Sparkles,
         },
         {
-            key: 'tickets_finish',
-            label: 'Recently Finished',
-            value: metrics.tickets_finish,
-            description: 'Waiting for final QA',
+            key: 'closed',
+            label: 'Closed',
+            value: metrics.tickets_closed,
             icon: CircleCheck,
         },
     ];
+
+    const trendMax = weeklyTicketTrend.length > 0 ? Math.max(...weeklyTicketTrend.map((p) => p.total)) : 1;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -744,28 +419,59 @@ export default function Dashboard({
                         </CardHeader>
                         <CardContent className="divide-y divide-border/60">
                             {engineerHighlights.length === 0 && (
-                                <div className="py-6 text-sm text-muted-foreground">No engineers registered yet.</div>
+                                <p className="py-6 text-center text-sm text-muted-foreground">No engineer data available yet.</p>
                             )}
-                            {engineerHighlights.map((engineer) => (
-                                <div key={engineer.id} className="flex flex-col gap-4 py-4 md:flex-row md:items-center md:justify-between">
+                            {engineerHighlights.map((eng) => (
+                                <div key={eng.id} className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
                                     <div className="flex items-center gap-3">
-                                        <Avatar>
-                                            <AvatarFallback>{initialsFromName(engineer.name)}</AvatarFallback>
+                                        <Avatar className="size-10 border border-border/50">
+                                            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                                                {initialsFromName(eng.name)}
+                                            </AvatarFallback>
                                         </Avatar>
-                                        <div className="space-y-1">
-                                            <p className="text-sm font-semibold">{engineer.name}</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {engineer.specialization ?? 'Generalist'} · {engineer.province ?? 'No base province'}
-                                            </p>
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold leading-none">{eng.name}</p>
+                                            <p className="text-xs text-muted-foreground">{eng.specialization ?? '—'}</p>
                                         </div>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-3 text-xs">
-                                        <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-semibold text-primary">
-                                            {engineer.special_places_count} special places
-                                        </span>
-                                        <Badge variant={engineer.is_active ? 'outline' : 'secondary'} className="rounded-full">
-                                            {engineer.is_active ? 'Active' : 'Inactive'}
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant={eng.is_active ? 'default' : 'secondary'} className="text-[10px]">
+                                            {eng.is_active ? 'Active' : 'Inactive'}
                                         </Badge>
+                                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                            <MapPin className="size-3" />
+                                            {eng.special_places_count}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border border-border/60">
+                        <CardHeader>
+                            <CardTitle>Special Place Distribution</CardTitle>
+                            <CardDescription>Geographic coverage by province</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {specialPlaceDistribution.length === 0 && (
+                                <p className="text-sm text-muted-foreground">No distribution data available.</p>
+                            )}
+                            {specialPlaceDistribution.map((prov) => (
+                                <div key={prov.code} className="flex items-center justify-between gap-2">
+                                    <span className="text-sm font-medium">{prov.province}</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
+                                            <div
+                                                className="h-full bg-primary transition-all"
+                                                style={{
+                                                    width: `${(prov.total / (specialPlaceDistribution.length > 0 ? Math.max(...specialPlaceDistribution.map((p) => p.total)) : 1)) * 100}%`,
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="w-8 text-right text-xs font-semibold text-muted-foreground">
+                                            {prov.total}
+                                        </span>
                                     </div>
                                 </div>
                             ))}
@@ -773,7 +479,8 @@ export default function Dashboard({
                     </Card>
                 </section>
             </div>
-            {/* All KPI demo sections removed. Only AppDesk dashboard remains. */}
         </AppLayout>
     );
 }
+
+export default AppDeskDashboard;

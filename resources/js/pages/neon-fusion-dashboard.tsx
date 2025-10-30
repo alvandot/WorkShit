@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart2, TrendingUp, Users, Activity, Zap, Globe, BookOpen, Palette } from 'lucide-react';
+import { Globe, BookOpen, Palette } from 'lucide-react';
 import { useState } from 'react';
 
 // Option 1: Futuristic Neon Fusion (Purple, Cyan, and Black, with geometric grid layout, headings in Orbitron, body in system-ui)

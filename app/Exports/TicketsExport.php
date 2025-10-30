@@ -14,7 +14,7 @@ class TicketsExport implements FromCollection, WithHeadings, WithMapping
      */
     public function collection()
     {
-        return Ticket::with(['assignedTo', 'createdBy'])->get();
+        return Ticket::with(['assignedTo', 'assignedBy', 'createdBy'])->get();
     }
 
     public function headings(): array
@@ -29,6 +29,8 @@ class TicketsExport implements FromCollection, WithHeadings, WithMapping
             'Deadline',
             'Status',
             'Assigned To',
+            'Assigned At',
+            'Assigned By',
             'Created By',
             'Created At',
         ];
@@ -48,7 +50,9 @@ class TicketsExport implements FromCollection, WithHeadings, WithMapping
             $ticket->schedule?->format('Y-m-d H:i:s'),
             $ticket->deadline?->format('Y-m-d H:i:s'),
             $ticket->status,
-            $ticket->assignedTo?->name,
+            $ticket->assignedTo?->name ?? 'Unassigned',
+            $ticket->assigned_at?->format('Y-m-d H:i:s') ?? '-',
+            $ticket->assignedBy?->name ?? '-',
             $ticket->createdBy?->name,
             $ticket->created_at->format('Y-m-d H:i:s'),
         ];
