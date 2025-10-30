@@ -25,6 +25,7 @@ import {
     Trash,
     User,
 } from 'lucide-react';
+import FileGallery from '@/components/file-gallery';
 
 interface User {
     id: number;
@@ -55,9 +56,9 @@ interface Ticket {
     assigned_to: number | null;
     created_by: number | null;
     notes: string | null;
-    ct_bad_part: string | null;
-    ct_good_part: string | null;
-    bap_file: string | null;
+    ct_bad_part: string[] | null;
+    ct_good_part: string[] | null;
+    bap_file: string[] | null;
     completion_notes: string | null;
     completed_at: string | null;
     created_at: string;
@@ -90,7 +91,9 @@ export default function ShowTicket({ ticket }: Props) {
     };
 
     const hasAttachments =
-        ticket.ct_bad_part || ticket.ct_good_part || ticket.bap_file;
+        (ticket.ct_bad_part && ticket.ct_bad_part.length > 0) ||
+        (ticket.ct_good_part && ticket.ct_good_part.length > 0) ||
+        (ticket.bap_file && ticket.bap_file.length > 0);
 
     const getFileIcon = (fileName: string | null) => {
         if (!fileName) return <FileText className="size-5" />;
@@ -347,124 +350,45 @@ export default function ShowTicket({ ticket }: Props) {
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
-                                        <Download className="size-5" />
+                                        <ImageIcon className="size-5" />
                                         Uploaded Files
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-3">
-                                        {ticket.ct_bad_part && (
-                                            <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4 transition-colors hover:bg-muted/50">
-                                                <div className="flex items-center gap-3">
-                                                    {getFileIcon(
-                                                        ticket.ct_bad_part,
-                                                    )}
-                                                    <div>
-                                                        <p className="text-sm font-medium">
-                                                            CT Bad Part
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {getFileName(
-                                                                ticket.ct_bad_part,
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <a
-                                                    href={`/tickets/${ticket.id}/download/ct_bad_part`}
-                                                    className="inline-flex"
-                                                >
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                    >
-                                                        <Download className="mr-2 size-4" />
-                                                        Download
-                                                    </Button>
-                                                </a>
-                                            </div>
-                                        )}
+                                <CardContent className="space-y-8">
+                                    {ticket.ct_bad_part && ticket.ct_bad_part.length > 0 && (
+                                        <FileGallery
+                                            files={ticket.ct_bad_part}
+                                            label="CT Bad Part Photos"
+                                        />
+                                    )}
 
-                                        {ticket.ct_good_part && (
-                                            <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4 transition-colors hover:bg-muted/50">
-                                                <div className="flex items-center gap-3">
-                                                    {getFileIcon(
-                                                        ticket.ct_good_part,
-                                                    )}
-                                                    <div>
-                                                        <p className="text-sm font-medium">
-                                                            CT Good Part
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {getFileName(
-                                                                ticket.ct_good_part,
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <a
-                                                    href={`/tickets/${ticket.id}/download/ct_good_part`}
-                                                    className="inline-flex"
-                                                >
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                    >
-                                                        <Download className="mr-2 size-4" />
-                                                        Download
-                                                    </Button>
-                                                </a>
-                                            </div>
-                                        )}
+                                    {ticket.ct_good_part && ticket.ct_good_part.length > 0 && (
+                                        <FileGallery
+                                            files={ticket.ct_good_part}
+                                            label="CT Good Part Photos"
+                                        />
+                                    )}
 
-                                        {ticket.bap_file && (
-                                            <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4 transition-colors hover:bg-muted/50">
-                                                <div className="flex items-center gap-3">
-                                                    {getFileIcon(
-                                                        ticket.bap_file,
-                                                    )}
-                                                    <div>
-                                                        <p className="text-sm font-medium">
-                                                            BAP File
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {getFileName(
-                                                                ticket.bap_file,
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <a
-                                                    href={`/tickets/${ticket.id}/download/bap_file`}
-                                                    className="inline-flex"
-                                                >
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                    >
-                                                        <Download className="mr-2 size-4" />
-                                                        Download
-                                                    </Button>
-                                                </a>
-                                            </div>
-                                        )}
+                                    {ticket.bap_file && ticket.bap_file.length > 0 && (
+                                        <FileGallery
+                                            files={ticket.bap_file}
+                                            label="BAP Document Photos"
+                                        />
+                                    )}
 
-                                        {ticket.completion_notes && (
-                                            <>
-                                                <Separator className="my-4" />
-                                                <div>
-                                                    <p className="mb-2 text-sm font-medium text-muted-foreground">
-                                                        Completion Notes
-                                                    </p>
-                                                    <p className="text-sm leading-relaxed">
-                                                        {
-                                                            ticket.completion_notes
-                                                        }
-                                                    </p>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                    {ticket.completion_notes && (
+                                        <>
+                                            <Separator className="my-4" />
+                                            <div>
+                                                <p className="mb-2 text-sm font-medium text-muted-foreground">
+                                                    Completion Notes
+                                                </p>
+                                                <p className="text-sm leading-relaxed">
+                                                    {ticket.completion_notes}
+                                                </p>
+                                            </div>
+                                        </>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}

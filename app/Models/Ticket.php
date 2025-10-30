@@ -22,6 +22,9 @@ class Ticket extends Model
             'assigned_at' => 'datetime',
             'needs_revisit' => 'boolean',
             'visit_schedules' => 'array',
+            'ct_bad_part' => 'array',
+            'ct_good_part' => 'array',
+            'bap_file' => 'array',
         ];
     }
 

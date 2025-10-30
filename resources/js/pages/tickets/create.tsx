@@ -9,6 +9,7 @@ import InputError from '@/components/input-error';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import FileUploadWithPreview from '@/components/file-upload-with-preview';
 
 export default function Create() {
   const { data, setData, post, processing, errors } = useForm({
@@ -18,6 +19,9 @@ export default function Create() {
     contact: '',
     problem: '',
     schedule: '',
+    ct_bad_part: [] as File[],
+    ct_good_part: [] as File[],
+    bap_file: [] as File[],
   });
 
   const submit: FormEventHandler = (e) => {
@@ -145,8 +149,56 @@ export default function Create() {
                 <InputError message={errors.problem} />
               </div>
 
+              {/* File Uploads Section */}
+              <div className="space-y-6 pt-6 border-t">
+                <h3 className="text-lg font-semibold">File Attachments</h3>
+                <p className="text-sm text-muted-foreground">
+                  Upload photos of the faulty and replacement components, and the BAP document.
+                  All images will be automatically converted to WebP format for optimal storage.
+                </p>
+
+                {/* CT Bad Part Upload */}
+                <FileUploadWithPreview
+                  label="CT Bad Part Photos"
+                  name="ct_bad_part"
+                  description="Photos of the faulty component"
+                  accept="image/*"
+                  maxSize={10}
+                  multiple={true}
+                  onChange={(files) => setData('ct_bad_part', files)}
+                  value={data.ct_bad_part}
+                  error={errors.ct_bad_part}
+                />
+
+                {/* CT Good Part Upload */}
+                <FileUploadWithPreview
+                  label="CT Good Part Photos"
+                  name="ct_good_part"
+                  description="Photos of the replacement component"
+                  accept="image/*"
+                  maxSize={10}
+                  multiple={true}
+                  onChange={(files) => setData('ct_good_part', files)}
+                  value={data.ct_good_part}
+                  error={errors.ct_good_part}
+                />
+
+                {/* BAP File Upload */}
+                <FileUploadWithPreview
+                  label="BAP Document Photos"
+                  name="bap_file"
+                  description="BAP (Berita Acara Perbaikan) document photos"
+                  accept="image/*"
+                  maxSize={20}
+                  multiple={true}
+                  onChange={(files) => setData('bap_file', files)}
+                  value={data.bap_file}
+                  error={errors.bap_file}
+                />
+              </div>
+
               {/* Submit Button */}
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-6 border-t">
                 <Button
                   type="button"
                   variant="outline"
@@ -155,7 +207,7 @@ export default function Create() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={processing}>
-                  {processing ? 'Creating...' : 'Create Ticket'}
+                  {processing ? 'Creating Ticket...' : 'Create Ticket'}
                 </Button>
               </div>
             </form>

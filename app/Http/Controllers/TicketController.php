@@ -80,9 +80,51 @@ class TicketController extends Controller
             'status' => 'required|in:Open,Need to Receive,In Progress,Finish,Closed',
             'assigned_to' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
+            'ct_bad_part' => 'nullable|array',
+            'ct_bad_part.*' => 'file|mimes:jpg,jpeg,png,gif,webp|max:10240',
+            'ct_good_part' => 'nullable|array',
+            'ct_good_part.*' => 'file|mimes:jpg,jpeg,png,gif,webp|max:10240',
+            'bap_file' => 'nullable|array',
+            'bap_file.*' => 'file|mimes:jpg,jpeg,png,gif,webp|max:20480',
         ]);
 
         $validated['created_by'] = $request->user()?->id;
+
+        // Get the schedule date, fallback to today
+        $scheduleDate = isset($validated['schedule']) ? \Carbon\Carbon::parse($validated['schedule'])->format('Ymd') : now()->format('Ymd');
+
+        // Handle multiple CT Bad Part files
+        $ctBadPaths = [];
+        if ($request->hasFile('ct_bad_part')) {
+            foreach ($request->file('ct_bad_part') as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'CTBAD_' . $validated['ticket_number'] . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $ctBadPaths[] = $file->storeAs('tickets/ct_bad_parts', $filename, 'public');
+            }
+        }
+        $validated['ct_bad_part'] = $ctBadPaths;
+
+        // Handle multiple CT Good Part files
+        $ctGoodPaths = [];
+        if ($request->hasFile('ct_good_part')) {
+            foreach ($request->file('ct_good_part') as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'CTGOOD_' . $validated['ticket_number'] . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $ctGoodPaths[] = $file->storeAs('tickets/ct_good_parts', $filename, 'public');
+            }
+        }
+        $validated['ct_good_part'] = $ctGoodPaths;
+
+        // Handle multiple BAP files
+        $bapPaths = [];
+        if ($request->hasFile('bap_file')) {
+            foreach ($request->file('bap_file') as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'BAP_' . $validated['ticket_number'] . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $bapPaths[] = $file->storeAs('tickets/bap_files', $filename, 'public');
+            }
+        }
+        $validated['bap_file'] = $bapPaths;
 
         Ticket::create($validated);
 
@@ -249,32 +291,52 @@ class TicketController extends Controller
         }
 
         $validated = $request->validate([
-            'ct_bad_part' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
-            'ct_good_part' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
-            'bap_file' => 'nullable|file|mimes:jpg,jpeg,png|max:20480', // Changed to jpg/jpeg/png and 20MB
+            'ct_bad_part' => 'nullable|array',
+            'ct_bad_part.*' => 'file|mimes:jpg,jpeg,png,gif,webp|max:10240',
+            'ct_good_part' => 'nullable|array',
+            'ct_good_part.*' => 'file|mimes:jpg,jpeg,png,gif,webp|max:10240',
+            'bap_file' => 'nullable|array',
+            'bap_file.*' => 'file|mimes:jpg,jpeg,png,gif,webp|max:20480',
             'completion_notes' => 'nullable|string',
         ]);
 
+        // Get the schedule date from the ticket, fallback to today
+        $scheduleDate = $ticket->schedule ? $ticket->schedule->format('Ymd') : now()->format('Ymd');
+
+        // Handle multiple CT Bad Part files
+        $ctBadPaths = [];
         if ($request->hasFile('ct_bad_part')) {
-            $file = $request->file('ct_bad_part');
-            $extension = $file->getClientOriginalExtension();
-            $filename = 'CTBAD_' . $ticket->ticket_number . '_' . now()->format('Y-m-d') . '.' . $extension;
-            $validated['ct_bad_part'] = $file->storeAs('tickets/ct_bad_parts', $filename, 'public');
+            foreach ($request->file('ct_bad_part') as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'CTBAD_' . $ticket->ticket_number . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $ctBadPaths[] = $file->storeAs('tickets/ct_bad_parts', $filename, 'public');
+            }
         }
 
+        // Handle multiple CT Good Part files
+        $ctGoodPaths = [];
         if ($request->hasFile('ct_good_part')) {
-            $file = $request->file('ct_good_part');
-            $extension = $file->getClientOriginalExtension();
-            $filename = 'CTGOOD_' . $ticket->ticket_number . '_' . now()->format('Y-m-d') . '.' . $extension;
-            $validated['ct_good_part'] = $file->storeAs('tickets/ct_good_parts', $filename, 'public');
+            foreach ($request->file('ct_good_part') as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'CTGOOD_' . $ticket->ticket_number . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $ctGoodPaths[] = $file->storeAs('tickets/ct_good_parts', $filename, 'public');
+            }
         }
 
+        // Handle multiple BAP files
+        $bapPaths = [];
         if ($request->hasFile('bap_file')) {
-            $file = $request->file('bap_file');
-            $extension = $file->getClientOriginalExtension();
-            $filename = 'BAP_' . $ticket->ticket_number . '_' . now()->format('Y-m-d') . '.' . $extension;
-            $validated['bap_file'] = $file->storeAs('tickets/bap_files', $filename, 'public');
+            foreach ($request->file('bap_file') as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = 'BAP_' . $ticket->ticket_number . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $bapPaths[] = $file->storeAs('tickets/bap_files', $filename, 'public');
+            }
         }
+
+        // Merge with existing files if any
+        $validated['ct_bad_part'] = array_merge($ticket->ct_bad_part ?? [], $ctBadPaths);
+        $validated['ct_good_part'] = array_merge($ticket->ct_good_part ?? [], $ctGoodPaths);
+        $validated['bap_file'] = array_merge($ticket->bap_file ?? [], $bapPaths);
 
         // Update visit schedules status to completed
         $visitSchedules = $ticket->visit_schedules ?? [];
@@ -357,21 +419,28 @@ class TicketController extends Controller
     }
 
     /**
-     * Download ticket file.
+     * Download ticket file by index.
      */
-    public function downloadFile(Ticket $ticket, string $fileType)
+    public function downloadFile(Ticket $ticket, string $fileType, int $index = 0)
     {
         // Validate file type
         if (! in_array($fileType, ['ct_bad_part', 'ct_good_part', 'bap_file'])) {
             abort(404, 'Invalid file type');
         }
 
-        // Check if file exists in ticket
-        $filePath = $ticket->{$fileType};
+        // Get the file array
+        $files = $ticket->{$fileType};
 
-        if (! $filePath) {
-            abort(404, 'File not found');
+        if (! $files || ! is_array($files)) {
+            abort(404, 'No files found');
         }
+
+        // Check if index exists
+        if (! isset($files[$index])) {
+            abort(404, 'File index not found');
+        }
+
+        $filePath = $files[$index];
 
         // Get the full path
         $fullPath = storage_path('app/public/'.$filePath);

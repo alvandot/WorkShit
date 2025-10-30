@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import FileUploadWithPreview from '@/components/file-upload-with-preview';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
@@ -89,9 +90,9 @@ interface Ticket {
     assigned_to: number | null;
     created_by: number | null;
     notes: string | null;
-    ct_bad_part: string | null;
-    ct_good_part: string | null;
-    bap_file: string | null;
+    ct_bad_part: string[] | null;
+    ct_good_part: string[] | null;
+    bap_file: string[] | null;
     needs_revisit: boolean;
     current_visit: number;
     visit_schedules: Record<number, VisitSchedule> | null;
@@ -296,9 +297,9 @@ export default function Timeline({ ticket }: Props) {
 
     // Form for completion (End Case)
     const completeForm = useForm({
-        ct_bad_part: null as File | null,
-        ct_good_part: null as File | null,
-        bap_file: null as File | null,
+        ct_bad_part: [] as File[],
+        ct_good_part: [] as File[],
+        bap_file: [] as File[],
         completion_notes: '',
     });
 
@@ -793,57 +794,117 @@ export default function Timeline({ ticket }: Props) {
 
                             {/* Completion Documents */}
                             {ticket.completed_at &&
-                                (ticket.ct_bad_part ||
-                                    ticket.ct_good_part ||
-                                    ticket.bap_file) && (
+                                ((ticket.ct_bad_part && ticket.ct_bad_part.length > 0) ||
+                                    (ticket.ct_good_part && ticket.ct_good_part.length > 0) ||
+                                    (ticket.bap_file && ticket.bap_file.length > 0)) && (
                                     <div className="border-t-2 border-dashed pt-4">
                                         <div className="bg-success/5 rounded-lg p-4">
                                             <p className="text-success mb-4 flex items-center gap-2 text-base font-bold">
                                                 <Download className="size-5" />
                                                 Completion Documents
                                             </p>
-                                            <div className="space-y-2">
-                                                {ticket.ct_bad_part && (
-                                                    <a
-                                                        href={`/tickets/${ticket.id}/download/ct_bad_part`}
-                                                        className="bg-base-100 hover:bg-base-200 border-base-300 flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-md"
-                                                    >
-                                                        <div className="rounded-lg bg-primary/10 p-2">
-                                                            <FileText className="size-5 text-primary" />
+                                            <div className="space-y-4">
+                                                {ticket.ct_bad_part && ticket.ct_bad_part.length > 0 && (
+                                                    <div>
+                                                        <p className="mb-2 text-sm font-semibold text-muted-foreground">
+                                                            CT Bad Part ({ticket.ct_bad_part.length})
+                                                        </p>
+                                                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                                            {ticket.ct_bad_part.map((file, index) => (
+                                                                <a
+                                                                    key={index}
+                                                                    href={`/tickets/${ticket.id}/download/ct_bad_part/${index}`}
+                                                                    download
+                                                                    className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/50 transition-all hover:border-primary hover:shadow-md"
+                                                                >
+                                                                    <img
+                                                                        src={`/storage/${file}`}
+                                                                        alt={`CT Bad Part ${index + 1}`}
+                                                                        className="size-full object-cover transition-transform group-hover:scale-110"
+                                                                        onError={(e) => {
+                                                                            const target = e.target as HTMLImageElement;
+                                                                            target.style.display = 'none';
+                                                                            const parent = target.parentElement;
+                                                                            if (parent) {
+                                                                                parent.innerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-muted-foreground">Image not found</p></div>';
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                                                        <Download className="size-6 text-white" />
+                                                                    </div>
+                                                                </a>
+                                                            ))}
                                                         </div>
-                                                        <span className="flex-1 text-sm font-semibold">
-                                                            CT Bad Part
-                                                        </span>
-                                                        <Download className="size-5 text-muted-foreground" />
-                                                    </a>
+                                                    </div>
                                                 )}
-                                                {ticket.ct_good_part && (
-                                                    <a
-                                                        href={`/tickets/${ticket.id}/download/ct_good_part`}
-                                                        className="bg-base-100 hover:bg-base-200 border-base-300 flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-md"
-                                                    >
-                                                        <div className="bg-success/10 rounded-lg p-2">
-                                                            <FileText className="text-success size-5" />
+                                                {ticket.ct_good_part && ticket.ct_good_part.length > 0 && (
+                                                    <div>
+                                                        <p className="mb-2 text-sm font-semibold text-muted-foreground">
+                                                            CT Good Part ({ticket.ct_good_part.length})
+                                                        </p>
+                                                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                                            {ticket.ct_good_part.map((file, index) => (
+                                                                <a
+                                                                    key={index}
+                                                                    href={`/tickets/${ticket.id}/download/ct_good_part/${index}`}
+                                                                    download
+                                                                    className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/50 transition-all hover:border-primary hover:shadow-md"
+                                                                >
+                                                                    <img
+                                                                        src={`/storage/${file}`}
+                                                                        alt={`CT Good Part ${index + 1}`}
+                                                                        className="size-full object-cover transition-transform group-hover:scale-110"
+                                                                        onError={(e) => {
+                                                                            const target = e.target as HTMLImageElement;
+                                                                            target.style.display = 'none';
+                                                                            const parent = target.parentElement;
+                                                                            if (parent) {
+                                                                                parent.innerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-muted-foreground">Image not found</p></div>';
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                                                        <Download className="size-6 text-white" />
+                                                                    </div>
+                                                                </a>
+                                                            ))}
                                                         </div>
-                                                        <span className="flex-1 text-sm font-semibold">
-                                                            CT Good Part
-                                                        </span>
-                                                        <Download className="size-5 text-muted-foreground" />
-                                                    </a>
+                                                    </div>
                                                 )}
-                                                {ticket.bap_file && (
-                                                    <a
-                                                        href={`/tickets/${ticket.id}/download/bap_file`}
-                                                        className="bg-base-100 hover:bg-base-200 border-base-300 flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-md"
-                                                    >
-                                                        <div className="rounded-lg bg-accent/10 p-2">
-                                                            <FileText className="size-5 text-accent" />
+                                                {ticket.bap_file && ticket.bap_file.length > 0 && (
+                                                    <div>
+                                                        <p className="mb-2 text-sm font-semibold text-muted-foreground">
+                                                            BAP Files ({ticket.bap_file.length})
+                                                        </p>
+                                                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                                            {ticket.bap_file.map((file, index) => (
+                                                                <a
+                                                                    key={index}
+                                                                    href={`/tickets/${ticket.id}/download/bap_file/${index}`}
+                                                                    download
+                                                                    className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/50 transition-all hover:border-primary hover:shadow-md"
+                                                                >
+                                                                    <img
+                                                                        src={`/storage/${file}`}
+                                                                        alt={`BAP ${index + 1}`}
+                                                                        className="size-full object-cover transition-transform group-hover:scale-110"
+                                                                        onError={(e) => {
+                                                                            const target = e.target as HTMLImageElement;
+                                                                            target.style.display = 'none';
+                                                                            const parent = target.parentElement;
+                                                                            if (parent) {
+                                                                                parent.innerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-muted-foreground">Image not found</p></div>';
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                                                        <Download className="size-6 text-white" />
+                                                                    </div>
+                                                                </a>
+                                                            ))}
                                                         </div>
-                                                        <span className="flex-1 text-sm font-semibold">
-                                                            BAP File
-                                                        </span>
-                                                        <Download className="size-5 text-muted-foreground" />
-                                                    </a>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
@@ -1231,7 +1292,7 @@ export default function Timeline({ ticket }: Props) {
                 open={currentStageDialog !== null}
                 onOpenChange={(open) => !open && setCurrentStageDialog(null)}
             >
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle>{currentStage?.title}</DialogTitle>
                         <DialogDescription>
@@ -1243,71 +1304,70 @@ export default function Timeline({ ticket }: Props) {
                         // End Case - Special form with file uploads
                         <form
                             onSubmit={handleCompleteSubmit}
-                            className="space-y-4"
+                            className="flex flex-col flex-1 min-h-0"
                         >
-                            <div>
-                                <Label>CT Bad Part</Label>
-                                <Input
-                                    type="file"
-                                    accept=".jpg,.jpeg,.png,.pdf"
-                                    onChange={(e) =>
-                                        completeForm.setData(
-                                            'ct_bad_part',
-                                            e.target.files?.[0] || null,
-                                        )
+                            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+                                <FileUploadWithPreview
+                                    label="CT Bad Part"
+                                    name="ct_bad_part"
+                                    accept="image/*"
+                                    maxSize={10}
+                                    multiple={true}
+                                    value={completeForm.data.ct_bad_part}
+                                    onChange={(files) =>
+                                        completeForm.setData('ct_bad_part', files)
                                     }
+                                    error={completeForm.errors.ct_bad_part}
+                                    description="Upload images of faulty components (will be converted to WebP)"
+                                    existingFiles={ticket.ct_bad_part || []}
                                 />
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Upload image or PDF (max 10MB)
-                                </p>
-                            </div>
-                            <div>
-                                <Label>CT Good Part</Label>
-                                <Input
-                                    type="file"
-                                    accept=".jpg,.jpeg,.png,.pdf"
-                                    onChange={(e) =>
-                                        completeForm.setData(
-                                            'ct_good_part',
-                                            e.target.files?.[0] || null,
-                                        )
+
+                                <FileUploadWithPreview
+                                    label="CT Good Part"
+                                    name="ct_good_part"
+                                    accept="image/*"
+                                    maxSize={10}
+                                    multiple={true}
+                                    value={completeForm.data.ct_good_part}
+                                    onChange={(files) =>
+                                        completeForm.setData('ct_good_part', files)
                                     }
+                                    error={completeForm.errors.ct_good_part}
+                                    description="Upload images of replacement components (will be converted to WebP)"
+                                    existingFiles={ticket.ct_good_part || []}
                                 />
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Upload image or PDF (max 10MB)
-                                </p>
-                            </div>
-                            <div>
-                                <Label>BAP (Berita Acara Pekerjaan)</Label>
-                                <Input
-                                    type="file"
-                                    accept=".jpg,.jpeg,.png"
-                                    onChange={(e) =>
-                                        completeForm.setData(
-                                            'bap_file',
-                                            e.target.files?.[0] || null,
-                                        )
+
+                                <FileUploadWithPreview
+                                    label="BAP (Berita Acara Pekerjaan)"
+                                    name="bap_file"
+                                    accept="image/*"
+                                    maxSize={20}
+                                    multiple={true}
+                                    value={completeForm.data.bap_file}
+                                    onChange={(files) =>
+                                        completeForm.setData('bap_file', files)
                                     }
+                                    error={completeForm.errors.bap_file}
+                                    description="Upload BAP images (will be converted to WebP)"
+                                    existingFiles={ticket.bap_file || []}
                                 />
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Upload image JPG/JPEG/PNG (max 20MB)
-                                </p>
+
+                                <div>
+                                    <Label>Completion Notes</Label>
+                                    <Textarea
+                                        value={completeForm.data.completion_notes}
+                                        onChange={(e) =>
+                                            completeForm.setData(
+                                                'completion_notes',
+                                                e.target.value,
+                                            )
+                                        }
+                                        placeholder="Add completion notes..."
+                                        rows={4}
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <Label>Completion Notes</Label>
-                                <Textarea
-                                    value={completeForm.data.completion_notes}
-                                    onChange={(e) =>
-                                        completeForm.setData(
-                                            'completion_notes',
-                                            e.target.value,
-                                        )
-                                    }
-                                    placeholder="Add completion notes..."
-                                    rows={4}
-                                />
-                            </div>
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-2 pt-4 border-t mt-4 bg-background">
                                 <Button
                                     type="button"
                                     variant="outline"

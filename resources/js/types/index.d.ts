@@ -61,9 +61,9 @@ export interface Ticket {
     assigned_by: number | null;
     created_by: number | null;
     notes: string | null;
-    ct_bad_part: string | null;
-    ct_good_part: string | null;
-    bap_file: string | null;
+    ct_bad_part: string[] | null;
+    ct_good_part: string[] | null;
+    bap_file: string[] | null;
     needs_revisit: boolean;
     current_visit: number;
     visit_schedules: VisitSchedule[] | null;
