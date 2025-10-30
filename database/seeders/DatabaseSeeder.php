@@ -28,6 +28,9 @@ class DatabaseSeeder extends Seeder
             ProvinceSeeder::class,
             TicketSeeder::class,
             TicketActivitySeeder::class,
+            \Database\Seeders\FakeTicketSeeder::class,
+            \Database\Seeders\PartsDummySeeder::class,
+            \Database\Seeders\EnsureTicketHasPartSeeder::class,
         ]);
     }
 }

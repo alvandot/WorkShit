@@ -31,14 +31,12 @@ class TicketAssignmentSeeder extends Seeder
                 'ticket_id' => $ticket->id,
                 'assigned_to' => $assignedTo->id,
                 'assigned_by' => $assignedBy->id,
-                'assigned_at' => now()->subDays(rand(1, 30)),
                 'notes' => 'Auto-assigned during seeding',
                 'is_active' => true,
             ]);
 
             $ticket->update([
                 'assigned_to' => $assignedTo->id,
-                'assigned_at' => $assignment->assigned_at,
                 'assigned_by' => $assignedBy->id,
             ]);
 
@@ -48,7 +46,7 @@ class TicketAssignmentSeeder extends Seeder
                 'activity_type' => 'assigned',
                 'title' => 'Ticket assigned',
                 'description' => "Assigned to {$assignedTo->name}",
-                'activity_time' => $assignment->assigned_at,
+                // 'activity_time' => $assignment->assigned_at, // removed
             ]);
         }
 

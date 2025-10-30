@@ -37,28 +37,25 @@ class ComprehensiveDatabaseSeeder extends Seeder
         // 2. Create Tickets with different statuses
         $this->command->info('🎫 Creating tickets...');
 
+
         $openTickets = Ticket::factory(5)->create([
             'status' => 'Open',
-            'created_by' => $admin->id,
             'assigned_to' => null,
         ]);
 
         $inProgressTickets = Ticket::factory(8)->create([
             'status' => 'In Progress',
-            'created_by' => $admin->id,
             'assigned_to' => $engineers->random()->id,
         ]);
 
         $resolvedTickets = Ticket::factory(6)->create([
             'status' => 'Resolved',
-            'created_by' => $admin->id,
             'assigned_to' => $engineers->random()->id,
             'completed_at' => now()->subDays(rand(1, 7)),
         ]);
 
         $closedTickets = Ticket::factory(3)->create([
             'status' => 'Closed',
-            'created_by' => $admin->id,
             'assigned_to' => $engineers->random()->id,
             'completed_at' => now()->subDays(rand(8, 30)),
         ]);
@@ -116,7 +113,7 @@ class ComprehensiveDatabaseSeeder extends Seeder
                 'ticket_id' => $ticket->id,
                 'old_status' => null,
                 'new_status' => 'Open',
-                'changed_by' => $ticket->created_by,
+                'changed_by' => $ticket->assigned_by ?? $admin->id,
                 'notes' => 'Ticket created',
             ]);
             $historyCount++;

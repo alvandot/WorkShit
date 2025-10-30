@@ -28,7 +28,6 @@ class TicketFactory extends Factory
             'deadline' => fake()->dateTimeBetween('+1 week', '+2 weeks'),
             'status' => fake()->randomElement(['Open', 'Need to Receive', 'In Progress', 'Finish', 'Closed']),
             'assigned_to' => null,
-            'created_by' => null,
             'notes' => fake()->optional()->paragraph(),
         ];
     }

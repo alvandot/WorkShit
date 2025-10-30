@@ -19,7 +19,6 @@ class Ticket extends Model
             'schedule' => 'datetime',
             'deadline' => 'datetime',
             'completed_at' => 'datetime',
-            'assigned_at' => 'datetime',
             'needs_revisit' => 'boolean',
             'visit_schedules' => 'array',
             'ct_bad_part' => 'array',
@@ -41,7 +40,6 @@ class Ticket extends Model
         'deadline',
         'status',
         'assigned_to',
-        'assigned_at',
         'assigned_by',
         'created_by',
         'notes',
@@ -75,9 +73,10 @@ class Ticket extends Model
         return $this->hasMany(TicketActivity::class)->orderBy('activity_time', 'asc');
     }
 
-    public function parts(): HasMany
+
+    public function recommendedPart(): BelongsTo
     {
-        return $this->hasMany(Part::class);
+        return $this->belongsTo(Part::class, 'part_recommended');
     }
 
     public function assignedBy(): BelongsTo
