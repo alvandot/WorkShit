@@ -1,3 +1,304 @@
+// --- Neon Fusion Dashboard Section (from neon-fusion-dashboard.tsx) ---
+
+import { Globe as GlobeNeon, BookOpen as BookOpenNeon, Palette as PaletteNeon } from 'lucide-react';
+import { useState as useStateNeon } from 'react';
+
+const neonKpis = [
+    {
+        label: 'Global Reach',
+        value: '72 Countries',
+        icon: <GlobeNeon className="size-7 text-cyan-400" />,
+        trend: '+3',
+        description: 'new countries this month',
+    },
+    {
+        label: 'Knowledge Base',
+        value: '1,204',
+        icon: <BookOpenNeon className="size-7 text-purple-400" />,
+        trend: '+120',
+        description: 'articles published',
+    },
+    {
+        label: 'Design Variants',
+        value: '18',
+        icon: <PaletteNeon className="size-7 text-pink-400" />,
+        trend: '+2',
+        description: 'new themes',
+    },
+    {
+        label: 'Active Users',
+        value: 1287,
+        icon: <Users className="size-7 text-cyan-400" />,
+        trend: '+4.2%',
+        description: 'in the last 24 hours',
+    },
+];
+
+export function NeonFusionDashboard() {
+    const [hovered, setHovered] = useStateNeon<number | null>(null);
+    return (
+        <AppLayout>
+            <div className="min-h-screen bg-gradient-to-br from-black via-blue-950 to-cyan-900 py-10 px-2 md:px-8 font-sans">
+                <header className="mb-8">
+                    <h1 className="text-4xl md:text-6xl font-extrabold tracking-widest text-cyan-300 font-orbitron drop-shadow-neon mb-2 uppercase transition-colors duration-500">Neon Fusion Dashboard</h1>
+                    <p className="text-base md:text-lg text-purple-200 font-normal max-w-2xl leading-relaxed">A futuristic dashboard blending neon colors, geometric grid layouts, and Orbitron headings for a cyberpunk-inspired experience.</p>
+                </header>
+                <section className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                    {neonKpis.map((kpi, idx) => (
+                        <Card
+                            key={kpi.label}
+                            className={`group relative bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-transform duration-300 hover:scale-105 hover:shadow-neon focus-within:ring-2 focus-within:ring-pink-400 ${hovered === idx ? 'ring-2 ring-cyan-400' : ''}`}
+                            onMouseEnter={() => setHovered(idx)}
+                            onMouseLeave={() => setHovered(null)}
+                            tabIndex={0}
+                        >
+                            <CardHeader className="flex flex-row items-center gap-4 pb-2">
+                                <div className="p-3 rounded-full bg-gradient-to-br from-cyan-700 to-purple-800 shadow-md group-hover:scale-110 transition-transform duration-300">
+                                    {kpi.icon}
+                                </div>
+                                <div>
+                                    <CardTitle className="text-2xl md:text-3xl font-orbitron text-cyan-200 font-bold tracking-widest mb-1 uppercase">{kpi.value}</CardTitle>
+                                    <CardDescription className="text-purple-200 text-xs md:text-sm font-medium uppercase tracking-wide">{kpi.label}</CardDescription>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2">
+                                <span className="text-pink-400 font-semibold text-lg">{kpi.trend}</span>
+                                <span className="text-cyan-300 text-xs">{kpi.description}</span>
+                            </CardContent>
+                            <div className="absolute inset-0 rounded-xl pointer-events-none group-hover:bg-cyan-400/10 transition-colors duration-300" />
+                        </Card>
+                    ))}
+                </section>
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                    <Card className="bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-shadow duration-300 hover:shadow-neon">
+                        <CardHeader>
+                            <CardTitle className="text-xl md:text-2xl font-orbitron text-cyan-200 font-bold uppercase">Live Activity</CardTitle>
+                            <CardDescription className="text-purple-200">Real-time updates and micro-interactions</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button variant="outline" className="bg-cyan-900/40 text-cyan-200 border-cyan-400 hover:bg-cyan-800/60 hover:text-white transition-all duration-300 shadow-md font-orbitron">Trigger Action</Button>
+                            <div className="mt-6 h-24 flex items-center justify-center text-pink-400 animate-pulse font-orbitron text-lg">Live data coming soon...</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-shadow duration-300 hover:shadow-neon">
+                        <CardHeader>
+                            <CardTitle className="text-xl md:text-2xl font-orbitron text-cyan-200 font-bold uppercase">Analytics</CardTitle>
+                            <CardDescription className="text-purple-200">Charts, trends, and more</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-24 flex items-center justify-center text-cyan-400 font-orbitron text-lg">Chart coming soon...</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-black/80 border border-cyan-700 shadow-2xl rounded-xl transition-shadow duration-300 hover:shadow-neon">
+                        <CardHeader>
+                            <CardTitle className="text-xl md:text-2xl font-orbitron text-cyan-200 font-bold uppercase">Design Gallery</CardTitle>
+                            <CardDescription className="text-purple-200">Explore fusion themes</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-24 flex items-center justify-center text-pink-400 font-orbitron text-lg">Gallery coming soon...</div>
+                        </CardContent>
+                    </Card>
+                </section>
+            </div>
+        </AppLayout>
+    );
+}
+// --- Minimalist Split Dashboard Section (from minimalist-split-dashboard.tsx) ---
+
+import { Globe as GlobeSplit, BookOpen as BookOpenSplit, Palette as PaletteSplit } from 'lucide-react';
+import { useState as useStateSplit } from 'react';
+
+const splitKpis = [
+    {
+        label: 'Collaborators',
+        value: 19,
+        icon: <Users className="size-7 text-slate-600" />,
+        trend: '+2',
+        description: 'joined this week',
+    },
+    {
+        label: 'Docs',
+        value: '312',
+        icon: <BookOpenSplit className="size-7 text-accent-500" />,
+        trend: '+8',
+        description: 'pages updated',
+    },
+    {
+        label: 'Continents',
+        value: '5',
+        icon: <GlobeSplit className="size-7 text-slate-400" />,
+        trend: 'stable',
+        description: 'coverage',
+    },
+    {
+        label: 'Palettes',
+        value: '4',
+        icon: <PaletteSplit className="size-7 text-accent-400" />,
+        trend: '+1',
+        description: 'added',
+    },
+];
+
+export function MinimalistSplitDashboard() {
+    const [hovered, setHovered] = useStateSplit<number | null>(null);
+    return (
+        <AppLayout>
+            <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 font-mono">
+                <aside className="md:w-1/3 bg-slate-900 text-white flex flex-col justify-between py-12 px-6 md:px-10 shadow-2xl">
+                    <div>
+                        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-accent-400">Minimalist Split</h1>
+                        <p className="text-base md:text-lg text-slate-200 font-normal max-w-md leading-relaxed mb-8">A dashboard with a strong left-right split, slate and white contrast, and mono body for a clean, modern, and focused look.</p>
+                        <div className="space-y-6">
+                            {splitKpis.map((kpi, idx) => (
+                                <Card
+                                    key={kpi.label}
+                                    className={`group relative bg-slate-800/80 border-none shadow-lg rounded-lg transition-transform duration-300 hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-accent-400 ${hovered === idx ? 'ring-2 ring-accent-400' : ''}`}
+                                    onMouseEnter={() => setHovered(idx)}
+                                    onMouseLeave={() => setHovered(null)}
+                                    tabIndex={0}
+                                >
+                                    <CardHeader className="flex flex-row items-center gap-4 pb-2">
+                                        <div className="p-3 rounded-full bg-gradient-to-br from-accent-400 to-slate-700 shadow-md group-hover:scale-110 transition-transform duration-300">
+                                            {kpi.icon}
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-2xl font-bold text-accent-200 mb-1">{kpi.value}</CardTitle>
+                                            <CardDescription className="text-slate-200 text-xs font-medium">{kpi.label}</CardDescription>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="flex flex-col gap-2">
+                                        <span className="text-accent-400 font-semibold text-lg">{kpi.trend}</span>
+                                        <span className="text-slate-300 text-xs">{kpi.description}</span>
+                                    </CardContent>
+                                    <div className="absolute inset-0 rounded-lg pointer-events-none group-hover:bg-accent-400/10 transition-colors duration-300" />
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                    <footer className="mt-12 text-slate-400 text-xs">&copy; 2025 Minimalist Split Demo</footer>
+                </aside>
+                <main className="flex-1 flex flex-col justify-center items-center py-16 px-4 md:px-12">
+                    <Card className="w-full max-w-2xl bg-white border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl mb-8">
+                        <CardHeader>
+                            <CardTitle className="text-2xl font-bold text-slate-900">Live Collaboration</CardTitle>
+                            <CardDescription className="text-slate-500">Real-time updates and mono micro-interactions</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button variant="outline" className="bg-accent-50 text-accent-600 border-accent-400 hover:bg-accent-100 hover:text-accent-900 transition-all duration-300 shadow-md font-mono">Trigger Collaboration</Button>
+                            <div className="mt-6 h-24 flex items-center justify-center text-accent-400 animate-pulse font-mono text-lg">Collaboration data coming soon...</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="w-full max-w-2xl bg-white border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl">
+                        <CardHeader>
+                            <CardTitle className="text-2xl font-bold text-slate-900">Docs Analytics</CardTitle>
+                            <CardDescription className="text-slate-500">Docs trends and more</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-24 flex items-center justify-center text-accent-400 font-mono text-lg">Chart coming soon...</div>
+                        </CardContent>
+                    </Card>
+                </main>
+            </div>
+        </AppLayout>
+    );
+}
+// --- KPI Demo Dashboard Section (from demo-dashboard.tsx) ---
+
+import { TrendingUp as TrendingUpDemo, Users as UsersDemo, Activity, Zap } from 'lucide-react';
+import { useState as useStateDemo } from 'react';
+
+const kpis = [
+    {
+        label: 'Active Users',
+        value: 1287,
+        icon: <UsersDemo className="size-7 text-cyan-400" />,
+        trend: '+4.2%',
+        description: 'in the last 24 hours',
+    },
+    {
+        label: 'Engagement',
+        value: '87%',
+        icon: <Activity className="size-7 text-blue-400" />,
+        trend: '+2.1%',
+        description: 'vs last week',
+    },
+    {
+        label: 'Performance',
+        value: '99.9%',
+        icon: <Zap className="size-7 text-cyan-300" />,
+        trend: 'stable',
+        description: 'system uptime',
+    },
+    {
+        label: 'Growth',
+        value: '+312',
+        icon: <TrendingUpDemo className="size-7 text-blue-300" />,
+        trend: '+8.7%',
+        description: 'new signups',
+    },
+];
+
+export function DemoKpiDashboard() {
+    const [hovered, setHovered] = useStateDemo<number | null>(null);
+
+    return (
+        <AppLayout>
+            <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-cyan-900 py-12 px-4 sm:px-8 font-sans">
+                <header className="mb-10">
+                    <h1 className="text-5xl font-extrabold tracking-tight text-cyan-300 font-inter drop-shadow-lg mb-2 transition-colors duration-500">Professional Dashboard</h1>
+                    <p className="text-lg text-blue-100 font-normal max-w-2xl leading-relaxed">A modern, interactive dashboard built with React, Tailwind CSS, and shadcn/ui. Experience a dark blue and cyan palette, Inter headings, and micro-interactions throughout.</p>
+                </header>
+                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                    {kpis.map((kpi, idx) => (
+                        <Card
+                            key={kpi.label}
+                            className={`group relative bg-blue-950/80 border-none shadow-xl rounded-2xl transition-transform duration-300 hover:scale-105 hover:shadow-2xl focus-within:ring-2 focus-within:ring-cyan-400 ${hovered === idx ? 'ring-2 ring-cyan-400' : ''}`}
+                            onMouseEnter={() => setHovered(idx)}
+                            onMouseLeave={() => setHovered(null)}
+                            tabIndex={0}
+                        >
+                            <CardHeader className="flex flex-row items-center gap-4 pb-2">
+                                <div className="p-3 rounded-full bg-gradient-to-br from-cyan-700 to-blue-800 shadow-md group-hover:scale-110 transition-transform duration-300">
+                                    {kpi.icon}
+                                </div>
+                                <div>
+                                    <CardTitle className="text-3xl font-inter text-cyan-200 font-bold tracking-tight mb-1">{kpi.value}</CardTitle>
+                                    <CardDescription className="text-blue-200 text-sm font-medium">{kpi.label}</CardDescription>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2">
+                                <span className="text-cyan-400 font-semibold text-lg">{kpi.trend}</span>
+                                <span className="text-blue-300 text-xs">{kpi.description}</span>
+                            </CardContent>
+                            <div className="absolute inset-0 rounded-2xl pointer-events-none group-hover:bg-cyan-400/5 transition-colors duration-300" />
+                        </Card>
+                    ))}
+                </section>
+                <section className="flex flex-col md:flex-row gap-8 items-stretch">
+                    <Card className="flex-1 bg-blue-950/80 border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl">
+                        <CardHeader>
+                            <CardTitle className="text-2xl font-inter text-cyan-200 font-bold">Live Activity</CardTitle>
+                            <CardDescription className="text-blue-200">Real-time updates and micro-interactions</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button variant="outline" className="bg-cyan-900/40 text-cyan-200 border-cyan-400 hover:bg-cyan-800/60 hover:text-white transition-all duration-300 shadow-md font-inter">Trigger Action</Button>
+                            <div className="mt-6 h-32 flex items-center justify-center text-cyan-400 animate-pulse font-inter text-xl">Live data coming soon...</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="flex-1 bg-blue-950/80 border-none shadow-xl rounded-2xl transition-shadow duration-300 hover:shadow-2xl">
+                        <CardHeader>
+                            <CardTitle className="text-2xl font-inter text-cyan-200 font-bold">Analytics</CardTitle>
+                            <CardDescription className="text-blue-200">Charts, trends, and more</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-40 flex items-center justify-center text-cyan-400 font-inter text-xl">Chart coming soon...</div>
+                        </CardContent>
+                    </Card>
+                </section>
+            </div>
+        </AppLayout>
+    );
+}
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
