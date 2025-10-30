@@ -316,7 +316,6 @@ export default function FileUploadWithPreview({
                     </p>
                   </div>
                 )}
-
                 {/* View Link */}
                 <a
                   href={`/storage/${fileUrl}`}
@@ -328,6 +327,7 @@ export default function FileUploadWithPreview({
                     View
                   </Button>
                 </a>
+                {/* No delete button for existing files */}
               </div>
             ))}
           </div>

@@ -1375,13 +1375,7 @@ export default function Timeline({ ticket }: Props) {
                                                             onClick={() => setZoomPreview({ url, label: 'CT Bad Part' })}
                                                         />
                                                         <span className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">CT Bad Part</span>
-                                                        <button type="button" onClick={() => {
-                                                            const files = [...completeForm.data.ct_bad_part];
-                                                            files.splice(idx, 1);
-                                                            completeForm.setData('ct_bad_part', files);
-                                                        }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
-                                                            <XCircle className="size-4" />
-                                                        </button>
+                                                        {/* Delete button removed as requested */}
                                                     </div>
                                                 );
                                             })}
@@ -1396,13 +1390,7 @@ export default function Timeline({ ticket }: Props) {
                                                             onClick={() => setZoomPreview({ url, label: 'CT Good Part' })}
                                                         />
                                                         <span className="absolute top-1 left-1 bg-green-600 text-white text-xs px-2 py-0.5 rounded">CT Good Part</span>
-                                                        <button type="button" onClick={() => {
-                                                            const files = [...completeForm.data.ct_good_part];
-                                                            files.splice(idx, 1);
-                                                            completeForm.setData('ct_good_part', files);
-                                                        }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
-                                                            <XCircle className="size-4" />
-                                                        </button>
+                                                        {/* Delete button removed as requested */}
                                                     </div>
                                                 );
                                             })}
@@ -1417,13 +1405,7 @@ export default function Timeline({ ticket }: Props) {
                                                             onClick={() => setZoomPreview({ url, label: 'BAP' })}
                                                         />
                                                         <span className="absolute top-1 left-1 bg-purple-600 text-white text-xs px-2 py-0.5 rounded">BAP</span>
-                                                        <button type="button" onClick={() => {
-                                                            const files = [...completeForm.data.bap_file];
-                                                            files.splice(idx, 1);
-                                                            completeForm.setData('bap_file', files);
-                                                        }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
-                                                            <XCircle className="size-4" />
-                                                        </button>
+                                                        {/* Delete button removed as requested */}
                                                     </div>
                                                 );
                                             })}
