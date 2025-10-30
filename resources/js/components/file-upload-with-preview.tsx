@@ -58,7 +58,8 @@ async function convertToWebP(file: File, quality: number = 0.8): Promise<File> {
             // Create new File from blob - handle browser compatibility
             try {
               // Modern browsers support File constructor
-              const webpFile = new File(
+              // Use correct File constructor: new File([blob], filename, options)
+              const webpFile = new window.File(
                 [blob],
                 file.name.replace(/\.[^/.]+$/, '.webp'),
                 { type: 'image/webp', lastModified: Date.now() }
