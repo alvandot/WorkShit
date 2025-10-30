@@ -1349,14 +1349,15 @@ export default function Timeline({ ticket }: Props) {
                                     name="bap_file"
                                     accept="image/*"
                                     maxSize={20}
-                                    multiple={true}
+                                    multiple={false}
                                     value={completeForm.data.bap_file}
                                     onChange={(files) =>
                                         completeForm.setData('bap_file', files)
                                     }
                                     error={completeForm.errors.bap_file}
-                                    description="Upload BAP images (will be converted to WebP)"
+                                    description="Upload BAP image (original format, tidak di-convert ke WebP)"
                                     existingFiles={ticket.bap_file || []}
+                                    disableWebpConversion={true}
                                 />
 
                                 {/* Consolidated Preview Section */}

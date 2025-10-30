@@ -20,6 +20,7 @@ interface FileUploadWithPreviewProps {
   error?: string;
   description?: string;
   existingFiles?: string[]; // URLs of existing uploaded files
+  disableWebpConversion?: boolean; // If true, do not convert to WebP
 }
 
 // Convert image to WebP format with compression
@@ -100,6 +101,7 @@ export default function FileUploadWithPreview({
   error,
   description,
   existingFiles = [],
+  disableWebpConversion = false,
 }: FileUploadWithPreviewProps) {
   const [filesWithPreview, setFilesWithPreview] = useState<FileWithPreview[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -129,13 +131,17 @@ export default function FileUploadWithPreview({
           continue;
         }
 
-        // Convert to WebP
-        try {
-          const webpFile = await convertToWebP(file, 0.85);
-          validFiles.push(webpFile);
-        } catch (err) {
-          console.error(`Error converting ${file.name}:`, err);
-          alert(`Could not convert ${file.name}. Please try another file.`);
+        // Convert to WebP unless disabled
+        if (disableWebpConversion) {
+          validFiles.push(file);
+        } else {
+          try {
+            const webpFile = await convertToWebP(file, 0.85);
+            validFiles.push(webpFile);
+          } catch (err) {
+            console.error(`Error converting ${file.name}:`, err);
+            alert(`Could not convert ${file.name}. Please try another file.`);
+          }
         }
       }
 
