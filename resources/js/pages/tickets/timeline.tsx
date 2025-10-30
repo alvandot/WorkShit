@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+
 interface User {
     id: number;
     name: string;
@@ -159,6 +160,11 @@ const TIMELINE_STAGES = [
 ] as const;
 
 export default function Timeline({ ticket }: Props) {
+    // State for zoom preview
+    const [zoomPreview, setZoomPreview] = useState<{
+        url: string;
+        label: string;
+    } | null>(null);
     const [currentStageDialog, setCurrentStageDialog] = useState<string | null>(
         null,
     );
@@ -1358,49 +1364,85 @@ export default function Timeline({ ticket }: Props) {
                                     <div className="mt-6">
                                         <h3 className="text-base font-semibold mb-2">Preview Semua File Sebelum Submit</h3>
                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                            {completeForm.data.ct_bad_part.map((file: File, idx: number) => (
-                                                <div key={file.name + idx} className="relative group border rounded-lg overflow-hidden">
-                                                    <img src={URL.createObjectURL(file)} alt={file.name} className="object-cover w-full h-32" />
-                                                    <span className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">CT Bad Part</span>
-                                                    <button type="button" onClick={() => {
-                                                        const files = [...completeForm.data.ct_bad_part];
-                                                        files.splice(idx, 1);
-                                                        completeForm.setData('ct_bad_part', files);
-                                                    }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
-                                                        <XCircle className="size-4" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                            {completeForm.data.ct_good_part.map((file: File, idx: number) => (
-                                                <div key={file.name + idx} className="relative group border rounded-lg overflow-hidden">
-                                                    <img src={URL.createObjectURL(file)} alt={file.name} className="object-cover w-full h-32" />
-                                                    <span className="absolute top-1 left-1 bg-green-600 text-white text-xs px-2 py-0.5 rounded">CT Good Part</span>
-                                                    <button type="button" onClick={() => {
-                                                        const files = [...completeForm.data.ct_good_part];
-                                                        files.splice(idx, 1);
-                                                        completeForm.setData('ct_good_part', files);
-                                                    }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
-                                                        <XCircle className="size-4" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                            {completeForm.data.bap_file.map((file: File, idx: number) => (
-                                                <div key={file.name + idx} className="relative group border rounded-lg overflow-hidden">
-                                                    <img src={URL.createObjectURL(file)} alt={file.name} className="object-cover w-full h-32" />
-                                                    <span className="absolute top-1 left-1 bg-purple-600 text-white text-xs px-2 py-0.5 rounded">BAP</span>
-                                                    <button type="button" onClick={() => {
-                                                        const files = [...completeForm.data.bap_file];
-                                                        files.splice(idx, 1);
-                                                        completeForm.setData('bap_file', files);
-                                                    }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
-                                                        <XCircle className="size-4" />
-                                                    </button>
-                                                </div>
-                                            ))}
+                                            {completeForm.data.ct_bad_part.map((file: File, idx: number) => {
+                                                const url = URL.createObjectURL(file);
+                                                return (
+                                                    <div key={file.name + idx} className="relative group border rounded-lg overflow-hidden">
+                                                        <img
+                                                            src={url}
+                                                            alt={file.name}
+                                                            className="object-cover w-full h-32 cursor-zoom-in"
+                                                            onClick={() => setZoomPreview({ url, label: 'CT Bad Part' })}
+                                                        />
+                                                        <span className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">CT Bad Part</span>
+                                                        <button type="button" onClick={() => {
+                                                            const files = [...completeForm.data.ct_bad_part];
+                                                            files.splice(idx, 1);
+                                                            completeForm.setData('ct_bad_part', files);
+                                                        }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
+                                                            <XCircle className="size-4" />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                            {completeForm.data.ct_good_part.map((file: File, idx: number) => {
+                                                const url = URL.createObjectURL(file);
+                                                return (
+                                                    <div key={file.name + idx} className="relative group border rounded-lg overflow-hidden">
+                                                        <img
+                                                            src={url}
+                                                            alt={file.name}
+                                                            className="object-cover w-full h-32 cursor-zoom-in"
+                                                            onClick={() => setZoomPreview({ url, label: 'CT Good Part' })}
+                                                        />
+                                                        <span className="absolute top-1 left-1 bg-green-600 text-white text-xs px-2 py-0.5 rounded">CT Good Part</span>
+                                                        <button type="button" onClick={() => {
+                                                            const files = [...completeForm.data.ct_good_part];
+                                                            files.splice(idx, 1);
+                                                            completeForm.setData('ct_good_part', files);
+                                                        }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
+                                                            <XCircle className="size-4" />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                            {completeForm.data.bap_file.map((file: File, idx: number) => {
+                                                const url = URL.createObjectURL(file);
+                                                return (
+                                                    <div key={file.name + idx} className="relative group border rounded-lg overflow-hidden">
+                                                        <img
+                                                            src={url}
+                                                            alt={file.name}
+                                                            className="object-cover w-full h-32 cursor-zoom-in"
+                                                            onClick={() => setZoomPreview({ url, label: 'BAP' })}
+                                                        />
+                                                        <span className="absolute top-1 left-1 bg-purple-600 text-white text-xs px-2 py-0.5 rounded">BAP</span>
+                                                        <button type="button" onClick={() => {
+                                                            const files = [...completeForm.data.bap_file];
+                                                            files.splice(idx, 1);
+                                                            completeForm.setData('bap_file', files);
+                                                        }} className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100">
+                                                            <XCircle className="size-4" />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                        <p className="text-xs text-muted-foreground mt-2">Pastikan semua file sudah benar sebelum submit.</p>
+                                        <p className="text-xs text-muted-foreground mt-2">Pastikan semua file sudah benar sebelum submit. Klik gambar untuk zoom.</p>
                                     </div>
                                 )}
+
+                                {/* Zoom Preview Modal */}
+                                <Dialog open={!!zoomPreview} onOpenChange={(open) => !open && setZoomPreview(null)}>
+                                    <DialogContent className="max-w-2xl flex flex-col items-center">
+                                        {zoomPreview && (
+                                            <>
+                                                <img src={zoomPreview.url} alt="Preview" className="max-h-[70vh] w-auto rounded-lg mb-4" />
+                                                <div className="text-center font-semibold text-base mb-2">{zoomPreview.label}</div>
+                                            </>
+                                        )}
+                                    </DialogContent>
+                                </Dialog>
 
                                 <div>
                                     <Label>Completion Notes</Label>
