@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EngineerController;
+use App\Http\Controllers\SpecialPlaceController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -12,9 +15,10 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('engineers', EngineerController::class)->except(['show']);
+    Route::resource('special-places', SpecialPlaceController::class)->except(['show']);
 
     // Ticket routes
     Route::get('tickets/export', [TicketController::class, 'export'])->name('tickets.export');

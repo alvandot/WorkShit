@@ -903,7 +903,7 @@ export default function Timeline({ ticket }: Props) {
                                                           : 'Follow the sequential steps to complete this visit'}
                                                 </CardDescription>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                                                 {(() => {
                                                     // Determine actual badge based on visit progress
                                                     const visitActivities =
@@ -959,7 +959,7 @@ export default function Timeline({ ticket }: Props) {
 
                                                     // Show progress bar instead of badge
                                                     return (
-                                                        <div className="flex min-w-[200px] items-center gap-3">
+                                                        <div className="flex w-full items-center gap-3 sm:min-w-[200px]">
                                                             <div className="flex-1">
                                                                 <div className="mb-1 flex items-center justify-between">
                                                                     <span className="text-xs font-medium text-muted-foreground">
@@ -1083,7 +1083,7 @@ export default function Timeline({ ticket }: Props) {
                                                                 key={stage.key}
                                                             >
                                                                 <div
-                                                                    className={`relative flex gap-4 rounded-lg border-2 p-4 transition-all ${
+                                                                    className={`relative flex flex-col gap-4 rounded-lg border-2 p-4 transition-all sm:flex-row ${
                                                                         completed
                                                                             ? 'border-green-500 bg-green-50 dark:bg-green-950/20'
                                                                             : isCurrent &&
@@ -1127,7 +1127,7 @@ export default function Timeline({ ticket }: Props) {
 
                                                                     {/* Stage Content */}
                                                                     <div className="flex-1">
-                                                                        <div className="flex items-start justify-between">
+                                                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                                                             <div>
                                                                                 <h3 className="flex items-center gap-2 text-lg font-bold">
                                                                                     {

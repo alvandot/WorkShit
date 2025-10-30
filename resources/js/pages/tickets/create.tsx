@@ -55,7 +55,10 @@ export default function CreateTicket({ users = [] }: Props) {
         ticket_number: '',
         case_id: '',
         company: '',
+        address: '',
+        phone_number: '',
         serial_number: '',
+        product_number: '',
         problem: '',
         schedule: '',
         deadline: '',
@@ -82,9 +85,11 @@ export default function CreateTicket({ users = [] }: Props) {
         },
     ];
 
+    const assignedToRaw = (form.data.assigned_to as string) ?? '';
     const assignedUser = users.find(
-        (user) => user.id.toString() === (form.data.assigned_to as string),
+        (user) => user.id.toString() === assignedToRaw,
     );
+    const assignedToValue = assignedToRaw.length > 0 ? assignedToRaw : 'unassigned';
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -357,6 +362,88 @@ export default function CreateTicket({ users = [] }: Props) {
                                                 message={form.errors.serial_number}
                                             />
                                         </div>
+
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="product_number"
+                                                className="flex items-center gap-2"
+                                            >
+                                                Product Number
+                                                {form.valid('product_number') && (
+                                                    <CheckCircle2 className="size-4 text-green-600" />
+                                                )}
+                                                {form.invalid('product_number') && (
+                                                    <XCircle className="size-4 text-red-600" />
+                                                )}
+                                            </Label>
+                                            <Input
+                                                id="product_number"
+                                                type="text"
+                                                value={
+                                                    form.data.product_number as string
+                                                }
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'product_number',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                onBlur={() =>
+                                                    form.validate('product_number')
+                                                }
+                                                placeholder="e.g., PN-2210-A"
+                                                className={cn(
+                                                    form.invalid('product_number') &&
+                                                        'border-red-500',
+                                                    form.valid('product_number') &&
+                                                        'border-green-500',
+                                                )}
+                                            />
+                                            <InputError
+                                                message={form.errors.product_number}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="phone_number"
+                                                className="flex items-center gap-2"
+                                            >
+                                                Contact Phone
+                                                {form.valid('phone_number') && (
+                                                    <CheckCircle2 className="size-4 text-green-600" />
+                                                )}
+                                                {form.invalid('phone_number') && (
+                                                    <XCircle className="size-4 text-red-600" />
+                                                )}
+                                            </Label>
+                                            <Input
+                                                id="phone_number"
+                                                type="tel"
+                                                value={
+                                                    form.data.phone_number as string
+                                                }
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'phone_number',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                onBlur={() =>
+                                                    form.validate('phone_number')
+                                                }
+                                                placeholder="e.g., +62 812-3456-7890"
+                                                className={cn(
+                                                    form.invalid('phone_number') &&
+                                                        'border-red-500',
+                                                    form.valid('phone_number') &&
+                                                        'border-green-500',
+                                                )}
+                                            />
+                                            <InputError
+                                                message={form.errors.phone_number}
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">
@@ -393,6 +480,41 @@ export default function CreateTicket({ users = [] }: Props) {
                                             )}
                                         />
                                         <InputError message={form.errors.problem} />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="address"
+                                            className="flex items-center gap-2"
+                                        >
+                                            Service Address
+                                            {form.valid('address') && (
+                                                <CheckCircle2 className="size-4 text-green-600" />
+                                            )}
+                                            {form.invalid('address') && (
+                                                <XCircle className="size-4 text-red-600" />
+                                            )}
+                                        </Label>
+                                        <textarea
+                                            id="address"
+                                            value={form.data.address as string}
+                                            onChange={(e) =>
+                                                form.setData(
+                                                    'address',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            onBlur={() => form.validate('address')}
+                                            placeholder="Provide on-site address or meeting location..."
+                                            className={cn(
+                                                'flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                                                form.invalid('address') &&
+                                                    'border-red-500',
+                                                form.valid('address') &&
+                                                    'border-green-500',
+                                            )}
+                                        />
+                                        <InputError message={form.errors.address} />
                                     </div>
 
                                     <div className="space-y-2">
@@ -504,11 +626,13 @@ export default function CreateTicket({ users = [] }: Props) {
                                             Assign To
                                         </Label>
                                         <Select
-                                            value={form.data.assigned_to as string}
+                                            value={assignedToValue}
                                             onValueChange={(value) =>
                                                 form.setData(
                                                     'assigned_to',
-                                                    value,
+                                                    value === 'unassigned'
+                                                        ? ''
+                                                        : value,
                                                 )
                                             }
                                         >
@@ -516,7 +640,7 @@ export default function CreateTicket({ users = [] }: Props) {
                                                 <SelectValue placeholder="Select user..." />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="">
+                                                <SelectItem value="unassigned">
                                                     Unassigned
                                                 </SelectItem>
                                                 {users.map((user) => (
@@ -586,10 +710,34 @@ export default function CreateTicket({ users = [] }: Props) {
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                                            Product Number
+                                        </p>
+                                        <p className="mt-1 font-semibold">
+                                            {(form.data.product_number as string) || 'Not specified'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                                             Problem Snapshot
                                         </p>
                                         <p className="mt-1 text-muted-foreground">
                                             {(form.data.problem as string) || 'Describe the issue to help the field team prepare.'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                                            Contact Phone
+                                        </p>
+                                        <p className="mt-1 font-semibold">
+                                            {(form.data.phone_number as string) || 'Not provided'}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                                            Service Address
+                                        </p>
+                                        <p className="mt-1 text-muted-foreground text-pretty">
+                                            {(form.data.address as string) || 'Capture the exact service location for the onsite team.'}
                                         </p>
                                     </div>
                                     <div className="grid gap-2 text-xs">
@@ -609,6 +757,12 @@ export default function CreateTicket({ users = [] }: Props) {
                                             <span>Schedule</span>
                                             <span className="font-semibold">
                                                 {(form.data.schedule as string) || 'TBD'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+                                            <span>Deadline</span>
+                                            <span className="font-semibold">
+                                                {(form.data.deadline as string) || '—'}
                                             </span>
                                         </div>
                                     </div>
@@ -655,6 +809,17 @@ export default function CreateTicket({ users = [] }: Props) {
                                             )}
                                         />
                                         <span>Status selected to match workflow.</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2
+                                            className={cn(
+                                                'size-4',
+                                                form.data.address && form.data.phone_number
+                                                    ? 'text-green-500'
+                                                    : 'text-muted-foreground',
+                                            )}
+                                        />
+                                        <span>Contact and address details confirmed.</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <CheckCircle2

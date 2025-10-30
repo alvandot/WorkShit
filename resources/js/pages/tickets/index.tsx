@@ -459,8 +459,9 @@ export default function TicketsIndex({ tickets, filters }: Props) {
                 </section>
 
                 {/* Table Section */}
-                <div className="overflow-hidden rounded-xl border bg-card shadow-lg">
-                    <Table>
+                <div className="rounded-xl border bg-card shadow-lg">
+                    <div className="w-full overflow-x-auto rounded-xl">
+                        <Table className="min-w-[720px]">
                         <TableHeader>
                             <TableRow className="bg-muted/50 hover:bg-muted/50">
                                 <TableHead className="w-20 font-bold text-foreground">
@@ -662,7 +663,8 @@ export default function TicketsIndex({ tickets, filters }: Props) {
                                 ))
                             )}
                         </TableBody>
-                    </Table>
+                        </Table>
+                    </div>
                 </div>
 
                 {/* Pagination Section */}

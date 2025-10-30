@@ -7,6 +7,10 @@ const prefersDark = () => {
         return false;
     }
 
+    if (typeof window.matchMedia !== 'function') {
+        return false;
+    }
+
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
@@ -17,6 +21,33 @@ const setCookie = (name: string, value: string, days = 365) => {
 
     const maxAge = days * 24 * 60 * 60;
     document.cookie = `${name}=${value};path=/;max-age=${maxAge};SameSite=Lax`;
+};
+
+const readStoredAppearance = (): Appearance => {
+    if (typeof window === 'undefined') {
+        return 'system';
+    }
+
+    try {
+        return (
+            (window.localStorage.getItem('appearance') as Appearance | null) ||
+            'system'
+        );
+    } catch {
+        return 'system';
+    }
+};
+
+const persistAppearance = (mode: Appearance) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    try {
+        window.localStorage.setItem('appearance', mode);
+    } catch {
+        // Ignore storage errors (e.g. Safari private browsing)
+    }
 };
 
 const applyTheme = (appearance: Appearance) => {
@@ -35,19 +66,39 @@ const mediaQuery = () => {
     return window.matchMedia('(prefers-color-scheme: dark)');
 };
 
+const addSystemThemeChangeListener = (
+    listener: (event: MediaQueryListEvent) => void,
+) => {
+    const query = mediaQuery();
+
+    if (!query) {
+        return () => undefined;
+    }
+
+    if (typeof query.addEventListener === 'function') {
+        query.addEventListener('change', listener);
+
+        return () => query.removeEventListener('change', listener);
+    }
+
+    if (typeof query.addListener === 'function') {
+        query.addListener(listener);
+
+        return () => query.removeListener(listener);
+    }
+
+    return () => undefined;
+};
+
 const handleSystemThemeChange = () => {
-    const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'system');
+    applyTheme(readStoredAppearance());
 };
 
 export function initializeTheme() {
-    const savedAppearance =
-        (localStorage.getItem('appearance') as Appearance) || 'system';
-
-    applyTheme(savedAppearance);
+    applyTheme(readStoredAppearance());
 
     // Add the event listener for system theme changes...
-    mediaQuery()?.addEventListener('change', handleSystemThemeChange);
+    addSystemThemeChangeListener(handleSystemThemeChange);
 }
 
 export function useAppearance() {
@@ -56,8 +107,7 @@ export function useAppearance() {
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
 
-        // Store in localStorage for client-side persistence...
-        localStorage.setItem('appearance', mode);
+        persistAppearance(mode);
 
         // Store in cookie for SSR...
         setCookie('appearance', mode);
@@ -66,18 +116,14 @@ export function useAppearance() {
     }, []);
 
     useEffect(() => {
-        const savedAppearance = localStorage.getItem(
-            'appearance',
-        ) as Appearance | null;
-
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        updateAppearance(savedAppearance || 'system');
+        updateAppearance(readStoredAppearance());
 
-        return () =>
-            mediaQuery()?.removeEventListener(
-                'change',
-                handleSystemThemeChange,
-            );
+        const removeListener = addSystemThemeChangeListener(
+            handleSystemThemeChange,
+        );
+
+        return () => removeListener();
     }, [updateAppearance]);
 
     return { appearance, updateAppearance } as const;
