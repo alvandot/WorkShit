@@ -1,12 +1,8 @@
 <?php
 
-<<<<<<< HEAD
-use App\Http\Controllers\AnalyticsController;
-=======
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EngineerController;
 use App\Http\Controllers\SpecialPlaceController;
->>>>>>> cfd1cf556cf1f2157eeeb48de797d9c5684c8b8a
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,23 +15,10 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-<<<<<<< HEAD
-    Route::get('dashboard', \App\Http\Controllers\DashboardController::class)->name('dashboard');
-
-    // Analytics routes
-    Route::prefix('analytics')->group(function () {
-        Route::get('overview', [AnalyticsController::class, 'overview'])->name('analytics.overview');
-        Route::get('trends', [AnalyticsController::class, 'trends'])->name('analytics.trends');
-        Route::get('performance', [AnalyticsController::class, 'performance'])->name('analytics.performance');
-        Route::get('realtime', [AnalyticsController::class, 'realtime'])->name('analytics.realtime');
-        Route::get('export', [AnalyticsController::class, 'export'])->name('analytics.export');
-    });
-=======
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('engineers', EngineerController::class)->except(['show']);
     Route::resource('special-places', SpecialPlaceController::class)->except(['show']);
->>>>>>> cfd1cf556cf1f2157eeeb48de797d9c5684c8b8a
 
     // Ticket routes
     Route::get('tickets/export', [TicketController::class, 'export'])->name('tickets.export');

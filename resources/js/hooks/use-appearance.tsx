@@ -25,16 +25,16 @@ const setCookie = (name: string, value: string, days = 365) => {
 
 const readStoredAppearance = (): Appearance => {
     if (typeof window === 'undefined') {
-        return 'system';
+        return 'light';
     }
 
     try {
         return (
             (window.localStorage.getItem('appearance') as Appearance | null) ||
-            'system'
+            'light'
         );
     } catch {
-        return 'system';
+        return 'light';
     }
 };
 
@@ -102,7 +102,7 @@ export function initializeTheme() {
 }
 
 export function useAppearance() {
-    const [appearance, setAppearance] = useState<Appearance>('system');
+    const [appearance, setAppearance] = useState<Appearance>('light');
 
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
