@@ -199,7 +199,7 @@ export default function BapForm({
                         value={data.bap_file}
                         onChange={(files) => setData('bap_file', files)}
                         error={errors.bap_file}
-                        description="Upload BAP yang sudah ditandatangani (format original)"
+                        description="Upload BAP yang sudah ditandatangani (akan dikonversi ke AVIF)"
                         existingFiles={ticket.bap_file || []}
                         disableWebpConversion={true}
                         required={true}

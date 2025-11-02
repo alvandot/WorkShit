@@ -303,8 +303,8 @@ export default function FileUploadWithPreview({
                                   : 'Click to upload or drag and drop'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                            Images only (JPG, PNG, GIF) - will be converted to
-                            WebP
+                            Images only (JPG or PNG Extension) - will be converted to
+                            AVIF
                             {multiple && ' (multiple files allowed)'}
                         </p>
                     </div>

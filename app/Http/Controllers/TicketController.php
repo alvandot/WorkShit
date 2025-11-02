@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\TicketsExport;
+use App\Helpers\ImageHelper;
 use App\Models\Ticket;
 use App\Services\BapService;
 use Illuminate\Http\Request;
@@ -337,33 +338,33 @@ class TicketController extends Controller
         // Get the schedule date from the ticket, fallback to today
         $scheduleDate = $ticket->schedule ? $ticket->schedule->format('Ymd') : now()->format('Ymd');
 
-        // Handle multiple CT Bad Part files
+        // Handle multiple CT Bad Part files with AVIF conversion
         $ctBadPaths = [];
         if ($request->hasFile('ct_bad_part')) {
             foreach ($request->file('ct_bad_part') as $index => $file) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = 'CTBAD_'.$ticket->ticket_number.'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
-                $ctBadPaths[] = $file->storeAs('tickets/ct_bad_parts', $filename, 'public');
+                // Use ImageHelper to process and convert to AVIF
+                $path = ImageHelper::processAndStore($file, 'tickets/ct_bad_parts', 85, true);
+                $ctBadPaths[] = $path;
             }
         }
 
-        // Handle multiple CT Good Part files
+        // Handle multiple CT Good Part files with AVIF conversion
         $ctGoodPaths = [];
         if ($request->hasFile('ct_good_part')) {
             foreach ($request->file('ct_good_part') as $index => $file) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = 'CTGOOD_'.$ticket->ticket_number.'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
-                $ctGoodPaths[] = $file->storeAs('tickets/ct_good_parts', $filename, 'public');
+                // Use ImageHelper to process and convert to AVIF
+                $path = ImageHelper::processAndStore($file, 'tickets/ct_good_parts', 85, true);
+                $ctGoodPaths[] = $path;
             }
         }
 
-        // Handle multiple BAP files
+        // Handle multiple BAP files with AVIF conversion
         $bapPaths = [];
         if ($request->hasFile('bap_file')) {
             foreach ($request->file('bap_file') as $index => $file) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = 'BAP_'.$ticket->ticket_number.'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
-                $bapPaths[] = $file->storeAs('tickets/bap_files', $filename, 'public');
+                // Use ImageHelper to process and convert to AVIF
+                $path = ImageHelper::processAndStore($file, 'tickets/bap_files', 85, true);
+                $bapPaths[] = $path;
             }
         }
 

@@ -3,10 +3,6 @@ import {
     BeforeAfterComparison,
     MediaGallery,
 } from '@/components/media-gallery';
-import {
-    Timeline as TimelineComponent,
-    TimelineItem,
-} from '@/components/timeline/timeline';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -311,26 +307,6 @@ export default function Timeline({ ticket }: Props) {
 
     // Form for completion (End Case) with BAP fields
     const completeForm = useForm({
-        // User Information
-        user_name: ticket.user_name || '',
-        user_id_number: ticket.user_id_number || '',
-        location: ticket.location || ticket.address || '',
-        user_phone: ticket.user_phone || ticket.phone_number || '',
-        user_email: ticket.user_email || '',
-
-        // Case Details
-        unit_type: ticket.unit_type || 'Laptop',
-        category: ticket.category || 'Incident',
-        scope: ticket.scope || 'Maintenance Support',
-        warranty_status: ticket.warranty_status || 'Warranty',
-        case_description: ticket.case_description || ticket.problem || '',
-
-        // Work Information
-        work_notes: ticket.work_notes || '',
-        solution_category: ticket.solution_category || 'Repair',
-
-        // Parts
-        replaced_parts: ticket.replaced_parts || [],
 
         // Visit & Resolution
         visit_date: new Date().toISOString().split('T')[0],
@@ -503,19 +479,6 @@ export default function Timeline({ ticket }: Props) {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2 sm:flex-row">
-                                <a
-                                    href={`/tickets/${ticket.id}/bap/download`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Button
-                                        variant="outline"
-                                        className="h-11 min-w-36 gap-2 rounded-full border-primary/40 bg-primary/20 text-primary backdrop-blur transition hover:-translate-y-0.5 hover:bg-primary/30 dark:text-primary"
-                                    >
-                                        <Download className="size-4" />
-                                        Download BAP
-                                    </Button>
-                                </a>
                                 <Link href={`/tickets/${ticket.id}/detail`}>
                                     <Button
                                         variant="outline"
@@ -882,39 +845,31 @@ export default function Timeline({ ticket }: Props) {
                                         <FileText className="size-5" />
                                         BAP Document
                                     </p>
-                                    <p className="mb-3 text-xs text-muted-foreground">
-                                        Download Berita Acara Pekerjaan untuk
-                                        ticket ini. BAP dapat diunduh kapan
-                                        saja, termasuk sebelum ticket selesai
-                                        (draft mode).
-                                    </p>
+                                    <div className="mb-3 space-y-2">
+                                        <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                                            📋 Download BAP untuk Print Sebelum Mengerjakan Ticket
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            BAP harus di-download dan di-print terlebih dahulu sebelum Anda mulai mengerjakan ticket.
+                                            Bawa BAP yang sudah di-print saat kunjungan, minta tanda tangan customer,
+                                            kemudian upload kembali saat complete ticket.
+                                        </p>
+                                    </div>
                                     <div className="flex flex-wrap gap-2">
-                                        <Link
-                                            href={`/tickets/${ticket.id}/bap/preview`}
-                                            target="_blank"
-                                            className="inline-flex min-w-[140px] flex-1"
-                                        >
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="w-full"
-                                            >
-                                                <FileText className="mr-2 size-4" />
-                                                Preview BAP
-                                            </Button>
-                                        </Link>
-                                        <Link
+                                        <a
                                             href={`/tickets/${ticket.id}/bap/download`}
-                                            className="inline-flex min-w-[140px] flex-1"
+                                            className="inline-flex w-full"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                         >
                                             <Button
                                                 size="sm"
                                                 className="w-full bg-blue-600 hover:bg-blue-700"
                                             >
                                                 <Download className="mr-2 size-4" />
-                                                Download BAP
+                                                Download BAP untuk Print
                                             </Button>
-                                        </Link>
+                                        </a>
                                     </div>
                                     {!ticket.completed_at && (
                                         <div className="mt-3 flex items-start gap-2 rounded-md border border-yellow-200 bg-yellow-50 p-2 dark:border-yellow-800 dark:bg-yellow-950/20">
