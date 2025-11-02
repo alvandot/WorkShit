@@ -1,0 +1,36 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // User::factory(10)->create();
+
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $this->call([
+            ProvinceSeeder::class,
+            TicketSeeder::class,
+            TicketActivitySeeder::class,
+            \Database\Seeders\FakeTicketSeeder::class,
+            \Database\Seeders\PartsDummySeeder::class,
+            \Database\Seeders\EnsureTicketHasPartSeeder::class,
+        ]);
+    }
+}

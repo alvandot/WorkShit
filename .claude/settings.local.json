@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run types:*)",
+      "Bash(php artisan route:list:*)",
+      "Bash(vendor/bin/pint:*)",
+      "Bash(npm run build:*)",
+      "Bash(php artisan:*)",
+      "Bash(npm install:*)",
+      "Bash(composer require:*)",
+      "Bash(npx shadcn@latest add checkbox)",
+      "Bash(composer show:*)",
+      "Bash(copy:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
