@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface LazyImageOptions {
     src: string;
@@ -29,7 +29,7 @@ export const useLazyImage = (options: LazyImageOptions) => {
             {
                 rootMargin: '50px', // Start loading 50px before the image enters the viewport
                 threshold: 0.1,
-            }
+            },
         );
 
         if (imgRef.current) {
@@ -106,7 +106,7 @@ export const LazyImage = (props: LazyImageOptions) => {
         <div className={`relative ${className}`}>
             {/* Show skeleton/placeholder while loading */}
             {!isLoaded && !isError && (
-                <div className="absolute inset-0 bg-muted animate-pulse rounded" />
+                <div className="absolute inset-0 animate-pulse rounded bg-muted" />
             )}
 
             {/* WebP source for modern browsers */}
@@ -144,7 +144,7 @@ export const LazyImage = (props: LazyImageOptions) => {
 
             {/* Error state */}
             {isError && (
-                <div className="flex items-center justify-center bg-muted/50 rounded text-muted-foreground text-sm">
+                <div className="flex items-center justify-center rounded bg-muted/50 text-sm text-muted-foreground">
                     Failed to load image
                 </div>
             )}

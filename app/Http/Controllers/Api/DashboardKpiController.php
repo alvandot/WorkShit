@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -35,6 +34,7 @@ class DashboardKpiController extends Controller
                 ['label' => 'Palettes', 'value' => '4', 'icon' => 'Palette', 'trend' => '+1', 'description' => 'added'],
             ],
         ];
+
         return response()->json($data);
     }
 }

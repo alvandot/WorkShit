@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tickets', function (Blueprint $table) {
-            if (!Schema::hasColumn('tickets', 'assigned_at')) {
+            if (! Schema::hasColumn('tickets', 'assigned_at')) {
                 $table->timestamp('assigned_at')->nullable()->after('assigned_to');
             }
-            if (!Schema::hasColumn('tickets', 'assigned_by')) {
+            if (! Schema::hasColumn('tickets', 'assigned_by')) {
                 $table->foreignId('assigned_by')->nullable()->after('assigned_at')->constrained('users')->nullOnDelete();
             }
         });

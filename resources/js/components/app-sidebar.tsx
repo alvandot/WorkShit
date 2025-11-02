@@ -16,12 +16,15 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
     BarChart3,
+    Download,
     FileText,
     HelpCircle,
     LayoutDashboard,
+    ListChecks,
+    MapPin,
     Settings,
     Ticket,
-    Users,
+    UserCog,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -35,18 +38,44 @@ const mainNavItems: NavItem[] = [
         title: 'Analytics',
         href: '/analytics',
         icon: BarChart3,
+        items: [
+            {
+                title: 'Overview',
+                href: '/analytics/overview',
+            },
+            {
+                title: 'Trends',
+                href: '/analytics/trends',
+            },
+            {
+                title: 'Performance',
+                href: '/analytics/performance',
+            },
+            {
+                title: 'Real-time',
+                href: '/analytics/realtime',
+            },
+        ],
     },
 ];
 
 const ticketingNavItems: NavItem[] = [
     {
-        title: 'Manage Tickets',
+        title: 'All Tickets',
         href: '/tickets',
         icon: Ticket,
         items: [
             {
+                title: 'All',
+                href: '/tickets',
+            },
+            {
                 title: 'Open',
-                href: '/tickets?status=open',
+                href: '/tickets?status=Open',
+            },
+            {
+                title: 'In Progress',
+                href: '/tickets?status=In Progress',
             },
             {
                 title: 'Closed',
@@ -62,7 +91,48 @@ const ticketingNavItems: NavItem[] = [
     {
         title: 'Assignments',
         href: '/assignments',
-        icon: Users,
+        icon: ListChecks,
+    },
+];
+
+const resourcesNavItems: NavItem[] = [
+    {
+        title: 'Engineers',
+        href: '/engineers',
+        icon: UserCog,
+        items: [
+            {
+                title: 'All Engineers',
+                href: '/engineers',
+            },
+            {
+                title: 'Add Engineer',
+                href: '/engineers/create',
+            },
+        ],
+    },
+    {
+        title: 'Special Places',
+        href: '/special-places',
+        icon: MapPin,
+        items: [
+            {
+                title: 'All Locations',
+                href: '/special-places',
+            },
+            {
+                title: 'Add Location',
+                href: '/special-places/create',
+            },
+        ],
+    },
+];
+
+const reportsNavItems: NavItem[] = [
+    {
+        title: 'Export Data',
+        href: '/tickets/export',
+        icon: Download,
     },
 ];
 
@@ -103,6 +173,16 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <SidebarGroupLabel>Ticketing</SidebarGroupLabel>
                     <NavMain items={ticketingNavItems} />
+                </SidebarGroup>
+
+                <SidebarGroup>
+                    <SidebarGroupLabel>Resources</SidebarGroupLabel>
+                    <NavMain items={resourcesNavItems} />
+                </SidebarGroup>
+
+                <SidebarGroup>
+                    <SidebarGroupLabel>Reports</SidebarGroupLabel>
+                    <NavMain items={reportsNavItems} />
                 </SidebarGroup>
 
                 <SidebarGroup>

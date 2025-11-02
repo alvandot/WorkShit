@@ -27,7 +27,6 @@ import {
 import { Head, Link, router } from '@inertiajs/react';
 import {
     ClipboardList,
-    Download,
     Filter,
     RefreshCcw,
     TrendingUp,
@@ -90,11 +89,7 @@ export default function AssignmentsIndex({
 
     const handlePageChange = (url: string | null) => {
         if (url) {
-            router.get(
-                url,
-                {},
-                { preserveState: true, preserveScroll: true },
-            );
+            router.get(url, {}, { preserveState: true, preserveScroll: true });
         }
     };
 
@@ -106,7 +101,7 @@ export default function AssignmentsIndex({
                 <div>
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+                            <h1 className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-3xl font-bold text-transparent">
                                 Assignment Management
                             </h1>
                             <p className="mt-2 text-muted-foreground">
@@ -116,7 +111,7 @@ export default function AssignmentsIndex({
                         <div className="flex items-center gap-2">
                             <Button variant="outline" asChild>
                                 <Link href="/tickets">
-                                    <ClipboardList className="size-4 mr-2" />
+                                    <ClipboardList className="mr-2 size-4" />
                                     View Tickets
                                 </Link>
                             </Button>
@@ -127,9 +122,7 @@ export default function AssignmentsIndex({
                 <div className="grid gap-4 md:grid-cols-4">
                     <Card>
                         <CardHeader className="pb-3">
-                            <CardDescription>
-                                Total Assignments
-                            </CardDescription>
+                            <CardDescription>Total Assignments</CardDescription>
                             <CardTitle className="text-3xl">
                                 {metrics.totalAssignments}
                             </CardTitle>
@@ -144,7 +137,7 @@ export default function AssignmentsIndex({
                     <Card>
                         <CardHeader className="pb-3">
                             <CardDescription>Engineers</CardDescription>
-                            <CardTitle className="text-3xl flex items-baseline gap-2">
+                            <CardTitle className="flex items-baseline gap-2 text-3xl">
                                 <Users className="size-6" />
                                 {metrics.totalEngineers}
                             </CardTitle>
@@ -178,7 +171,7 @@ export default function AssignmentsIndex({
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <TrendingUp className="size-3" />
                                 Total completed tickets
                             </div>
@@ -207,7 +200,7 @@ export default function AssignmentsIndex({
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-8 text-muted-foreground">
+                            <div className="py-8 text-center text-muted-foreground">
                                 No engineer statistics available
                             </div>
                         )}
@@ -230,7 +223,7 @@ export default function AssignmentsIndex({
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex flex-wrap items-end gap-3">
-                            <div className="flex-1 min-w-[200px] space-y-2">
+                            <div className="min-w-[200px] flex-1 space-y-2">
                                 <label className="text-sm font-medium">
                                     Engineer
                                 </label>
@@ -257,7 +250,7 @@ export default function AssignmentsIndex({
                                 </Select>
                             </div>
 
-                            <div className="flex-1 min-w-[150px] space-y-2">
+                            <div className="min-w-[150px] flex-1 space-y-2">
                                 <label className="text-sm font-medium">
                                     Date From
                                 </label>
@@ -270,7 +263,7 @@ export default function AssignmentsIndex({
                                 />
                             </div>
 
-                            <div className="flex-1 min-w-[150px] space-y-2">
+                            <div className="min-w-[150px] flex-1 space-y-2">
                                 <label className="text-sm font-medium">
                                     Date To
                                 </label>
@@ -283,14 +276,11 @@ export default function AssignmentsIndex({
 
                             <div className="flex gap-2">
                                 <Button onClick={handleFilter}>
-                                    <Filter className="size-4 mr-2" />
+                                    <Filter className="mr-2 size-4" />
                                     Apply
                                 </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={handleReset}
-                                >
-                                    <RefreshCcw className="size-4 mr-2" />
+                                <Button variant="outline" onClick={handleReset}>
+                                    <RefreshCcw className="mr-2 size-4" />
                                     Reset
                                 </Button>
                             </div>
@@ -345,20 +335,18 @@ export default function AssignmentsIndex({
                                 )}
                             </div>
                         ) : (
-                            <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                                <ClipboardList className="size-12 mx-auto mb-4 text-muted-foreground" />
-                                <h3 className="text-lg font-medium mb-2">
+                            <div className="rounded-lg border-2 border-dashed py-12 text-center">
+                                <ClipboardList className="mx-auto mb-4 size-12 text-muted-foreground" />
+                                <h3 className="mb-2 text-lg font-medium">
                                     No assignments found
                                 </h3>
-                                <p className="text-muted-foreground mb-4">
+                                <p className="mb-4 text-muted-foreground">
                                     {filters.engineer_id || filters.date_from
                                         ? 'Try adjusting your filters'
                                         : 'Start by assigning tickets to engineers'}
                                 </p>
                                 <Button asChild variant="outline">
-                                    <Link href="/tickets">
-                                        View Tickets
-                                    </Link>
+                                    <Link href="/tickets">View Tickets</Link>
                                 </Button>
                             </div>
                         )}

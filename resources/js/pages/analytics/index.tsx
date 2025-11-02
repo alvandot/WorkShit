@@ -1,154 +1,156 @@
-import { Head, router } from '@inertiajs/react'
-import AppLayout from '@/layouts/app-layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
-    BarChart3,
-    TrendingUp,
-    Users,
-    Clock,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppLayout from '@/layouts/app-layout';
+import { Head } from '@inertiajs/react';
+import {
     Activity,
-    Download,
-    Calendar,
-    RefreshCw,
-    ArrowUp,
     ArrowDown,
-    Minus,
-    Package,
-    TicketIcon,
-    AlertCircle,
+    ArrowUp,
     CheckCircle2,
+    Download,
+    Minus,
+    RefreshCw,
+    TicketIcon,
     Timer,
-    Zap,
-} from 'lucide-react'
-import { useEffect, useState } from 'react'
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
-    LineChart,
-    Line,
-    BarChart,
-    Bar,
-    PieChart,
-    Pie,
-    Cell,
-    AreaChart,
     Area,
-    XAxis,
-    YAxis,
+    AreaChart,
+    Bar,
+    BarChart,
     CartesianGrid,
-    Tooltip,
+    Cell,
     Legend,
-    ResponsiveContainer,
-    RadarChart,
-    PolarGrid,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
     PolarAngleAxis,
+    PolarGrid,
     PolarRadiusAxis,
     Radar,
-    Funnel,
-    FunnelChart,
-} from 'recharts'
+    RadarChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
 
 interface PageProps {
     filters: {
-        start_date: string
-        end_date: string
-        period: string
-    }
+        start_date: string;
+        end_date: string;
+        period: string;
+    };
 }
 
 interface OverviewData {
-    total_tickets: number
-    active_tickets: number
-    closed_tickets: number
-    status_distribution: Record<string, number>
-    priority_distribution: Record<string, number>
-    avg_resolution_time_hours: number
+    total_tickets: number;
+    active_tickets: number;
+    closed_tickets: number;
+    status_distribution: Record<string, number>;
+    priority_distribution: Record<string, number>;
+    avg_resolution_time_hours: number;
     technician_stats: Array<{
-        id: number
-        name: string
-        assigned_tickets: number
-        completed_tickets: number
-        completion_rate: number
-    }>
+        id: number;
+        name: string;
+        assigned_tickets: number;
+        completed_tickets: number;
+        completion_rate: number;
+    }>;
 }
 
 interface TrendsData {
-    creation_trends: Record<string, number>
-    closure_trends: Record<string, number>
-    activity_trends: Record<string, number>
-    period: string
+    creation_trends: Record<string, number>;
+    closure_trends: Record<string, number>;
+    activity_trends: Record<string, number>;
+    period: string;
 }
 
 interface PerformanceData {
-    sla_compliance_rate: number
-    avg_first_response_time_hours: number
-    revisit_rate: number
-    activity_breakdown: Record<string, number>
+    sla_compliance_rate: number;
+    avg_first_response_time_hours: number;
+    revisit_rate: number;
+    activity_breakdown: Record<string, number>;
 }
 
 interface TicketsData {
-    ticket_trends: Record<string, Record<string, number>>
-    response_time_distribution: Record<string, number>
-    status_funnel: Array<{ status: string; count: number }>
-    top_companies: Array<{ company: string; count: number }>
+    ticket_trends: Record<string, Record<string, number>>;
+    response_time_distribution: Record<string, number>;
+    status_funnel: Array<{ status: string; count: number }>;
+    top_companies: Array<{ company: string; count: number }>;
 }
 
 interface EngineersData {
     engineer_workload: Array<{
-        id: number
-        name: string
-        email: string
-        total_assigned: number
-        open_tickets: number
-        completed_tickets: number
-        completion_rate: number
-        avg_completion_hours: number
-    }>
-    engineer_utilization: Record<string, Record<string, number>>
+        id: number;
+        name: string;
+        email: string;
+        total_assigned: number;
+        open_tickets: number;
+        completed_tickets: number;
+        completion_rate: number;
+        avg_completion_hours: number;
+    }>;
+    engineer_utilization: Record<string, Record<string, number>>;
 }
 
 interface PartsData {
     top_parts: Array<{
-        part_name: string
-        part_number: string
-        usage_count: number
-    }>
-    parts_trend: Record<string, number>
-    parts_per_ticket_distribution: Record<string, number>
+        part_name: string;
+        part_number: string;
+        usage_count: number;
+    }>;
+    parts_trend: Record<string, number>;
+    parts_per_ticket_distribution: Record<string, number>;
 }
 
 interface ComparisonsData {
     current_period: {
-        start: string
-        end: string
+        start: string;
+        end: string;
         metrics: {
-            total_tickets: number
-            closed_tickets: number
-            avg_resolution_hours: number
-            revisit_rate: number
-        }
-    }
+            total_tickets: number;
+            closed_tickets: number;
+            avg_resolution_hours: number;
+            revisit_rate: number;
+        };
+    };
     previous_period: {
-        start: string
-        end: string
+        start: string;
+        end: string;
         metrics: {
-            total_tickets: number
-            closed_tickets: number
-            avg_resolution_hours: number
-            revisit_rate: number
-        }
-    }
+            total_tickets: number;
+            closed_tickets: number;
+            avg_resolution_hours: number;
+            revisit_rate: number;
+        };
+    };
     changes: {
-        total_tickets: number
-        closed_tickets: number
-        avg_resolution_hours: number
-        revisit_rate: number
-    }
+        total_tickets: number;
+        closed_tickets: number;
+        avg_resolution_hours: number;
+        revisit_rate: number;
+    };
 }
 
 const COLORS = {
@@ -160,7 +162,7 @@ const COLORS = {
     pink: '#ec4899',
     cyan: '#06b6d4',
     emerald: '#10b981',
-}
+};
 
 const STATUS_COLORS = [
     COLORS.primary,
@@ -168,117 +170,128 @@ const STATUS_COLORS = [
     COLORS.purple,
     COLORS.success,
     COLORS.danger,
-]
+];
 
 export default function AnalyticsIndex({ filters }: PageProps) {
     const [dateRange, setDateRange] = useState({
         start: filters.start_date,
         end: filters.end_date,
-    })
-    const [period, setPeriod] = useState(filters.period)
-    const [loading, setLoading] = useState(true)
-    const [overviewData, setOverviewData] = useState<OverviewData | null>(null)
-    const [trendsData, setTrendsData] = useState<TrendsData | null>(null)
-    const [performanceData, setPerformanceData] = useState<PerformanceData | null>(null)
-    const [ticketsData, setTicketsData] = useState<TicketsData | null>(null)
-    const [engineersData, setEngineersData] = useState<EngineersData | null>(null)
-    const [partsData, setPartsData] = useState<PartsData | null>(null)
-    const [comparisonsData, setComparisonsData] = useState<ComparisonsData | null>(null)
-    const [autoRefresh, setAutoRefresh] = useState(false)
-    const [activeTab, setActiveTab] = useState('overview')
+    });
+    const [period, setPeriod] = useState(filters.period);
+    const [loading, setLoading] = useState(true);
+    const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
+    const [trendsData, setTrendsData] = useState<TrendsData | null>(null);
+    const [performanceData, setPerformanceData] =
+        useState<PerformanceData | null>(null);
+    const [ticketsData, setTicketsData] = useState<TicketsData | null>(null);
+    const [engineersData, setEngineersData] = useState<EngineersData | null>(
+        null,
+    );
+    const [partsData, setPartsData] = useState<PartsData | null>(null);
+    const [comparisonsData, setComparisonsData] =
+        useState<ComparisonsData | null>(null);
+    const [autoRefresh, setAutoRefresh] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
 
     const fetchData = async () => {
-        setLoading(true)
+        setLoading(true);
         try {
             const params = new URLSearchParams({
                 start_date: dateRange.start,
                 end_date: dateRange.end,
                 period,
-            })
+            });
 
-            const [overview, trends, performance, tickets, engineers, parts, comparisons] =
-                await Promise.all([
-                    fetch(`/analytics/overview?${params}`).then((r) => r.json()),
-                    fetch(`/analytics/trends?${params}`).then((r) => r.json()),
-                    fetch(`/analytics/performance?${params}`).then((r) => r.json()),
-                    fetch(
-                        `/analytics/tickets?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end, group_by: period })}`
-                    ).then((r) => r.json()),
-                    fetch(
-                        `/analytics/engineers?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`
-                    ).then((r) => r.json()),
-                    fetch(
-                        `/analytics/parts?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`
-                    ).then((r) => r.json()),
-                    fetch(
-                        `/analytics/comparisons?${new URLSearchParams({ current_start: dateRange.start, current_end: dateRange.end })}`
-                    ).then((r) => r.json()),
-                ])
+            const [
+                overview,
+                trends,
+                performance,
+                tickets,
+                engineers,
+                parts,
+                comparisons,
+            ] = await Promise.all([
+                fetch(`/analytics/overview?${params}`).then((r) => r.json()),
+                fetch(`/analytics/trends?${params}`).then((r) => r.json()),
+                fetch(`/analytics/performance?${params}`).then((r) => r.json()),
+                fetch(
+                    `/analytics/tickets?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end, group_by: period })}`,
+                ).then((r) => r.json()),
+                fetch(
+                    `/analytics/engineers?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`,
+                ).then((r) => r.json()),
+                fetch(
+                    `/analytics/parts?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`,
+                ).then((r) => r.json()),
+                fetch(
+                    `/analytics/comparisons?${new URLSearchParams({ current_start: dateRange.start, current_end: dateRange.end })}`,
+                ).then((r) => r.json()),
+            ]);
 
-            setOverviewData(overview)
-            setTrendsData(trends)
-            setPerformanceData(performance)
-            setTicketsData(tickets)
-            setEngineersData(engineers)
-            setPartsData(parts)
-            setComparisonsData(comparisons)
+            setOverviewData(overview);
+            setTrendsData(trends);
+            setPerformanceData(performance);
+            setTicketsData(tickets);
+            setEngineersData(engineers);
+            setPartsData(parts);
+            setComparisonsData(comparisons);
         } catch (error) {
-            console.error('Failed to fetch analytics data:', error)
+            console.error('Failed to fetch analytics data:', error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
-        fetchData()
-    }, [dateRange, period])
+        fetchData();
+    }, [dateRange, period]);
 
     useEffect(() => {
         if (autoRefresh) {
-            const interval = setInterval(fetchData, 60000) // Refresh every minute
-            return () => clearInterval(interval)
+            const interval = setInterval(fetchData, 60000); // Refresh every minute
+            return () => clearInterval(interval);
         }
-    }, [autoRefresh, dateRange, period])
+    }, [autoRefresh, dateRange, period]);
 
     const handleExport = (type: string) => {
         const params = new URLSearchParams({
             type,
             start_date: dateRange.start,
             end_date: dateRange.end,
-        })
-        window.location.href = `/analytics/export?${params}`
-    }
+        });
+        window.location.href = `/analytics/export?${params}`;
+    };
 
     const handleDatePreset = (preset: string) => {
-        const now = new Date()
-        let start: Date
-        let end = now
+        const now = new Date();
+        let start: Date;
+        let end = now;
 
         switch (preset) {
             case 'today':
-                start = new Date(now.setHours(0, 0, 0, 0))
-                break
+                start = new Date(now.setHours(0, 0, 0, 0));
+                break;
             case 'week':
-                start = new Date(now.setDate(now.getDate() - 7))
-                break
+                start = new Date(now.setDate(now.getDate() - 7));
+                break;
             case 'month':
-                start = new Date(now.setMonth(now.getMonth() - 1))
-                break
+                start = new Date(now.setMonth(now.getMonth() - 1));
+                break;
             case 'quarter':
-                start = new Date(now.setMonth(now.getMonth() - 3))
-                break
+                start = new Date(now.setMonth(now.getMonth() - 3));
+                break;
             case 'year':
-                start = new Date(now.setFullYear(now.getFullYear() - 1))
-                break
+                start = new Date(now.setFullYear(now.getFullYear() - 1));
+                break;
             default:
-                start = new Date(now.setDate(now.getDate() - 30))
+                start = new Date(now.setDate(now.getDate() - 30));
         }
 
         setDateRange({
             start: start.toISOString().split('T')[0],
             end: end.toISOString().split('T')[0],
-        })
-    }
+        });
+    };
 
     const TrendIndicator = ({ value }: { value: number }) => {
         if (value > 0) {
@@ -287,22 +300,24 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                     <ArrowUp className="size-4" />
                     <span className="text-sm font-medium">{value}%</span>
                 </div>
-            )
+            );
         } else if (value < 0) {
             return (
                 <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
                     <ArrowDown className="size-4" />
-                    <span className="text-sm font-medium">{Math.abs(value)}%</span>
+                    <span className="text-sm font-medium">
+                        {Math.abs(value)}%
+                    </span>
                 </div>
-            )
+            );
         }
         return (
             <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                 <Minus className="size-4" />
                 <span className="text-sm font-medium">0%</span>
             </div>
-        )
-    }
+        );
+    };
 
     return (
         <AppLayout>
@@ -329,7 +344,11 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                         />
                         Auto Refresh
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => fetchData()}>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchData()}
+                    >
                         <RefreshCw className="mr-2 size-4" />
                         Refresh
                     </Button>
@@ -342,16 +361,27 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
                         <div className="space-y-2">
                             <Label>Date Preset</Label>
-                            <Select onValueChange={handleDatePreset} defaultValue="month">
+                            <Select
+                                onValueChange={handleDatePreset}
+                                defaultValue="month"
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select preset" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="today">Today</SelectItem>
-                                    <SelectItem value="week">Last 7 Days</SelectItem>
-                                    <SelectItem value="month">Last 30 Days</SelectItem>
-                                    <SelectItem value="quarter">Last 3 Months</SelectItem>
-                                    <SelectItem value="year">Last Year</SelectItem>
+                                    <SelectItem value="week">
+                                        Last 7 Days
+                                    </SelectItem>
+                                    <SelectItem value="month">
+                                        Last 30 Days
+                                    </SelectItem>
+                                    <SelectItem value="quarter">
+                                        Last 3 Months
+                                    </SelectItem>
+                                    <SelectItem value="year">
+                                        Last Year
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -361,7 +391,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                 type="date"
                                 value={dateRange.start}
                                 onChange={(e) =>
-                                    setDateRange({ ...dateRange, start: e.target.value })
+                                    setDateRange({
+                                        ...dateRange,
+                                        start: e.target.value,
+                                    })
                                 }
                             />
                         </div>
@@ -371,7 +404,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                 type="date"
                                 value={dateRange.end}
                                 onChange={(e) =>
-                                    setDateRange({ ...dateRange, end: e.target.value })
+                                    setDateRange({
+                                        ...dateRange,
+                                        end: e.target.value,
+                                    })
                                 }
                             />
                         </div>
@@ -385,7 +421,9 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     <SelectItem value="hour">Hourly</SelectItem>
                                     <SelectItem value="day">Daily</SelectItem>
                                     <SelectItem value="week">Weekly</SelectItem>
-                                    <SelectItem value="month">Monthly</SelectItem>
+                                    <SelectItem value="month">
+                                        Monthly
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -420,12 +458,18 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                     </div>
                 </div>
             ) : (
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <Tabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    className="space-y-6"
+                >
                     <TabsList className="grid w-full grid-cols-6">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="tickets">Tickets</TabsTrigger>
                         <TabsTrigger value="engineers">Engineers</TabsTrigger>
-                        <TabsTrigger value="performance">Performance</TabsTrigger>
+                        <TabsTrigger value="performance">
+                            Performance
+                        </TabsTrigger>
                         <TabsTrigger value="parts">Parts</TabsTrigger>
                         <TabsTrigger value="comparison">Comparison</TabsTrigger>
                     </TabsList>
@@ -447,7 +491,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </div>
                                     {comparisonsData && (
                                         <TrendIndicator
-                                            value={comparisonsData.changes.total_tickets}
+                                            value={
+                                                comparisonsData.changes
+                                                    .total_tickets
+                                            }
                                         />
                                     )}
                                 </CardContent>
@@ -483,7 +530,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </div>
                                     {comparisonsData && (
                                         <TrendIndicator
-                                            value={comparisonsData.changes.closed_tickets}
+                                            value={
+                                                comparisonsData.changes
+                                                    .closed_tickets
+                                            }
                                         />
                                     )}
                                 </CardContent>
@@ -498,12 +548,16 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">
-                                        {overviewData?.avg_resolution_time_hours.toFixed(1)}h
+                                        {overviewData?.avg_resolution_time_hours.toFixed(
+                                            1,
+                                        )}
+                                        h
                                     </div>
                                     {comparisonsData && (
                                         <TrendIndicator
                                             value={
-                                                -comparisonsData.changes.avg_resolution_hours
+                                                -comparisonsData.changes
+                                                    .avg_resolution_hours
                                             }
                                         />
                                     )}
@@ -522,11 +576,15 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <PieChart>
                                             <Pie
                                                 data={Object.entries(
-                                                    overviewData?.status_distribution || {}
+                                                    overviewData?.status_distribution ||
+                                                        {},
                                                 ).map(([key, value]) => ({
                                                     name: key,
                                                     value,
@@ -534,7 +592,13 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                                 cx="50%"
                                                 cy="50%"
                                                 labelLine={false}
-                                                label={({ name, percent }: { name: string; percent: number }) =>
+                                                label={({
+                                                    name,
+                                                    percent,
+                                                }: {
+                                                    name: string;
+                                                    percent: number;
+                                                }) =>
                                                     `${name}: ${(percent * 100).toFixed(0)}%`
                                                 }
                                                 outerRadius={80}
@@ -542,13 +606,15 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                                 dataKey="value"
                                             >
                                                 {Object.keys(
-                                                    overviewData?.status_distribution || {}
+                                                    overviewData?.status_distribution ||
+                                                        {},
                                                 ).map((entry, index) => (
                                                     <Cell
                                                         key={`cell-${index}`}
                                                         fill={
                                                             STATUS_COLORS[
-                                                                index % STATUS_COLORS.length
+                                                                index %
+                                                                    STATUS_COLORS.length
                                                             ]
                                                         }
                                                     />
@@ -570,14 +636,24 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <LineChart
                                             data={Object.keys(
-                                                trendsData?.creation_trends || {}
+                                                trendsData?.creation_trends ||
+                                                    {},
                                             ).map((key) => ({
                                                 period: key,
-                                                created: trendsData?.creation_trends[key] || 0,
-                                                closed: trendsData?.closure_trends[key] || 0,
+                                                created:
+                                                    trendsData?.creation_trends[
+                                                        key
+                                                    ] || 0,
+                                                closed:
+                                                    trendsData?.closure_trends[
+                                                        key
+                                                    ] || 0,
                                             }))}
                                         >
                                             <CartesianGrid strokeDasharray="3 3" />
@@ -619,7 +695,8 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                             .map((tech) => ({
                                                 name: tech.name,
                                                 assigned: tech.assigned_tickets,
-                                                completed: tech.completed_tickets,
+                                                completed:
+                                                    tech.completed_tickets,
                                                 rate: tech.completion_rate,
                                             }))}
                                     >
@@ -628,8 +705,14 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                         <YAxis />
                                         <Tooltip />
                                         <Legend />
-                                        <Bar dataKey="assigned" fill={COLORS.primary} />
-                                        <Bar dataKey="completed" fill={COLORS.success} />
+                                        <Bar
+                                            dataKey="assigned"
+                                            fill={COLORS.primary}
+                                        />
+                                        <Bar
+                                            dataKey="completed"
+                                            fill={COLORS.success}
+                                        />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -642,16 +725,22 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                             {/* Response Time Distribution */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Response Time Distribution</CardTitle>
+                                    <CardTitle>
+                                        Response Time Distribution
+                                    </CardTitle>
                                     <CardDescription>
                                         Time taken to respond to tickets
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <BarChart
                                             data={Object.entries(
-                                                ticketsData?.response_time_distribution || {}
+                                                ticketsData?.response_time_distribution ||
+                                                    {},
                                             ).map(([key, value]) => ({
                                                 bucket: key,
                                                 count: value,
@@ -661,7 +750,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                             <XAxis dataKey="bucket" />
                                             <YAxis />
                                             <Tooltip />
-                                            <Bar dataKey="count" fill={COLORS.primary} />
+                                            <Bar
+                                                dataKey="count"
+                                                fill={COLORS.primary}
+                                            />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </CardContent>
@@ -676,28 +768,42 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <BarChart
-                                            data={ticketsData?.status_funnel || []}
+                                            data={
+                                                ticketsData?.status_funnel || []
+                                            }
                                             layout="horizontal"
                                         >
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis type="number" />
-                                            <YAxis dataKey="status" type="category" width={120} />
+                                            <YAxis
+                                                dataKey="status"
+                                                type="category"
+                                                width={120}
+                                            />
                                             <Tooltip />
-                                            <Bar dataKey="count" fill={COLORS.purple}>
-                                                {(ticketsData?.status_funnel || []).map(
-                                                    (entry, index) => (
-                                                        <Cell
-                                                            key={`cell-${index}`}
-                                                            fill={
-                                                                STATUS_COLORS[
-                                                                    index % STATUS_COLORS.length
-                                                                ]
-                                                            }
-                                                        />
-                                                    )
-                                                )}
+                                            <Bar
+                                                dataKey="count"
+                                                fill={COLORS.purple}
+                                            >
+                                                {(
+                                                    ticketsData?.status_funnel ||
+                                                    []
+                                                ).map((entry, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={
+                                                            STATUS_COLORS[
+                                                                index %
+                                                                    STATUS_COLORS.length
+                                                            ]
+                                                        }
+                                                    />
+                                                ))}
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>
@@ -708,7 +814,9 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                         {/* Top Companies */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Top Companies by Ticket Volume</CardTitle>
+                                <CardTitle>
+                                    Top Companies by Ticket Volume
+                                </CardTitle>
                                 <CardDescription>
                                     Companies with the most tickets
                                 </CardDescription>
@@ -721,9 +829,16 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis type="number" />
-                                        <YAxis dataKey="company" type="category" width={150} />
+                                        <YAxis
+                                            dataKey="company"
+                                            type="category"
+                                            width={150}
+                                        />
                                         <Tooltip />
-                                        <Bar dataKey="count" fill={COLORS.cyan} />
+                                        <Bar
+                                            dataKey="count"
+                                            fill={COLORS.cyan}
+                                        />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -741,7 +856,7 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                 <ResponsiveContainer width="100%" height={400}>
                                     <AreaChart
                                         data={Object.entries(
-                                            ticketsData?.ticket_trends || {}
+                                            ticketsData?.ticket_trends || {},
                                         ).map(([period, statuses]) => ({
                                             period,
                                             ...statuses,
@@ -752,26 +867,29 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                         <YAxis />
                                         <Tooltip />
                                         <Legend />
-                                        {Object.keys(overviewData?.status_distribution || {}).map(
-                                            (status, index) => (
-                                                <Area
-                                                    key={status}
-                                                    type="monotone"
-                                                    dataKey={status}
-                                                    stackId="1"
-                                                    stroke={
-                                                        STATUS_COLORS[
-                                                            index % STATUS_COLORS.length
-                                                        ]
-                                                    }
-                                                    fill={
-                                                        STATUS_COLORS[
-                                                            index % STATUS_COLORS.length
-                                                        ]
-                                                    }
-                                                />
-                                            )
-                                        )}
+                                        {Object.keys(
+                                            overviewData?.status_distribution ||
+                                                {},
+                                        ).map((status, index) => (
+                                            <Area
+                                                key={status}
+                                                type="monotone"
+                                                dataKey={status}
+                                                stackId="1"
+                                                stroke={
+                                                    STATUS_COLORS[
+                                                        index %
+                                                            STATUS_COLORS.length
+                                                    ]
+                                                }
+                                                fill={
+                                                    STATUS_COLORS[
+                                                        index %
+                                                            STATUS_COLORS.length
+                                                    ]
+                                                }
+                                            />
+                                        ))}
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -782,70 +900,80 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                     <TabsContent value="engineers" className="space-y-6">
                         {/* Engineer Workload Cards */}
                         <div className="grid gap-4 md:grid-cols-3">
-                            {engineersData?.engineer_workload.slice(0, 3).map((engineer) => (
-                                <Card key={engineer.id}>
-                                    <CardHeader>
-                                        <CardTitle className="text-base">
-                                            {engineer.name}
-                                        </CardTitle>
-                                        <CardDescription>{engineer.email}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                Total Assigned
-                                            </span>
-                                            <Badge variant="outline">
-                                                {engineer.total_assigned}
-                                            </Badge>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                Open Tickets
-                                            </span>
-                                            <Badge variant="outline">
-                                                {engineer.open_tickets}
-                                            </Badge>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                Completed
-                                            </span>
-                                            <Badge variant="outline">
-                                                {engineer.completed_tickets}
-                                            </Badge>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                Completion Rate
-                                            </span>
-                                            <Badge
-                                                variant={
-                                                    engineer.completion_rate >= 80
-                                                        ? 'default'
-                                                        : 'secondary'
-                                                }
-                                            >
-                                                {engineer.completion_rate}%
-                                            </Badge>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                Avg Completion Time
-                                            </span>
-                                            <span className="text-sm font-medium">
-                                                {engineer.avg_completion_hours.toFixed(1)}h
-                                            </span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                            {engineersData?.engineer_workload
+                                .slice(0, 3)
+                                .map((engineer) => (
+                                    <Card key={engineer.id}>
+                                        <CardHeader>
+                                            <CardTitle className="text-base">
+                                                {engineer.name}
+                                            </CardTitle>
+                                            <CardDescription>
+                                                {engineer.email}
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-muted-foreground">
+                                                    Total Assigned
+                                                </span>
+                                                <Badge variant="outline">
+                                                    {engineer.total_assigned}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-muted-foreground">
+                                                    Open Tickets
+                                                </span>
+                                                <Badge variant="outline">
+                                                    {engineer.open_tickets}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-muted-foreground">
+                                                    Completed
+                                                </span>
+                                                <Badge variant="outline">
+                                                    {engineer.completed_tickets}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-muted-foreground">
+                                                    Completion Rate
+                                                </span>
+                                                <Badge
+                                                    variant={
+                                                        engineer.completion_rate >=
+                                                        80
+                                                            ? 'default'
+                                                            : 'secondary'
+                                                    }
+                                                >
+                                                    {engineer.completion_rate}%
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-muted-foreground">
+                                                    Avg Completion Time
+                                                </span>
+                                                <span className="text-sm font-medium">
+                                                    {engineer.avg_completion_hours.toFixed(
+                                                        1,
+                                                    )}
+                                                    h
+                                                </span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
                         </div>
 
                         {/* Engineer Workload Chart */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Engineer Workload Comparison</CardTitle>
+                                <CardTitle>
+                                    Engineer Workload Comparison
+                                </CardTitle>
                                 <CardDescription>
                                     Assigned vs completed tickets per engineer
                                 </CardDescription>
@@ -853,12 +981,19 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={400}>
                                     <BarChart
-                                        data={engineersData?.engineer_workload || []}
+                                        data={
+                                            engineersData?.engineer_workload ||
+                                            []
+                                        }
                                         layout="vertical"
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis type="number" />
-                                        <YAxis dataKey="name" type="category" width={120} />
+                                        <YAxis
+                                            dataKey="name"
+                                            type="category"
+                                            width={120}
+                                        />
                                         <Tooltip />
                                         <Legend />
                                         <Bar
@@ -884,9 +1019,12 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                         {/* Engineer Performance Radar */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Engineer Performance Radar</CardTitle>
+                                <CardTitle>
+                                    Engineer Performance Radar
+                                </CardTitle>
                                 <CardDescription>
-                                    Multi-dimensional performance view (top 5 engineers)
+                                    Multi-dimensional performance view (top 5
+                                    engineers)
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -902,7 +1040,7 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                                 speed: Math.max(
                                                     0,
                                                     100 -
-                                                        engineer.avg_completion_hours
+                                                        engineer.avg_completion_hours,
                                                 ),
                                             }))}
                                     >
@@ -960,7 +1098,7 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                 <CardContent>
                                     <div className="text-2xl font-bold">
                                         {performanceData?.avg_first_response_time_hours.toFixed(
-                                            1
+                                            1,
                                         )}
                                         h
                                     </div>
@@ -995,7 +1133,8 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                 <CardContent>
                                     <div className="text-2xl font-bold">
                                         {Object.values(
-                                            performanceData?.activity_breakdown || {}
+                                            performanceData?.activity_breakdown ||
+                                                {},
                                         ).reduce((a, b) => a + b, 0)}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
@@ -1015,11 +1154,15 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <PieChart>
                                             <Pie
                                                 data={Object.entries(
-                                                    performanceData?.activity_breakdown || {}
+                                                    performanceData?.activity_breakdown ||
+                                                        {},
                                                 ).map(([key, value]) => ({
                                                     name: key,
                                                     value,
@@ -1027,7 +1170,13 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                                 cx="50%"
                                                 cy="50%"
                                                 labelLine={false}
-                                                label={({ name, percent }: { name: string; percent: number }) =>
+                                                label={({
+                                                    name,
+                                                    percent,
+                                                }: {
+                                                    name: string;
+                                                    percent: number;
+                                                }) =>
                                                     `${name}: ${(percent * 100).toFixed(0)}%`
                                                 }
                                                 outerRadius={80}
@@ -1035,13 +1184,15 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                                 dataKey="value"
                                             >
                                                 {Object.keys(
-                                                    performanceData?.activity_breakdown || {}
+                                                    performanceData?.activity_breakdown ||
+                                                        {},
                                                 ).map((entry, index) => (
                                                     <Cell
                                                         key={`cell-${index}`}
                                                         fill={
                                                             STATUS_COLORS[
-                                                                index % STATUS_COLORS.length
+                                                                index %
+                                                                    STATUS_COLORS.length
                                                             ]
                                                         }
                                                     />
@@ -1063,10 +1214,14 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <AreaChart
                                             data={Object.entries(
-                                                trendsData?.activity_trends || {}
+                                                trendsData?.activity_trends ||
+                                                    {},
                                             ).map(([key, value]) => ({
                                                 period: key,
                                                 activities: value,
@@ -1101,7 +1256,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={400}>
-                                    <BarChart data={partsData?.top_parts || []} layout="vertical">
+                                    <BarChart
+                                        data={partsData?.top_parts || []}
+                                        layout="vertical"
+                                    >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis type="number" />
                                         <YAxis
@@ -1110,7 +1268,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                             width={150}
                                         />
                                         <Tooltip />
-                                        <Bar dataKey="usage_count" fill={COLORS.emerald} />
+                                        <Bar
+                                            dataKey="usage_count"
+                                            fill={COLORS.emerald}
+                                        />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -1126,10 +1287,13 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <LineChart
                                             data={Object.entries(
-                                                partsData?.parts_trend || {}
+                                                partsData?.parts_trend || {},
                                             ).map(([key, value]) => ({
                                                 date: key,
                                                 count: value,
@@ -1159,10 +1323,14 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
                                         <BarChart
                                             data={Object.entries(
-                                                partsData?.parts_per_ticket_distribution || {}
+                                                partsData?.parts_per_ticket_distribution ||
+                                                    {},
                                             ).map(([key, value]) => ({
                                                 parts: `${key} parts`,
                                                 tickets: value,
@@ -1172,7 +1340,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                             <XAxis dataKey="parts" />
                                             <YAxis />
                                             <Tooltip />
-                                            <Bar dataKey="tickets" fill={COLORS.pink} />
+                                            <Bar
+                                                dataKey="tickets"
+                                                fill={COLORS.pink}
+                                            />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </CardContent>
@@ -1193,29 +1364,37 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                             </CardTitle>
                                             <CardDescription>
                                                 {new Date(
-                                                    comparisonsData.current_period.start
+                                                    comparisonsData.current_period.start,
                                                 ).toLocaleDateString()}{' '}
                                                 -{' '}
                                                 {new Date(
-                                                    comparisonsData.current_period.end
+                                                    comparisonsData.current_period.end,
                                                 ).toLocaleDateString()}
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm">Total Tickets</span>
+                                                <span className="text-sm">
+                                                    Total Tickets
+                                                </span>
                                                 <span className="text-2xl font-bold">
                                                     {
-                                                        comparisonsData.current_period.metrics
+                                                        comparisonsData
+                                                            .current_period
+                                                            .metrics
                                                             .total_tickets
                                                     }
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm">Closed Tickets</span>
+                                                <span className="text-sm">
+                                                    Closed Tickets
+                                                </span>
                                                 <span className="text-2xl font-bold">
                                                     {
-                                                        comparisonsData.current_period.metrics
+                                                        comparisonsData
+                                                            .current_period
+                                                            .metrics
                                                             .closed_tickets
                                                     }
                                                 </span>
@@ -1226,16 +1405,20 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                                 </span>
                                                 <span className="text-2xl font-bold">
                                                     {comparisonsData.current_period.metrics.avg_resolution_hours.toFixed(
-                                                        1
+                                                        1,
                                                     )}
                                                     h
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm">Revisit Rate</span>
+                                                <span className="text-sm">
+                                                    Revisit Rate
+                                                </span>
                                                 <span className="text-2xl font-bold">
                                                     {
-                                                        comparisonsData.current_period.metrics
+                                                        comparisonsData
+                                                            .current_period
+                                                            .metrics
                                                             .revisit_rate
                                                     }
                                                 </span>
@@ -1250,29 +1433,37 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                             </CardTitle>
                                             <CardDescription>
                                                 {new Date(
-                                                    comparisonsData.previous_period.start
+                                                    comparisonsData.previous_period.start,
                                                 ).toLocaleDateString()}{' '}
                                                 -{' '}
                                                 {new Date(
-                                                    comparisonsData.previous_period.end
+                                                    comparisonsData.previous_period.end,
                                                 ).toLocaleDateString()}
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm">Total Tickets</span>
+                                                <span className="text-sm">
+                                                    Total Tickets
+                                                </span>
                                                 <span className="text-2xl font-bold">
                                                     {
-                                                        comparisonsData.previous_period.metrics
+                                                        comparisonsData
+                                                            .previous_period
+                                                            .metrics
                                                             .total_tickets
                                                     }
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm">Closed Tickets</span>
+                                                <span className="text-sm">
+                                                    Closed Tickets
+                                                </span>
                                                 <span className="text-2xl font-bold">
                                                     {
-                                                        comparisonsData.previous_period.metrics
+                                                        comparisonsData
+                                                            .previous_period
+                                                            .metrics
                                                             .closed_tickets
                                                     }
                                                 </span>
@@ -1283,16 +1474,20 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                                 </span>
                                                 <span className="text-2xl font-bold">
                                                     {comparisonsData.previous_period.metrics.avg_resolution_hours.toFixed(
-                                                        1
+                                                        1,
                                                     )}
                                                     h
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm">Revisit Rate</span>
+                                                <span className="text-sm">
+                                                    Revisit Rate
+                                                </span>
                                                 <span className="text-2xl font-bold">
                                                     {
-                                                        comparisonsData.previous_period.metrics
+                                                        comparisonsData
+                                                            .previous_period
+                                                            .metrics
                                                             .revisit_rate
                                                     }
                                                 </span>
@@ -1311,7 +1506,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                         </CardHeader>
                                         <CardContent>
                                             <TrendIndicator
-                                                value={comparisonsData.changes.total_tickets}
+                                                value={
+                                                    comparisonsData.changes
+                                                        .total_tickets
+                                                }
                                             />
                                         </CardContent>
                                     </Card>
@@ -1324,7 +1522,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                         </CardHeader>
                                         <CardContent>
                                             <TrendIndicator
-                                                value={comparisonsData.changes.closed_tickets}
+                                                value={
+                                                    comparisonsData.changes
+                                                        .closed_tickets
+                                                }
                                             />
                                         </CardContent>
                                     </Card>
@@ -1338,7 +1539,8 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                         <CardContent>
                                             <TrendIndicator
                                                 value={
-                                                    -comparisonsData.changes.avg_resolution_hours
+                                                    -comparisonsData.changes
+                                                        .avg_resolution_hours
                                                 }
                                             />
                                             <p className="mt-1 text-xs text-muted-foreground">
@@ -1355,7 +1557,10 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                                         </CardHeader>
                                         <CardContent>
                                             <TrendIndicator
-                                                value={-comparisonsData.changes.revisit_rate}
+                                                value={
+                                                    -comparisonsData.changes
+                                                        .revisit_rate
+                                                }
                                             />
                                             <p className="mt-1 text-xs text-muted-foreground">
                                                 Lower is better
@@ -1369,5 +1574,5 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                 </Tabs>
             )}
         </AppLayout>
-    )
+    );
 }

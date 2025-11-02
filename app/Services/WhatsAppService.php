@@ -8,6 +8,7 @@ use Twilio\Rest\Client;
 class WhatsAppService
 {
     protected Client $client;
+
     protected string $from;
 
     public function __construct()
@@ -29,9 +30,11 @@ class WhatsAppService
                     'body' => $message,
                 ]
             );
+
             return true;
         } catch (\Exception $e) {
-            Log::error('WhatsApp send failed: ' . $e->getMessage());
+            Log::error('WhatsApp send failed: '.$e->getMessage());
+
             return false;
         }
     }

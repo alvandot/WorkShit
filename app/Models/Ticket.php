@@ -99,7 +99,6 @@ class Ticket extends Model
         return $this->hasMany(TicketActivity::class)->orderBy('activity_time', 'asc');
     }
 
-
     public function recommendedPart(): BelongsTo
     {
         return $this->belongsTo(Part::class, 'part_recommended');
@@ -133,5 +132,57 @@ class Ticket extends Model
     public function scopeWithAssignmentDetails($query)
     {
         return $query->with(['assignedTo', 'assignedBy', 'activeAssignment.assignedBy']);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', '!=', 'Closed');
+    }
+
+    public function scopeClosed($query)
+    {
+        return $query->where('status', 'Closed');
+    }
+
+    public function scopeByStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopeCreatedBetween($query, string $startDate, string $endDate)
+    {
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    public function scopeUpdatedBetween($query, string $startDate, string $endDate)
+    {
+        return $query->whereBetween('updated_at', [$startDate, $endDate]);
+    }
+
+    public function scopeCompletedBetween($query, string $startDate, string $endDate)
+    {
+        return $query->whereNotNull('completed_at')
+            ->whereBetween('completed_at', [$startDate, $endDate]);
+    }
+
+    public function scopeNeedsRevisit($query)
+    {
+        return $query->where('needs_revisit', true);
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('status', '!=', 'Closed')
+            ->where('deadline', '<', now());
+    }
+
+    public function scopeSearch($query, string $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('ticket_number', 'like', "%{$search}%")
+                ->orWhere('company', 'like', "%{$search}%")
+                ->orWhere('case_id', 'like', "%{$search}%")
+                ->orWhere('serial_number', 'like', "%{$search}%");
+        });
     }
 }

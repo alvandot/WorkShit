@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             return (
                 <div className="flex flex-col items-center justify-center p-8 text-center">
-                    <div className="rounded-full bg-destructive/10 p-6 mb-4">
+                    <div className="mb-4 rounded-full bg-destructive/10 p-6">
                         <svg
                             className="size-12 text-destructive"
                             fill="none"
@@ -46,28 +46,30 @@ export class ErrorBoundary extends Component<Props, State> {
                             />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-foreground">
                         Something went wrong
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-                        We encountered an error while loading this component. Please try refreshing the page.
+                    <p className="mb-4 max-w-sm text-sm text-muted-foreground">
+                        We encountered an error while loading this component.
+                        Please try refreshing the page.
                     </p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                        className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
                     >
                         Refresh Page
                     </button>
-                    {process.env.NODE_ENV === 'development' && this.state.error && (
-                        <details className="mt-4 text-left">
-                            <summary className="cursor-pointer text-sm font-medium">
-                                Error Details (Development)
-                            </summary>
-                            <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto max-w-full">
-                                {this.state.error.message}
-                            </pre>
-                        </details>
-                    )}
+                    {process.env.NODE_ENV === 'development' &&
+                        this.state.error && (
+                            <details className="mt-4 text-left">
+                                <summary className="cursor-pointer text-sm font-medium">
+                                    Error Details (Development)
+                                </summary>
+                                <pre className="mt-2 max-w-full overflow-auto rounded bg-muted p-2 text-xs">
+                                    {this.state.error.message}
+                                </pre>
+                            </details>
+                        )}
                 </div>
             );
         }
@@ -77,13 +79,19 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 // Lazy loading wrapper with error boundary
-export function LazyWrapper({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function LazyWrapper({
+    children,
+    fallback,
+}: {
+    children: ReactNode;
+    fallback?: ReactNode;
+}) {
     return (
         <ErrorBoundary fallback={fallback}>
             <Suspense
                 fallback={
                     <div className="flex items-center justify-center p-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
                     </div>
                 }
             >

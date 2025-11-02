@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
 
 interface SkeletonConfig {
     width?: string | number;
@@ -67,7 +67,10 @@ export const useSkeleton = (options: UseSkeletonOptions) => {
 };
 
 // Pre-configured skeleton components
-export const SkeletonText = ({ className, ...props }: Omit<SkeletonConfig, 'variant'>) => (
+export const SkeletonText = ({
+    className,
+    ...props
+}: Omit<SkeletonConfig, 'variant'>) => (
     <Skeleton
         className={`h-4 ${className || ''}`}
         style={{
@@ -78,7 +81,10 @@ export const SkeletonText = ({ className, ...props }: Omit<SkeletonConfig, 'vari
     />
 );
 
-export const SkeletonCircle = ({ className, ...props }: Omit<SkeletonConfig, 'variant'>) => (
+export const SkeletonCircle = ({
+    className,
+    ...props
+}: Omit<SkeletonConfig, 'variant'>) => (
     <Skeleton
         className={`rounded-full ${className || ''}`}
         style={{
@@ -89,8 +95,11 @@ export const SkeletonCircle = ({ className, ...props }: Omit<SkeletonConfig, 'va
     />
 );
 
-export const SkeletonCard = ({ className, ...props }: Omit<SkeletonConfig, 'variant'>) => (
-    <div className={`space-y-3 p-4 border rounded-lg ${className || ''}`}>
+export const SkeletonCard = ({
+    className,
+    ...props
+}: Omit<SkeletonConfig, 'variant'>) => (
+    <div className={`space-y-3 rounded-lg border p-4 ${className || ''}`}>
         <SkeletonCircle width="3rem" height="3rem" />
         <div className="space-y-2">
             <SkeletonText width="60%" />
@@ -100,7 +109,11 @@ export const SkeletonCard = ({ className, ...props }: Omit<SkeletonConfig, 'vari
     </div>
 );
 
-export const SkeletonTableRow = ({ className, count = 5, ...props }: SkeletonConfig) => (
+export const SkeletonTableRow = ({
+    className,
+    count = 5,
+    ...props
+}: SkeletonConfig) => (
     <div className={`flex space-x-4 ${className || ''}`}>
         {Array.from({ length: count }, (_, i) => (
             <SkeletonText
@@ -138,7 +151,7 @@ export const SkeletonList = ({
 // Hook for progressive loading (show content as it loads)
 export const useProgressiveLoading = <T,>(
     items: T[],
-    loadingStates: boolean[]
+    loadingStates: boolean[],
 ) => {
     const [visibleItems, setVisibleItems] = useState<T[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -148,8 +161,8 @@ export const useProgressiveLoading = <T,>(
 
         const interval = setInterval(() => {
             if (currentIndex < items.length && !loadingStates[currentIndex]) {
-                setVisibleItems(prev => [...prev, items[currentIndex]]);
-                setCurrentIndex(prev => prev + 1);
+                setVisibleItems((prev) => [...prev, items[currentIndex]]);
+                setCurrentIndex((prev) => prev + 1);
             }
         }, 100); // Stagger loading by 100ms
 
@@ -172,7 +185,7 @@ export const useOptimisticLoading = <T,>(
     options: {
         optimisticUpdate?: (currentData: T) => T;
         rollbackOnError?: boolean;
-    } = {}
+    } = {},
 ) => {
     const { optimisticUpdate, rollbackOnError = true } = options;
     const [data, setData] = useState<T>(initialData);

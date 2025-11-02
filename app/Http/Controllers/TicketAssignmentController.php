@@ -117,7 +117,7 @@ class TicketAssignmentController extends Controller
                 'user_id' => $request->user()->id,
                 'activity_type' => 'assigned',
                 'title' => 'Ticket assigned',
-                'description' => "Assigned to {$assignment->assignedTo->name}" .
+                'description' => "Assigned to {$assignment->assignedTo->name}".
                     ($validated['notes'] ? " - {$validated['notes']}" : ''),
                 'activity_time' => now(),
             ]);
@@ -228,7 +228,7 @@ class TicketAssignmentController extends Controller
                     'user_id' => $request->user()->id,
                     'activity_type' => 'assigned',
                     'title' => 'Ticket assigned (bulk)',
-                    'description' => "Assigned to {$assignment->assignedTo->name}" .
+                    'description' => "Assigned to {$assignment->assignedTo->name}".
                         ($validated['notes'] ? " - {$validated['notes']}" : ''),
                     'activity_time' => now(),
                 ]);
@@ -243,6 +243,7 @@ class TicketAssignmentController extends Controller
         });
 
         $count = $tickets->count();
+
         return back()->with('success', "{$count} ticket(s) assigned successfully.");
     }
 
@@ -301,7 +302,7 @@ class TicketAssignmentController extends Controller
                 'user_id' => $request->user()->id,
                 'activity_type' => 'reassigned',
                 'title' => 'Ticket reassigned',
-                'description' => "Reassigned from {$previousEngineer} to {$assignment->assignedTo->name}" .
+                'description' => "Reassigned from {$previousEngineer} to {$assignment->assignedTo->name}".
                     ($validated['notes'] ? " - {$validated['notes']}" : ''),
                 'activity_time' => now(),
             ]);

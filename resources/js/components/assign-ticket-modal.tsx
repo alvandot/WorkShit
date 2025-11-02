@@ -1,3 +1,4 @@
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -7,6 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -15,9 +17,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
-import { User, Ticket } from '@/types';
+import { Ticket, User } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { UserCircle } from 'lucide-react';
 
@@ -45,9 +45,10 @@ export default function AssignTicketModal({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const url = mode === 'reassign' && ticket.assigned_to
-            ? `/tickets/${ticket.id}/assign`
-            : '/assignments';
+        const url =
+            mode === 'reassign' && ticket.assigned_to
+                ? `/tickets/${ticket.id}/assign`
+                : '/assignments';
 
         post(url, {
             preserveScroll: true,

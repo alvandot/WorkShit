@@ -11,8 +11,6 @@ class ImageHelper
 {
     /**
      * Check if WebP encoding is supported by the current GD installation.
-     *
-     * @return bool
      */
     protected static function supportsWebP(): bool
     {
@@ -24,10 +22,9 @@ class ImageHelper
      * For PDFs, store as-is without conversion.
      * For images, converts to WebP if supported, otherwise optimizes as PNG.
      *
-     * @param  UploadedFile  $file
      * @param  string  $directory  Storage directory (e.g., 'tickets/ct_bad_parts')
      * @param  int  $quality  Image quality (0-100, default: 80)
-     * @return string  Stored file path
+     * @return string Stored file path
      */
     public static function processAndStore(UploadedFile $file, string $directory, int $quality = 80): string
     {
@@ -83,9 +80,6 @@ class ImageHelper
 
     /**
      * Delete old file if exists.
-     *
-     * @param  string|null  $filePath
-     * @return void
      */
     public static function deleteIfExists(?string $filePath): void
     {

@@ -1,5 +1,3 @@
-import { useCallback, useMemo, useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +10,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     Table,
     TableBody,
     TableCell,
@@ -19,13 +24,14 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import { type BreadcrumbItem } from '@/types';
-import engineersRoutes from '@/routes/engineers';
 import { dashboard } from '@/routes';
+import engineersRoutes from '@/routes/engineers';
+import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Filter, Plus, Search, Users } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 
 interface PaginationLink {
     url: string | null;
@@ -85,7 +91,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const statusStyle: Record<string, string> = {
     active: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200',
-    inactive: 'bg-slate-100 text-slate-700 dark:bg-slate-900/40 dark:text-slate-200',
+    inactive:
+        'bg-slate-100 text-slate-700 dark:bg-slate-900/40 dark:text-slate-200',
 };
 
 export default function EngineersIndex({ engineers, filters, stats }: Props) {
@@ -152,14 +159,20 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
             <Head title="Engineers" />
 
             <div className="space-y-6 pb-10">
-                <section className="flex flex-col gap-4 rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 starting:translate-y-3 starting:opacity-0 sm:flex-row sm:items-center sm:justify-between">
+                <section className="flex flex-col gap-4 rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 sm:flex-row sm:items-center sm:justify-between starting:translate-y-3 starting:opacity-0">
                     <div className="space-y-2">
-                        <Badge variant="outline" className="rounded-full border-white/30 bg-white/20 text-xs font-semibold uppercase tracking-[0.35em] text-white dark:text-foreground">
+                        <Badge
+                            variant="outline"
+                            className="rounded-full border-white/30 bg-white/20 text-xs font-semibold tracking-[0.35em] text-white uppercase dark:text-foreground"
+                        >
                             Engineer SP Hub
                         </Badge>
-                        <h1 className="text-3xl font-bold sm:text-4xl">Engineer Special Place Directory</h1>
+                        <h1 className="text-3xl font-bold sm:text-4xl">
+                            Engineer Special Place Directory
+                        </h1>
                         <p className="text-sm text-muted-foreground">
-                            Manage engineer coverage, availability, and their assignments across special places.
+                            Manage engineer coverage, availability, and their
+                            assignments across special places.
                         </p>
                     </div>
                     <Link href={engineersRoutes.create.url()}>
@@ -172,15 +185,22 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
 
                 <section className="grid gap-4 md:grid-cols-3">
                     {summaryCards.map((card) => (
-                        <Card key={card.title} className="border border-border/60">
+                        <Card
+                            key={card.title}
+                            className="border border-border/60"
+                        >
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm text-muted-foreground">
                                     {card.title}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="text-3xl font-semibold">{card.value}</div>
-                                <p className="text-xs text-muted-foreground">{card.description}</p>
+                                <div className="text-3xl font-semibold">
+                                    {card.value}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    {card.description}
+                                </p>
                             </CardContent>
                         </Card>
                     ))}
@@ -189,34 +209,50 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
                 <Card className="border border-border/60">
                     <CardHeader className="space-y-1">
                         <CardTitle>Filters</CardTitle>
-                        <CardDescription>Quickly narrow down the engineer roster.</CardDescription>
+                        <CardDescription>
+                            Quickly narrow down the engineer roster.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 lg:grid-cols-[2fr,1fr]">
                         <div className="space-y-2">
-                            <Label htmlFor="engineer-search" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+                            <Label
+                                htmlFor="engineer-search"
+                                className="flex items-center gap-2 text-xs font-semibold tracking-[0.35em] text-muted-foreground uppercase"
+                            >
                                 <Search className="size-3" />
                                 Search
                             </Label>
                             <Input
                                 id="engineer-search"
                                 value={search}
-                                onChange={(event) => onSearchChange(event.target.value)}
+                                onChange={(event) =>
+                                    onSearchChange(event.target.value)
+                                }
                                 placeholder="Search by name, email, or employee code"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+                            <Label className="flex items-center gap-2 text-xs font-semibold tracking-[0.35em] text-muted-foreground uppercase">
                                 <Filter className="size-3" />
                                 Status
                             </Label>
-                            <Select value={status} onValueChange={onStatusChange}>
+                            <Select
+                                value={status}
+                                onValueChange={onStatusChange}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Filter by status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All statuses</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                    <SelectItem value="all">
+                                        All statuses
+                                    </SelectItem>
+                                    <SelectItem value="active">
+                                        Active
+                                    </SelectItem>
+                                    <SelectItem value="inactive">
+                                        Inactive
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -227,9 +263,15 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
                             <CardTitle>Engineer Roster</CardTitle>
-                            <CardDescription>Comprehensive list of engineers and their special place assignments.</CardDescription>
+                            <CardDescription>
+                                Comprehensive list of engineers and their
+                                special place assignments.
+                            </CardDescription>
                         </div>
-                        <Badge variant="outline" className="rounded-full border-primary/30 bg-primary/10 text-xs text-primary">
+                        <Badge
+                            variant="outline"
+                            className="rounded-full border-primary/30 bg-primary/10 text-xs text-primary"
+                        >
                             <Users className="mr-1 size-3" />
                             {stats.total} total
                         </Badge>
@@ -243,35 +285,55 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
                                     <TableHead>Province</TableHead>
                                     <TableHead>Special Places</TableHead>
                                     <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Action</TableHead>
+                                    <TableHead className="text-right">
+                                        Action
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {engineers.data.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
-                                            No engineers found with the current filters.
+                                        <TableCell
+                                            colSpan={6}
+                                            className="py-10 text-center text-sm text-muted-foreground"
+                                        >
+                                            No engineers found with the current
+                                            filters.
                                         </TableCell>
                                     </TableRow>
                                 )}
                                 {engineers.data.map((engineer) => (
-                                    <TableRow key={engineer.id} className="hover:bg-primary/5">
+                                    <TableRow
+                                        key={engineer.id}
+                                        className="hover:bg-primary/5"
+                                    >
                                         <TableCell className="min-w-[180px]">
                                             <div className="flex flex-col">
-                                                <span className="font-semibold">{engineer.name}</span>
+                                                <span className="font-semibold">
+                                                    {engineer.name}
+                                                </span>
                                                 <span className="text-xs text-muted-foreground">
-                                                    {engineer.email ?? 'No email'} · {engineer.phone ?? 'No phone'}
+                                                    {engineer.email ??
+                                                        'No email'}{' '}
+                                                    ·{' '}
+                                                    {engineer.phone ??
+                                                        'No phone'}
                                                 </span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
-                                            {engineer.specialization ?? 'Generalist'}
+                                            {engineer.specialization ??
+                                                'Generalist'}
                                         </TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
-                                            {engineer.primary_province?.name ?? '—'}
+                                            {engineer.primary_province?.name ??
+                                                '—'}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="outline" className="rounded-full border-primary/30 bg-primary/10 text-xs text-primary">
+                                            <Badge
+                                                variant="outline"
+                                                className="rounded-full border-primary/30 bg-primary/10 text-xs text-primary"
+                                            >
                                                 {engineer.special_places_count}
                                             </Badge>
                                         </TableCell>
@@ -279,14 +341,25 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
                                             <span
                                                 className={cn(
                                                     'inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold',
-                                                    statusStyle[engineer.is_active ? 'active' : 'inactive'],
+                                                    statusStyle[
+                                                        engineer.is_active
+                                                            ? 'active'
+                                                            : 'inactive'
+                                                    ],
                                                 )}
                                             >
-                                                {engineer.is_active ? 'Active' : 'Inactive'}
+                                                {engineer.is_active
+                                                    ? 'Active'
+                                                    : 'Inactive'}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Link href={engineersRoutes.edit.url({ engineer: engineer.id })} className="text-sm font-medium text-primary hover:underline">
+                                            <Link
+                                                href={engineersRoutes.edit.url({
+                                                    engineer: engineer.id,
+                                                })}
+                                                className="text-sm font-medium text-primary hover:underline"
+                                            >
                                                 Edit
                                             </Link>
                                         </TableCell>
@@ -300,9 +373,13 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
                 <div className="flex flex-col gap-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
                     <p>
                         Showing
-                        <span className="mx-1 font-semibold text-foreground">{engineers.data.length}</span>
+                        <span className="mx-1 font-semibold text-foreground">
+                            {engineers.data.length}
+                        </span>
                         of
-                        <span className="mx-1 font-semibold text-foreground">{engineers.total}</span>
+                        <span className="mx-1 font-semibold text-foreground">
+                            {engineers.total}
+                        </span>
                         engineers.
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -312,9 +389,18 @@ export default function EngineersIndex({ engineers, filters, stats }: Props) {
                                 variant={link.active ? 'default' : 'outline'}
                                 size="sm"
                                 disabled={!link.url}
-                                onClick={() => link.url && router.get(link.url, {}, { preserveScroll: true })}
+                                onClick={() =>
+                                    link.url &&
+                                    router.get(
+                                        link.url,
+                                        {},
+                                        { preserveScroll: true },
+                                    )
+                                }
                             >
-                                {link.label.replace('&laquo; Previous', 'Prev').replace('Next &raquo;', 'Next')}
+                                {link.label
+                                    .replace('&laquo; Previous', 'Prev')
+                                    .replace('Next &raquo;', 'Next')}
                             </Button>
                         ))}
                     </div>

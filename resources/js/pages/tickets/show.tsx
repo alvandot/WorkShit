@@ -1,3 +1,4 @@
+import FileGallery from '@/components/file-gallery';
 import { Badge } from '@/components/ui/badge';
 import {
     Breadcrumb,
@@ -18,14 +19,12 @@ import {
     Building2,
     Calendar,
     Clock,
-    Download,
     FileText,
     Image as ImageIcon,
     Pencil,
     Trash,
     User,
 } from 'lucide-react';
-import FileGallery from '@/components/file-gallery';
 
 interface User {
     id: number;
@@ -78,8 +77,7 @@ const statusColors: Record<string, string> = {
         'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     'In Progress':
         'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-    Finish:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    Finish: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
     Closed: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
 };
 
@@ -355,26 +353,29 @@ export default function ShowTicket({ ticket }: Props) {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-8">
-                                    {ticket.ct_bad_part && ticket.ct_bad_part.length > 0 && (
-                                        <FileGallery
-                                            files={ticket.ct_bad_part}
-                                            label="CT Bad Part Photos"
-                                        />
-                                    )}
+                                    {ticket.ct_bad_part &&
+                                        ticket.ct_bad_part.length > 0 && (
+                                            <FileGallery
+                                                files={ticket.ct_bad_part}
+                                                label="CT Bad Part Photos"
+                                            />
+                                        )}
 
-                                    {ticket.ct_good_part && ticket.ct_good_part.length > 0 && (
-                                        <FileGallery
-                                            files={ticket.ct_good_part}
-                                            label="CT Good Part Photos"
-                                        />
-                                    )}
+                                    {ticket.ct_good_part &&
+                                        ticket.ct_good_part.length > 0 && (
+                                            <FileGallery
+                                                files={ticket.ct_good_part}
+                                                label="CT Good Part Photos"
+                                            />
+                                        )}
 
-                                    {ticket.bap_file && ticket.bap_file.length > 0 && (
-                                        <FileGallery
-                                            files={ticket.bap_file}
-                                            label="BAP Document Photos"
-                                        />
-                                    )}
+                                    {ticket.bap_file &&
+                                        ticket.bap_file.length > 0 && (
+                                            <FileGallery
+                                                files={ticket.bap_file}
+                                                label="BAP Document Photos"
+                                            />
+                                        )}
 
                                     {ticket.completion_notes && (
                                         <>

@@ -20,6 +20,7 @@ class TicketAssignmentSeeder extends Seeder
 
         if ($users->isEmpty() || $tickets->isEmpty()) {
             $this->command->info('No users or tickets available for assignment seeding.');
+
             return;
         }
 
@@ -50,6 +51,6 @@ class TicketAssignmentSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Successfully seeded ' . $tickets->count() . ' ticket assignments.');
+        $this->command->info('Successfully seeded '.$tickets->count().' ticket assignments.');
     }
 }

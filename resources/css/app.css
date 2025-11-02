@@ -141,3 +141,21 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer utilities {
+    /* Smooth scrolling for better UX */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Better text rendering */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Custom spacing utilities for consistent layout */
+    .content-container {
+        @apply mx-auto w-full max-w-[1600px] px-4 py-6 md:px-6 lg:px-8;
+    }
+}

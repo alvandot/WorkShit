@@ -4,36 +4,38 @@ import type { Metric } from 'web-vitals';
 export const useWebVitals = () => {
     useEffect(() => {
         // Load web-vitals library dynamically
-        import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
-            // Track Core Web Vitals
-            onCLS((metric: Metric) => {
-                console.log('CLS:', metric);
-                sendToAnalytics(metric);
-            });
+        import('web-vitals')
+            .then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+                // Track Core Web Vitals
+                onCLS((metric: Metric) => {
+                    console.log('CLS:', metric);
+                    sendToAnalytics(metric);
+                });
 
-            onFCP((metric: Metric) => {
-                console.log('FCP:', metric);
-                sendToAnalytics(metric);
-            });
+                onFCP((metric: Metric) => {
+                    console.log('FCP:', metric);
+                    sendToAnalytics(metric);
+                });
 
-            onLCP((metric: Metric) => {
-                console.log('LCP:', metric);
-                sendToAnalytics(metric);
-            });
+                onLCP((metric: Metric) => {
+                    console.log('LCP:', metric);
+                    sendToAnalytics(metric);
+                });
 
-            onTTFB((metric: Metric) => {
-                console.log('TTFB:', metric);
-                sendToAnalytics(metric);
-            });
+                onTTFB((metric: Metric) => {
+                    console.log('TTFB:', metric);
+                    sendToAnalytics(metric);
+                });
 
-            // INP replaces FID in newer versions
-            onINP((metric: Metric) => {
-                console.log('INP:', metric);
-                sendToAnalytics(metric);
+                // INP replaces FID in newer versions
+                onINP((metric: Metric) => {
+                    console.log('INP:', metric);
+                    sendToAnalytics(metric);
+                });
+            })
+            .catch((error) => {
+                console.warn('Failed to load web-vitals:', error);
             });
-        }).catch((error) => {
-            console.warn('Failed to load web-vitals:', error);
-        });
     }, []);
 };
 

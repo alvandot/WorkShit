@@ -1,3 +1,12 @@
+import BapForm from '@/components/tickets/bap-form';
+import {
+    BeforeAfterComparison,
+    MediaGallery,
+} from '@/components/media-gallery';
+import {
+    Timeline as TimelineComponent,
+    TimelineItem,
+} from '@/components/timeline/timeline';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,13 +25,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { Textarea } from '@/components/ui/textarea';
-import FileUploadWithPreview from '@/components/file-upload-with-preview';
-import BapForm from '@/components/tickets/bap-form';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import {
+    AlertCircle,
     ArrowLeft,
     Building2,
     Calendar,
@@ -43,7 +52,6 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-
 
 interface User {
     id: number;
@@ -117,8 +125,7 @@ const statusColors: Record<string, string> = {
         'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     'In Progress':
         'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-    Finish:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    Finish: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 };
 
 // Timeline stages configuration (ordered sequence)
@@ -437,7 +444,7 @@ export default function Timeline({ ticket }: Props) {
 
             <div className="space-y-6">
                 <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 shadow-lg starting:translate-y-4 starting:opacity-0">
-                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_theme(colors.primary/15),_transparent_60%)]" />
+                    <div className="bg-[radial-gradient(circle_at_top_left,_theme(colors.primary/15),_transparent_60%)] absolute inset-0 -z-10" />
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-wrap items-start justify-between gap-5">
                             <div className="flex items-start gap-4">
@@ -453,27 +460,34 @@ export default function Timeline({ ticket }: Props) {
                                 <div className="space-y-4">
                                     <div className="flex flex-wrap items-center gap-3">
                                         <Badge
-                                            className={statusColors[ticket.status]}
+                                            className={
+                                                statusColors[ticket.status]
+                                            }
                                             variant="outline"
                                         >
                                             {ticket.status}
                                         </Badge>
                                         {ticket.needs_revisit && (
-                                            <Badge variant="destructive" className="rounded-full">
+                                            <Badge
+                                                variant="destructive"
+                                                className="rounded-full"
+                                            >
                                                 Needs Revisit
                                             </Badge>
                                         )}
                                     </div>
                                     <div className="space-y-2">
-                                        <h1 className="text-balance text-3xl font-bold sm:text-4xl">
+                                        <h1 className="text-3xl font-bold text-balance sm:text-4xl">
                                             {ticket.company}
                                         </h1>
                                         <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                                            Track every visit milestone, capture supporting documents, and ensure the ticket closes with confidence.
+                                            Track every visit milestone, capture
+                                            supporting documents, and ensure the
+                                            ticket closes with confidence.
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3 text-sm">
-                                        <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 font-mono text-xs uppercase tracking-[0.3em]">
+                                        <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 font-mono text-xs tracking-[0.3em] uppercase">
                                             #{ticket.ticket_number}
                                         </span>
                                         {ticket.case_id && (
@@ -482,13 +496,18 @@ export default function Timeline({ ticket }: Props) {
                                             </span>
                                         )}
                                         <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">
-                                            Current Visit: {ticket.current_visit}
+                                            Current Visit:{' '}
+                                            {ticket.current_visit}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2 sm:flex-row">
-                                <a href={`/tickets/${ticket.id}/bap/download`} target="_blank" rel="noopener noreferrer">
+                                <a
+                                    href={`/tickets/${ticket.id}/bap/download`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
                                     <Button
                                         variant="outline"
                                         className="h-11 min-w-36 gap-2 rounded-full border-primary/40 bg-primary/20 text-primary backdrop-blur transition hover:-translate-y-0.5 hover:bg-primary/30 dark:text-primary"
@@ -511,7 +530,7 @@ export default function Timeline({ ticket }: Props) {
 
                         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                             <div className="rounded-2xl border border-white/20 bg-background/70 p-4 shadow-sm backdrop-blur">
-                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                <p className="text-xs font-semibold tracking-[0.3em] text-muted-foreground uppercase">
                                     Overall Progress
                                 </p>
                                 <div className="mt-3 flex items-end justify-between">
@@ -519,13 +538,17 @@ export default function Timeline({ ticket }: Props) {
                                         {overallProgress}%
                                     </span>
                                     <span className="text-xs text-muted-foreground">
-                                        {completedStageCount} of {totalStageSlots} stages
+                                        {completedStageCount} of{' '}
+                                        {totalStageSlots} stages
                                     </span>
                                 </div>
-                                <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-                                    <div
-                                        className="h-full rounded-full bg-primary transition-all duration-500"
-                                        style={{ width: `${overallProgress}%` }}
+                                <div className="mt-3">
+                                    <ProgressBar
+                                        value={overallProgress}
+                                        colorScheme="gradient"
+                                        variant="animated"
+                                        size="lg"
+                                        showPercentage={false}
                                     />
                                 </div>
                                 <p className="mt-3 text-xs text-muted-foreground">
@@ -534,13 +557,15 @@ export default function Timeline({ ticket }: Props) {
                             </div>
 
                             <div className="rounded-2xl border border-white/20 bg-background/70 p-4 shadow-sm backdrop-blur">
-                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                <p className="text-xs font-semibold tracking-[0.3em] text-muted-foreground uppercase">
                                     Upcoming Milestone
                                 </p>
                                 {upcomingStage ? (
                                     <div className="mt-3 space-y-2">
                                         <div className="flex items-center gap-3">
-                                            <div className={`rounded-full p-2 ${upcomingStage.color}`}>
+                                            <div
+                                                className={`rounded-full p-2 ${upcomingStage.color}`}
+                                            >
                                                 {UpcomingStageIcon && (
                                                     <UpcomingStageIcon className="size-5 text-white" />
                                                 )}
@@ -555,7 +580,8 @@ export default function Timeline({ ticket }: Props) {
                                             </div>
                                         </div>
                                         <p className="text-xs text-muted-foreground">
-                                            Complete current step to unlock the next action.
+                                            Complete current step to unlock the
+                                            next action.
                                         </p>
                                     </div>
                                 ) : (
@@ -564,14 +590,16 @@ export default function Timeline({ ticket }: Props) {
                                             All visits completed
                                         </p>
                                         <p className="text-xs">
-                                            Finalize documents or request revisit if additional work is needed.
+                                            Finalize documents or request
+                                            revisit if additional work is
+                                            needed.
                                         </p>
                                     </div>
                                 )}
                             </div>
 
                             <div className="rounded-2xl border border-white/20 bg-background/70 p-4 shadow-sm backdrop-blur">
-                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                <p className="text-xs font-semibold tracking-[0.3em] text-muted-foreground uppercase">
                                     Scheduling
                                 </p>
                                 <div className="mt-3 space-y-3 text-sm">
@@ -581,12 +609,16 @@ export default function Timeline({ ticket }: Props) {
                                                 Scheduled Visit
                                             </span>
                                             <span className="font-semibold">
-                                                {format(new Date(ticket.schedule), 'MMM dd, yyyy HH:mm')}
+                                                {format(
+                                                    new Date(ticket.schedule),
+                                                    'MMM dd, yyyy HH:mm',
+                                                )}
                                             </span>
                                         </div>
                                     ) : (
                                         <div className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                                            No schedule registered for the current visit yet.
+                                            No schedule registered for the
+                                            current visit yet.
                                         </div>
                                     )}
                                     {ticket.deadline && (
@@ -595,7 +627,10 @@ export default function Timeline({ ticket }: Props) {
                                                 Deadline
                                             </span>
                                             <span className="font-semibold text-amber-600 dark:text-amber-400">
-                                                {format(new Date(ticket.deadline), 'MMM dd, yyyy HH:mm')}
+                                                {format(
+                                                    new Date(ticket.deadline),
+                                                    'MMM dd, yyyy HH:mm',
+                                                )}
                                             </span>
                                         </div>
                                     )}
@@ -603,7 +638,8 @@ export default function Timeline({ ticket }: Props) {
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <User className="size-4" />
                                             <span>
-                                                Assigned to {ticket.assigned_to_user.name}
+                                                Assigned to{' '}
+                                                {ticket.assigned_to_user.name}
                                             </span>
                                         </div>
                                     ) : (
@@ -841,39 +877,52 @@ export default function Timeline({ ticket }: Props) {
 
                             {/* BAP Document - Always Visible */}
                             <div className="border-t-2 border-dashed pt-4">
-                                <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                                    <p className="text-blue-700 dark:text-blue-300 mb-3 flex items-center gap-2 text-base font-bold">
+                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/20">
+                                    <p className="mb-3 flex items-center gap-2 text-base font-bold text-blue-700 dark:text-blue-300">
                                         <FileText className="size-5" />
                                         BAP Document
                                     </p>
-                                    <p className="text-xs text-muted-foreground mb-3">
-                                        Download Berita Acara Pekerjaan untuk ticket ini. BAP dapat diunduh kapan saja, termasuk sebelum ticket selesai (draft mode).
+                                    <p className="mb-3 text-xs text-muted-foreground">
+                                        Download Berita Acara Pekerjaan untuk
+                                        ticket ini. BAP dapat diunduh kapan
+                                        saja, termasuk sebelum ticket selesai
+                                        (draft mode).
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                         <Link
                                             href={`/tickets/${ticket.id}/bap/preview`}
                                             target="_blank"
-                                            className="inline-flex flex-1 min-w-[140px]"
+                                            className="inline-flex min-w-[140px] flex-1"
                                         >
-                                            <Button size="sm" variant="outline" className="w-full">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="w-full"
+                                            >
                                                 <FileText className="mr-2 size-4" />
                                                 Preview BAP
                                             </Button>
                                         </Link>
                                         <Link
                                             href={`/tickets/${ticket.id}/bap/download`}
-                                            className="inline-flex flex-1 min-w-[140px]"
+                                            className="inline-flex min-w-[140px] flex-1"
                                         >
-                                            <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+                                            <Button
+                                                size="sm"
+                                                className="w-full bg-blue-600 hover:bg-blue-700"
+                                            >
                                                 <Download className="mr-2 size-4" />
                                                 Download BAP
                                             </Button>
                                         </Link>
                                     </div>
                                     {!ticket.completed_at && (
-                                        <div className="mt-3 flex items-start gap-2 rounded-md bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 p-2">
-                                            <span className="text-yellow-600 dark:text-yellow-400 text-xs">
-                                                <strong>Draft Mode:</strong> BAP ini masih dalam mode draft. Data akan otomatis terisi setelah ticket complete.
+                                        <div className="mt-3 flex items-start gap-2 rounded-md border border-yellow-200 bg-yellow-50 p-2 dark:border-yellow-800 dark:bg-yellow-950/20">
+                                            <span className="text-xs text-yellow-600 dark:text-yellow-400">
+                                                <strong>Draft Mode:</strong> BAP
+                                                ini masih dalam mode draft. Data
+                                                akan otomatis terisi setelah
+                                                ticket complete.
                                             </span>
                                         </div>
                                     )}
@@ -882,9 +931,12 @@ export default function Timeline({ ticket }: Props) {
 
                             {/* Completion Documents */}
                             {ticket.completed_at &&
-                                ((ticket.ct_bad_part && ticket.ct_bad_part.length > 0) ||
-                                    (ticket.ct_good_part && ticket.ct_good_part.length > 0) ||
-                                    (ticket.bap_file && ticket.bap_file.length > 0)) && (
+                                ((ticket.ct_bad_part &&
+                                    ticket.ct_bad_part.length > 0) ||
+                                    (ticket.ct_good_part &&
+                                        ticket.ct_good_part.length > 0) ||
+                                    (ticket.bap_file &&
+                                        ticket.bap_file.length > 0)) && (
                                     <div className="border-t-2 border-dashed pt-4">
                                         <div className="bg-success/5 rounded-lg p-4">
                                             <p className="text-success mb-4 flex items-center gap-2 text-base font-bold">
@@ -892,108 +944,153 @@ export default function Timeline({ ticket }: Props) {
                                                 Completion Documents
                                             </p>
                                             <div className="space-y-4">
-                                                {ticket.ct_bad_part && ticket.ct_bad_part.length > 0 && (
-                                                    <div>
-                                                        <p className="mb-2 text-sm font-semibold text-muted-foreground">
-                                                            CT Bad Part ({ticket.ct_bad_part.length})
-                                                        </p>
-                                                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                                            {ticket.ct_bad_part.map((file, index) => (
-                                                                <a
-                                                                    key={index}
-                                                                    href={`/tickets/${ticket.id}/download/ct_bad_part/${index}`}
-                                                                    download
-                                                                    className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/50 transition-all hover:border-primary hover:shadow-md"
-                                                                >
-                                                                    <img
-                                                                        src={`/storage/${file}`}
-                                                                        alt={`CT Bad Part ${index + 1}`}
-                                                                        className="size-full object-cover transition-transform group-hover:scale-110"
-                                                                        onError={(e) => {
-                                                                            const target = e.target as HTMLImageElement;
-                                                                            target.style.display = 'none';
-                                                                            const parent = target.parentElement;
-                                                                            if (parent) {
-                                                                                parent.innerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-muted-foreground">Image not found</p></div>';
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                                                                        <Download className="size-6 text-white" />
-                                                                    </div>
-                                                                </a>
-                                                            ))}
+                                                {ticket.ct_bad_part &&
+                                                    ticket.ct_bad_part.length >
+                                                        0 && (
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <AlertCircle className="size-5 text-red-500" />
+                                                                <h4 className="text-sm font-semibold text-red-700 dark:text-red-400">
+                                                                    CT Bad Part (
+                                                                    {
+                                                                        ticket
+                                                                            .ct_bad_part
+                                                                            .length
+                                                                    }{' '}
+                                                                    {ticket
+                                                                        .ct_bad_part
+                                                                        .length >
+                                                                    1
+                                                                        ? 'files'
+                                                                        : 'file'}
+                                                                    )
+                                                                </h4>
+                                                            </div>
+                                                            <MediaGallery
+                                                                items={ticket.ct_bad_part.map(
+                                                                    (
+                                                                        file,
+                                                                        index,
+                                                                    ) => ({
+                                                                        url: `/storage/${file}`,
+                                                                        title: `CT Bad Part ${index + 1}`,
+                                                                        description:
+                                                                            'Komponen Rusak',
+                                                                        type: 'image' as const,
+                                                                    }),
+                                                                )}
+                                                                columns={3}
+                                                            />
                                                         </div>
-                                                    </div>
-                                                )}
-                                                {ticket.ct_good_part && ticket.ct_good_part.length > 0 && (
-                                                    <div>
-                                                        <p className="mb-2 text-sm font-semibold text-muted-foreground">
-                                                            CT Good Part ({ticket.ct_good_part.length})
-                                                        </p>
-                                                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                                            {ticket.ct_good_part.map((file, index) => (
-                                                                <a
-                                                                    key={index}
-                                                                    href={`/tickets/${ticket.id}/download/ct_good_part/${index}`}
-                                                                    download
-                                                                    className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/50 transition-all hover:border-primary hover:shadow-md"
-                                                                >
-                                                                    <img
-                                                                        src={`/storage/${file}`}
-                                                                        alt={`CT Good Part ${index + 1}`}
-                                                                        className="size-full object-cover transition-transform group-hover:scale-110"
-                                                                        onError={(e) => {
-                                                                            const target = e.target as HTMLImageElement;
-                                                                            target.style.display = 'none';
-                                                                            const parent = target.parentElement;
-                                                                            if (parent) {
-                                                                                parent.innerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-muted-foreground">Image not found</p></div>';
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                                                                        <Download className="size-6 text-white" />
-                                                                    </div>
-                                                                </a>
-                                                            ))}
+                                                    )}
+
+                                                {/* Before/After Comparison */}
+                                                {ticket.ct_bad_part &&
+                                                    ticket.ct_bad_part.length >
+                                                        0 &&
+                                                    ticket.ct_good_part &&
+                                                    ticket.ct_good_part.length >
+                                                        0 && (
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <CheckCircle2 className="size-5 text-purple-500" />
+                                                                <h4 className="text-sm font-semibold text-purple-700 dark:text-purple-400">
+                                                                    Before/After
+                                                                    Comparison
+                                                                </h4>
+                                                            </div>
+                                                            <BeforeAfterComparison
+                                                                before={`/storage/${ticket.ct_bad_part[0]}`}
+                                                                after={`/storage/${ticket.ct_good_part[0]}`}
+                                                            />
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Drag slider untuk
+                                                                membandingkan
+                                                                komponen rusak
+                                                                dan komponen
+                                                                pengganti
+                                                            </p>
                                                         </div>
-                                                    </div>
-                                                )}
-                                                {ticket.bap_file && ticket.bap_file.length > 0 && (
-                                                    <div>
-                                                        <p className="mb-2 text-sm font-semibold text-muted-foreground">
-                                                            BAP Files ({ticket.bap_file.length})
-                                                        </p>
-                                                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                                            {ticket.bap_file.map((file, index) => (
-                                                                <a
-                                                                    key={index}
-                                                                    href={`/tickets/${ticket.id}/download/bap_file/${index}`}
-                                                                    download
-                                                                    className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/50 transition-all hover:border-primary hover:shadow-md"
-                                                                >
-                                                                    <img
-                                                                        src={`/storage/${file}`}
-                                                                        alt={`BAP ${index + 1}`}
-                                                                        className="size-full object-cover transition-transform group-hover:scale-110"
-                                                                        onError={(e) => {
-                                                                            const target = e.target as HTMLImageElement;
-                                                                            target.style.display = 'none';
-                                                                            const parent = target.parentElement;
-                                                                            if (parent) {
-                                                                                parent.innerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-muted-foreground">Image not found</p></div>';
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                                                                        <Download className="size-6 text-white" />
-                                                                    </div>
-                                                                </a>
-                                                            ))}
+                                                    )}
+
+                                                {ticket.ct_good_part &&
+                                                    ticket.ct_good_part.length >
+                                                        0 && (
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <CheckCircle2 className="size-5 text-emerald-500" />
+                                                                <h4 className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                                                                    CT Good Part (
+                                                                    {
+                                                                        ticket
+                                                                            .ct_good_part
+                                                                            .length
+                                                                    }{' '}
+                                                                    {ticket
+                                                                        .ct_good_part
+                                                                        .length >
+                                                                    1
+                                                                        ? 'files'
+                                                                        : 'file'}
+                                                                    )
+                                                                </h4>
+                                                            </div>
+                                                            <MediaGallery
+                                                                items={ticket.ct_good_part.map(
+                                                                    (
+                                                                        file,
+                                                                        index,
+                                                                    ) => ({
+                                                                        url: `/storage/${file}`,
+                                                                        title: `CT Good Part ${index + 1}`,
+                                                                        description:
+                                                                            'Komponen Pengganti',
+                                                                        type: 'image' as const,
+                                                                    }),
+                                                                )}
+                                                                columns={3}
+                                                            />
                                                         </div>
-                                                    </div>
-                                                )}
+                                                    )}
+                                                {ticket.bap_file &&
+                                                    ticket.bap_file.length >
+                                                        0 && (
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <CheckCircle2 className="size-5 text-blue-500" />
+                                                                <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-400">
+                                                                    BAP Files (
+                                                                    {
+                                                                        ticket
+                                                                            .bap_file
+                                                                            .length
+                                                                    }{' '}
+                                                                    {ticket
+                                                                        .bap_file
+                                                                        .length >
+                                                                    1
+                                                                        ? 'files'
+                                                                        : 'file'}
+                                                                    )
+                                                                </h4>
+                                                            </div>
+                                                            <MediaGallery
+                                                                items={ticket.bap_file.map(
+                                                                    (
+                                                                        file,
+                                                                        index,
+                                                                    ) => ({
+                                                                        url: `/storage/${file}`,
+                                                                        title: `BAP File ${index + 1}`,
+                                                                        description:
+                                                                            'Berita Acara Pekerjaan',
+                                                                        type: 'image' as const,
+                                                                    }),
+                                                                )}
+                                                                columns={2}
+                                                            />
+                                                        </div>
+                                                    )}
                                             </div>
                                         </div>
                                     </div>
@@ -1380,7 +1477,7 @@ export default function Timeline({ ticket }: Props) {
                 open={currentStageDialog !== null}
                 onOpenChange={(open) => !open && setCurrentStageDialog(null)}
             >
-                <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+                <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col">
                     <DialogHeader>
                         <DialogTitle>{currentStage?.title}</DialogTitle>
                         <DialogDescription>
@@ -1392,18 +1489,19 @@ export default function Timeline({ ticket }: Props) {
                         // End Case - BAP Form
                         <form
                             onSubmit={handleCompleteSubmit}
-                            className="flex flex-col flex-1 min-h-0"
+                            className="flex min-h-0 flex-1 flex-col"
                         >
                             <div className="flex-1 overflow-y-auto pr-2">
                                 <BapForm
                                     data={completeForm.data}
-                                    setData={(key, value) => completeForm.setData(key, value)}
+                                    setData={(key, value) =>
+                                        completeForm.setData(key, value)
+                                    }
                                     errors={completeForm.errors}
                                     ticket={ticket}
-                                    onZoomPreview={(url, label) => setZoomPreview({ url, label })}
                                 />
                             </div>
-                            <div className="flex justify-end gap-2 pt-4 border-t mt-4 bg-background">
+                            <div className="mt-4 flex justify-end gap-2 border-t bg-background pt-4">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -1426,7 +1524,12 @@ export default function Timeline({ ticket }: Props) {
                                 )}
                                 <Button
                                     type="submit"
-                                    disabled={completeForm.processing}
+                                    disabled={
+                                        completeForm.processing ||
+                                        completeForm.data.ct_bad_part.length === 0 ||
+                                        completeForm.data.ct_good_part.length === 0 ||
+                                        completeForm.data.bap_file.length === 0
+                                    }
                                 >
                                     {completeForm.processing
                                         ? 'Uploading...'
@@ -1601,16 +1704,19 @@ export default function Timeline({ ticket }: Props) {
             </Dialog>
 
             {/* Zoom Preview Dialog */}
-            <Dialog open={!!zoomPreview} onOpenChange={(open) => !open && setZoomPreview(null)}>
+            <Dialog
+                open={!!zoomPreview}
+                onOpenChange={(open) => !open && setZoomPreview(null)}
+            >
                 <DialogContent className="max-w-4xl">
                     {zoomPreview && (
                         <div className="flex flex-col items-center">
                             <img
                                 src={zoomPreview.url}
                                 alt="Preview"
-                                className="max-h-[80vh] w-auto rounded-lg mb-4 object-contain"
+                                className="mb-4 max-h-[80vh] w-auto rounded-lg object-contain"
                             />
-                            <div className="text-center font-semibold text-base mb-2">
+                            <div className="mb-2 text-center text-base font-semibold">
                                 {zoomPreview.label}
                             </div>
                         </div>

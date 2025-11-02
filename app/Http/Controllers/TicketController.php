@@ -99,7 +99,7 @@ class TicketController extends Controller
         if ($request->hasFile('ct_bad_part')) {
             foreach ($request->file('ct_bad_part') as $index => $file) {
                 $extension = $file->getClientOriginalExtension();
-                $filename = 'CTBAD_' . $validated['ticket_number'] . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $filename = 'CTBAD_'.$validated['ticket_number'].'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
                 $ctBadPaths[] = $file->storeAs('tickets/ct_bad_parts', $filename, 'public');
             }
         }
@@ -110,7 +110,7 @@ class TicketController extends Controller
         if ($request->hasFile('ct_good_part')) {
             foreach ($request->file('ct_good_part') as $index => $file) {
                 $extension = $file->getClientOriginalExtension();
-                $filename = 'CTGOOD_' . $validated['ticket_number'] . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $filename = 'CTGOOD_'.$validated['ticket_number'].'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
                 $ctGoodPaths[] = $file->storeAs('tickets/ct_good_parts', $filename, 'public');
             }
         }
@@ -121,7 +121,7 @@ class TicketController extends Controller
         if ($request->hasFile('bap_file')) {
             foreach ($request->file('bap_file') as $index => $file) {
                 $extension = $file->getClientOriginalExtension();
-                $filename = 'BAP_' . $validated['ticket_number'] . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $filename = 'BAP_'.$validated['ticket_number'].'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
                 $bapPaths[] = $file->storeAs('tickets/bap_files', $filename, 'public');
             }
         }
@@ -342,7 +342,7 @@ class TicketController extends Controller
         if ($request->hasFile('ct_bad_part')) {
             foreach ($request->file('ct_bad_part') as $index => $file) {
                 $extension = $file->getClientOriginalExtension();
-                $filename = 'CTBAD_' . $ticket->ticket_number . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $filename = 'CTBAD_'.$ticket->ticket_number.'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
                 $ctBadPaths[] = $file->storeAs('tickets/ct_bad_parts', $filename, 'public');
             }
         }
@@ -352,7 +352,7 @@ class TicketController extends Controller
         if ($request->hasFile('ct_good_part')) {
             foreach ($request->file('ct_good_part') as $index => $file) {
                 $extension = $file->getClientOriginalExtension();
-                $filename = 'CTGOOD_' . $ticket->ticket_number . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $filename = 'CTGOOD_'.$ticket->ticket_number.'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
                 $ctGoodPaths[] = $file->storeAs('tickets/ct_good_parts', $filename, 'public');
             }
         }
@@ -362,7 +362,7 @@ class TicketController extends Controller
         if ($request->hasFile('bap_file')) {
             foreach ($request->file('bap_file') as $index => $file) {
                 $extension = $file->getClientOriginalExtension();
-                $filename = 'BAP_' . $ticket->ticket_number . '_' . $scheduleDate . '_' . ($index + 1) . '.' . $extension;
+                $filename = 'BAP_'.$ticket->ticket_number.'_'.$scheduleDate.'_'.($index + 1).'.'.$extension;
                 $bapPaths[] = $file->storeAs('tickets/bap_files', $filename, 'public');
             }
         }

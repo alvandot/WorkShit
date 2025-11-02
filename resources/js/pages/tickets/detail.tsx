@@ -124,8 +124,7 @@ const statusColors: Record<string, string> = {
         'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     'In Progress':
         'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-    Finish:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    Finish: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
     Closed: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
 };
 
@@ -198,7 +197,7 @@ export default function Detail({ ticket }: Props) {
 
             <div className="space-y-6">
                 <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 shadow-lg starting:translate-y-4 starting:opacity-0">
-                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_theme(colors.primary/18),_transparent_65%)]" />
+                    <div className="bg-[radial-gradient(circle_at_top,_theme(colors.primary/18),_transparent_65%)] absolute inset-0 -z-10" />
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-wrap items-start justify-between gap-5">
                             <div className="flex items-start gap-4">
@@ -213,30 +212,43 @@ export default function Detail({ ticket }: Props) {
                                 </Link>
                                 <div className="space-y-4">
                                     <div className="flex flex-wrap items-center gap-3">
-                                        <Badge className={statusColors[ticket.status]}>
+                                        <Badge
+                                            className={
+                                                statusColors[ticket.status]
+                                            }
+                                        >
                                             {ticket.status}
                                         </Badge>
                                         {ticket.needs_revisit && (
-                                            <Badge variant="destructive" className="rounded-full">
+                                            <Badge
+                                                variant="destructive"
+                                                className="rounded-full"
+                                            >
                                                 Needs Revisit
                                             </Badge>
                                         )}
                                         {ticket.deleted_at && (
-                                            <Badge variant="outline" className="rounded-full border-white/40 bg-white/10 text-white dark:text-foreground">
+                                            <Badge
+                                                variant="outline"
+                                                className="rounded-full border-white/40 bg-white/10 text-white dark:text-foreground"
+                                            >
                                                 Archived
                                             </Badge>
                                         )}
                                     </div>
                                     <div className="space-y-2">
-                                        <h1 className="text-balance text-3xl font-bold sm:text-4xl">
+                                        <h1 className="text-3xl font-bold text-balance sm:text-4xl">
                                             Ticket Detail Overview
                                         </h1>
                                         <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                                            Review every activity, scheduling decision, and document linked to this ticket to keep stakeholders aligned.
+                                            Review every activity, scheduling
+                                            decision, and document linked to
+                                            this ticket to keep stakeholders
+                                            aligned.
                                         </p>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                                        <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 font-mono uppercase tracking-[0.3em]">
+                                        <span className="flex items-center gap-2 rounded-full border border-white/30 bg-white/30 px-3 py-1 font-mono tracking-[0.3em] uppercase">
                                             #{ticket.ticket_number}
                                         </span>
                                         {ticket.case_id && (
@@ -250,7 +262,8 @@ export default function Detail({ ticket }: Props) {
                                             </span>
                                         )}
                                         <span className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1">
-                                            Current Visit: {ticket.current_visit}
+                                            Current Visit:{' '}
+                                            {ticket.current_visit}
                                         </span>
                                     </div>
                                 </div>
@@ -283,14 +296,16 @@ export default function Detail({ ticket }: Props) {
                                     >
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                                                <p className="text-xs font-semibold tracking-[0.3em] text-muted-foreground uppercase">
                                                     {metric.label}
                                                 </p>
                                                 <p className="mt-3 text-2xl font-bold">
                                                     {metric.value}
                                                 </p>
                                             </div>
-                                            <div className={`rounded-full p-2 ${metric.accent}`}>
+                                            <div
+                                                className={`rounded-full p-2 ${metric.accent}`}
+                                            >
                                                 <Icon className="size-5" />
                                             </div>
                                         </div>

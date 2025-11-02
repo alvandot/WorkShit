@@ -43,4 +43,33 @@ class Engineer extends Model
     {
         return $this->hasMany(SpecialPlace::class);
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    public function scopeWithSpecialPlaces($query)
+    {
+        return $query->whereHas('specialPlaces');
+    }
+
+    public function scopeSearch($query, string $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('employee_code', 'like', "%{$search}%");
+        });
+    }
+
+    public function scopeByProvince($query, int $provinceId)
+    {
+        return $query->where('primary_province_id', $provinceId);
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreEngineerRequest;
+use App\Http\Requests\UpdateEngineerRequest;
 use App\Models\Engineer;
 use App\Models\Province;
 use Illuminate\Http\RedirectResponse;
@@ -20,19 +22,15 @@ class EngineerController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->string('search')->toString();
-            $query->where(function ($builder) use ($search) {
-                $builder->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('employee_code', 'like', "%{$search}%");
-            });
+            $query->search($search);
         }
 
         if ($request->filled('status')) {
             $status = strtolower($request->string('status')->toString());
             if ($status === 'active') {
-                $query->where('is_active', true);
+                $query->active();
             } elseif ($status === 'inactive') {
-                $query->where('is_active', false);
+                $query->inactive();
             }
         }
 
@@ -43,8 +41,8 @@ class EngineerController extends Controller
 
         $stats = [
             'total' => Engineer::count(),
-            'active' => Engineer::where('is_active', true)->count(),
-            'with_special_places' => Engineer::whereHas('specialPlaces')->count(),
+            'active' => Engineer::active()->count(),
+            'with_special_places' => Engineer::withSpecialPlaces()->count(),
         ];
 
         return Inertia::render('engineers/index', [
@@ -72,25 +70,9 @@ class EngineerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreEngineerRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'employee_code' => 'nullable|string|max:50|unique:engineers,employee_code',
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:engineers,email',
-            'phone' => 'nullable|string|max:50',
-            'phone_number' => 'nullable|string|max:20',
-            'specialization' => 'nullable|string|max:255',
-            'experience_years' => 'nullable|integer|min:0|max:60',
-            'primary_province_id' => 'nullable|exists:provinces,id',
-            'hired_at' => 'nullable|date',
-            'is_active' => 'sometimes|boolean',
-            'notes' => 'nullable|string',
-        ]);
-
-        $validated['is_active'] = $request->boolean('is_active', true);
-
-        Engineer::create($validated);
+        Engineer::create($request->validated());
 
         return redirect()
             ->route('engineers.index')
@@ -115,25 +97,9 @@ class EngineerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Engineer $engineer): RedirectResponse
+    public function update(UpdateEngineerRequest $request, Engineer $engineer): RedirectResponse
     {
-        $validated = $request->validate([
-            'employee_code' => 'nullable|string|max:50|unique:engineers,employee_code,'.$engineer->id,
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:engineers,email,'.$engineer->id,
-            'phone' => 'nullable|string|max:50',
-            'phone_number' => 'nullable|string|max:20',
-            'specialization' => 'nullable|string|max:255',
-            'experience_years' => 'nullable|integer|min:0|max:60',
-            'primary_province_id' => 'nullable|exists:provinces,id',
-            'hired_at' => 'nullable|date',
-            'is_active' => 'sometimes|boolean',
-            'notes' => 'nullable|string',
-        ]);
-
-        $validated['is_active'] = $request->boolean('is_active', true);
-
-        $engineer->update($validated);
+        $engineer->update($request->validated());
 
         return redirect()
             ->route('engineers.index')

@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Facades\DB;
-
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TicketSeeder extends Seeder
 {
@@ -84,18 +83,18 @@ class TicketSeeder extends Seeder
 
         foreach ($dummyTickets as $i => $data) {
             DB::table('tickets')->insert([
-                'ticket_number' => 'TCK-DUMMY-' . ($i + 1),
-                'case_id' => 'DUMMY-' . ($i + 1),
+                'ticket_number' => 'TCK-DUMMY-'.($i + 1),
+                'case_id' => 'DUMMY-'.($i + 1),
                 'company' => 'PT Dummy Company',
-                'address' => 'Jl. Dummy No. ' . ($i + 1),
-                'phone_number' => '+6281234567' . ($i + 1),
+                'address' => 'Jl. Dummy No. '.($i + 1),
+                'phone_number' => '+6281234567'.($i + 1),
                 'pic' => $data['pic'],
-                'phone_number_2' => '+6221123456' . ($i + 1),
+                'phone_number_2' => '+6221123456'.($i + 1),
                 'email' => $data['email'],
-                'unit' => 'Unit Dummy ' . ($i + 1),
-                'serial_number' => 'SN-DUMMY-' . ($i + 1),
-                'product_number' => 'PN-DUMMY-' . ($i + 1),
-                'problem' => 'Dummy problem ' . ($i + 1),
+                'unit' => 'Unit Dummy '.($i + 1),
+                'serial_number' => 'SN-DUMMY-'.($i + 1),
+                'product_number' => 'PN-DUMMY-'.($i + 1),
+                'problem' => 'Dummy problem '.($i + 1),
                 'schedule' => now(),
                 'deadline' => now()->addDays(3),
                 'status' => 'Open',

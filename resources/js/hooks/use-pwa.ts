@@ -7,19 +7,27 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function usePWA() {
     const [isInstallable, setIsInstallable] = useState(false);
-    const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+    const [deferredPrompt, setDeferredPrompt] =
+        useState<BeforeInstallPromptEvent | null>(null);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
     useEffect(() => {
         // Register service worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker
+                    .register('/sw.js')
                     .then((registration) => {
-                        console.log('[PWA] Service Worker registered:', registration);
+                        console.log(
+                            '[PWA] Service Worker registered:',
+                            registration,
+                        );
                     })
                     .catch((error) => {
-                        console.error('[PWA] Service Worker registration failed:', error);
+                        console.error(
+                            '[PWA] Service Worker registration failed:',
+                            error,
+                        );
                     });
             });
         }
@@ -40,13 +48,19 @@ export function usePWA() {
         const handleOnline = () => setIsOffline(false);
         const handleOffline = () => setIsOffline(true);
 
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.addEventListener(
+            'beforeinstallprompt',
+            handleBeforeInstallPrompt,
+        );
         window.addEventListener('appinstalled', handleAppInstalled);
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
         return () => {
-            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.removeEventListener(
+                'beforeinstallprompt',
+                handleBeforeInstallPrompt,
+            );
             window.removeEventListener('appinstalled', handleAppInstalled);
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);

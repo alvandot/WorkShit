@@ -32,7 +32,7 @@ export const useAriaAttributes = (options: AccessibilityOptions) => {
 
         return () => {
             // Cleanup attributes on unmount
-            Object.keys(options).forEach(key => {
+            Object.keys(options).forEach((key) => {
                 element.removeAttribute(key);
             });
         };
@@ -53,7 +53,7 @@ export const useKeyboardNavigation = (
     options: {
         preventDefault?: boolean;
         stopPropagation?: boolean;
-    } = {}
+    } = {},
 ) => {
     const { preventDefault = true, stopPropagation = false } = options;
 
@@ -181,12 +181,17 @@ export const useScreenReaderAnnouncement = () => {
 
         return () => {
             if (announcementRef.current && announcementRef.current.parentNode) {
-                announcementRef.current.parentNode.removeChild(announcementRef.current);
+                announcementRef.current.parentNode.removeChild(
+                    announcementRef.current,
+                );
             }
         };
     }, []);
 
-    const announce = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+    const announce = (
+        message: string,
+        priority: 'polite' | 'assertive' = 'polite',
+    ) => {
         if (announcementRef.current) {
             announcementRef.current.setAttribute('aria-live', priority);
             announcementRef.current.textContent = message;

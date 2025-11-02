@@ -37,7 +37,6 @@ class ComprehensiveDatabaseSeeder extends Seeder
         // 2. Create Tickets with different statuses
         $this->command->info('🎫 Creating tickets...');
 
-
         $openTickets = Ticket::factory(5)->create([
             'status' => 'Open',
             'assigned_to' => null,

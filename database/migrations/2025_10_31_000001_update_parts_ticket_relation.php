@@ -1,4 +1,5 @@
 <?php
+
 // Migration to update parts and tickets relationship
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

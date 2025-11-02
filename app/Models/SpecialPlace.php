@@ -38,4 +38,35 @@ class SpecialPlace extends Model
     {
         return $this->belongsTo(Engineer::class);
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    public function scopeUnassigned($query)
+    {
+        return $query->whereNull('engineer_id');
+    }
+
+    public function scopeByProvince($query, int $provinceId)
+    {
+        return $query->where('province_id', $provinceId);
+    }
+
+    public function scopeSearch($query, string $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('city', 'like', "%{$search}%")
+                ->orWhereHas('engineer', function ($relation) use ($search) {
+                    $relation->where('name', 'like', "%{$search}%");
+                });
+        });
+    }
 }

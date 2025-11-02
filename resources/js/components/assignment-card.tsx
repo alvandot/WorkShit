@@ -9,15 +9,15 @@ import {
 } from '@/components/ui/card';
 import { TicketAssignment } from '@/types';
 import { Link } from '@inertiajs/react';
+import { format } from 'date-fns';
 import {
     Calendar,
     Clock,
+    ExternalLink,
     FileText,
     User,
     UserCircle,
-    ExternalLink,
 } from 'lucide-react';
-import { format } from 'date-fns';
 
 interface AssignmentCardProps {
     assignment: TicketAssignment;
@@ -36,11 +36,11 @@ export default function AssignmentCard({ assignment }: AssignmentCardProps) {
     };
 
     return (
-        <Card className="hover:border-primary/50 transition-colors">
+        <Card className="transition-colors hover:border-primary/50">
             <CardHeader>
                 <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="flex items-center gap-2 text-base">
                             <FileText className="size-4 shrink-0" />
                             <span className="truncate">
                                 {ticket?.ticket_number}
@@ -87,7 +87,10 @@ export default function AssignmentCard({ assignment }: AssignmentCardProps) {
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <User className="size-4 shrink-0" />
                         <span>
-                            by <span className="text-foreground">{assigned_by_user?.name}</span>
+                            by{' '}
+                            <span className="text-foreground">
+                                {assigned_by_user?.name}
+                            </span>
                         </span>
                     </div>
 
@@ -96,7 +99,10 @@ export default function AssignmentCard({ assignment }: AssignmentCardProps) {
                             <Clock className="size-4 shrink-0" />
                             <span>
                                 Scheduled{' '}
-                                {format(new Date(ticket.schedule), 'MMM d, yyyy')}
+                                {format(
+                                    new Date(ticket.schedule),
+                                    'MMM d, yyyy',
+                                )}
                             </span>
                         </div>
                     )}
@@ -104,16 +110,21 @@ export default function AssignmentCard({ assignment }: AssignmentCardProps) {
 
                 {assignment.notes && (
                     <div className="rounded-md bg-muted p-2 text-sm">
-                        <p className="text-muted-foreground line-clamp-2">
+                        <p className="line-clamp-2 text-muted-foreground">
                             {assignment.notes}
                         </p>
                     </div>
                 )}
 
                 <div className="flex items-center gap-2 pt-2">
-                    <Button asChild size="sm" variant="outline" className="flex-1">
+                    <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                    >
                         <Link href={`/tickets/${ticket?.id}`}>
-                            <ExternalLink className="size-3.5 mr-1.5" />
+                            <ExternalLink className="mr-1.5 size-3.5" />
                             View Ticket
                         </Link>
                     </Button>

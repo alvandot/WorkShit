@@ -29,7 +29,7 @@ class BapService
         $pdf->setOptions([
             'isHtml5ParserEnabled' => true,
             'isRemoteEnabled' => false,
-            'defaultFont' => 'dejavu sans'
+            'defaultFont' => 'dejavu sans',
         ]);
 
         return $pdf;
@@ -54,7 +54,7 @@ class BapService
             'visit_date' => $ticket->visit_date
                 ? $ticket->visit_date->format('d/m/Y')
                 : ($ticket->schedule ? $ticket->schedule->format('d/m/Y') : now()->format('d/m/Y')),
-            'visit_time' => $ticket->visit_time ?? now()->format('H:i') . ' WIB',
+            'visit_time' => $ticket->visit_time ?? now()->format('H:i').' WIB',
 
             // Case Details
             'serial_number' => $ticket->serial_number ?? '',
@@ -85,7 +85,7 @@ class BapService
                 ? $ticket->resolved_date->format('d/m/Y')
                 : ($ticket->completed_at ? $ticket->completed_at->format('d/m/Y') : now()->format('d/m/Y')),
             'resolved_time' => $ticket->resolved_time
-                ?? ($ticket->completed_at ? $ticket->completed_at->format('H:i') . ' WIB' : now()->format('H:i') . ' WIB'),
+                ?? ($ticket->completed_at ? $ticket->completed_at->format('H:i').' WIB' : now()->format('H:i').' WIB'),
 
             // Engineer Information
             'engineer_name' => $ticket->assignedTo?->name ?? '',
@@ -108,6 +108,7 @@ class BapService
     private function generateTempBapCode(Ticket $ticket): string
     {
         $date = Carbon::now()->format('Ymd');
+
         return sprintf('BAP-%s-DRAFT', $date);
     }
 

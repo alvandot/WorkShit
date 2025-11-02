@@ -27,7 +27,8 @@ export default function EngineerWorkloadCard({
 }: EngineerWorkloadCardProps) {
     const completionRate =
         engineer.total_tickets_count > 0
-            ? (engineer.completed_tickets_count / engineer.total_tickets_count) *
+            ? (engineer.completed_tickets_count /
+                  engineer.total_tickets_count) *
               100
             : 0;
 
@@ -55,11 +56,11 @@ export default function EngineerWorkloadCard({
     };
 
     return (
-        <Card className="hover:border-primary/50 transition-colors">
+        <Card className="transition-colors hover:border-primary/50">
             <CardHeader>
                 <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="flex items-center gap-2 text-base">
                             <UserCircle className="size-4 shrink-0" />
                             <span className="truncate">{engineer.name}</span>
                         </CardTitle>
@@ -121,15 +122,8 @@ export default function EngineerWorkloadCard({
                     <Progress value={completionRate} className="h-2" />
                 </div>
 
-                <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                >
-                    <Link
-                        href={`/assignments?engineer_id=${engineer.id}`}
-                    >
+                <Button asChild size="sm" variant="outline" className="w-full">
+                    <Link href={`/assignments?engineer_id=${engineer.id}`}>
                         View Assignments
                     </Link>
                 </Button>

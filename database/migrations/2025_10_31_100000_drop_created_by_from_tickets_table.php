@@ -1,4 +1,5 @@
 <?php
+
 // Migration to drop created_by from tickets table
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

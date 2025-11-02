@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSpecialPlaceRequest;
+use App\Http\Requests\UpdateSpecialPlaceRequest;
 use App\Models\Engineer;
 use App\Models\Province;
 use App\Models\SpecialPlace;
@@ -21,26 +23,20 @@ class SpecialPlaceController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->string('search')->toString();
-            $query->where(function ($builder) use ($search) {
-                $builder->where('name', 'like', "%{$search}%")
-                    ->orWhere('city', 'like', "%{$search}%")
-                    ->orWhereHas('engineer', function ($relation) use ($search) {
-                        $relation->where('name', 'like', "%{$search}%");
-                    });
-            });
+            $query->search($search);
         }
 
         if ($request->filled('status')) {
             $status = strtolower($request->string('status')->toString());
             if ($status === 'active') {
-                $query->where('is_active', true);
+                $query->active();
             } elseif ($status === 'inactive') {
-                $query->where('is_active', false);
+                $query->inactive();
             }
         }
 
         if ($request->filled('province')) {
-            $query->where('province_id', $request->integer('province'));
+            $query->byProvince($request->integer('province'));
         }
 
         $specialPlaces = $query
@@ -50,8 +46,8 @@ class SpecialPlaceController extends Controller
 
         $stats = [
             'total' => SpecialPlace::count(),
-            'active' => SpecialPlace::where('is_active', true)->count(),
-            'unassigned' => SpecialPlace::whereNull('engineer_id')->count(),
+            'active' => SpecialPlace::active()->count(),
+            'unassigned' => SpecialPlace::unassigned()->count(),
         ];
 
         return Inertia::render('special-places/index', [
@@ -80,23 +76,9 @@ class SpecialPlaceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSpecialPlaceRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'province_id' => 'required|exists:provinces,id',
-            'engineer_id' => 'nullable|exists:engineers,id',
-            'city' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_phone' => 'nullable|string|max:50',
-            'is_active' => 'sometimes|boolean',
-            'notes' => 'nullable|string',
-        ]);
-
-        $validated['is_active'] = $request->boolean('is_active', true);
-
-        SpecialPlace::create($validated);
+        SpecialPlace::create($request->validated());
 
         return redirect()->route('special-places.index')->with('success', 'Special Place created successfully.');
     }
@@ -118,23 +100,9 @@ class SpecialPlaceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SpecialPlace $specialPlace): RedirectResponse
+    public function update(UpdateSpecialPlaceRequest $request, SpecialPlace $specialPlace): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'province_id' => 'required|exists:provinces,id',
-            'engineer_id' => 'nullable|exists:engineers,id',
-            'city' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_phone' => 'nullable|string|max:50',
-            'is_active' => 'sometimes|boolean',
-            'notes' => 'nullable|string',
-        ]);
-
-        $validated['is_active'] = $request->boolean('is_active', true);
-
-        $specialPlace->update($validated);
+        $specialPlace->update($request->validated());
 
         return redirect()->route('special-places.index')->with('success', 'Special Place updated successfully.');
     }
