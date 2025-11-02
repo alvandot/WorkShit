@@ -41,19 +41,19 @@ const mainNavItems: NavItem[] = [
         items: [
             {
                 title: 'Overview',
-                href: '/analytics/overview',
+                href: '/analytics?tab=overview',
             },
             {
                 title: 'Trends',
-                href: '/analytics/trends',
+                href: '/analytics?tab=trends',
             },
             {
                 title: 'Performance',
-                href: '/analytics/performance',
+                href: '/analytics?tab=performance',
             },
             {
                 title: 'Real-time',
-                href: '/analytics/realtime',
+                href: '/analytics?tab=realtime',
             },
         ],
     },

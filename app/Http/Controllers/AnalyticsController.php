@@ -25,12 +25,14 @@ class AnalyticsController extends Controller
     {
         $startDate = $request->get('start_date', now()->subDays(30)->startOfDay());
         $endDate = $request->get('end_date', now()->endOfDay());
+        $tab = $request->get('tab', 'overview');
 
         return Inertia::render('analytics/index', [
             'filters' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'period' => $request->get('period', 'daily'),
+                'tab' => $tab,
             ],
         ]);
     }

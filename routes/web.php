@@ -19,16 +19,30 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Help & Support
+    Route::get('help', function () {
+        return Inertia::render('help/index');
+    })->name('help.index');
+
     // Analytics routes
     Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
-    Route::get('analytics/overview', [AnalyticsController::class, 'overview'])->name('analytics.overview');
-    Route::get('analytics/trends', [AnalyticsController::class, 'trends'])->name('analytics.trends');
-    Route::get('analytics/performance', [AnalyticsController::class, 'performance'])->name('analytics.performance');
-    Route::get('analytics/realtime', [AnalyticsController::class, 'realtime'])->name('analytics.realtime');
-    Route::get('analytics/tickets', [AnalyticsController::class, 'tickets'])->name('analytics.tickets');
-    Route::get('analytics/engineers', [AnalyticsController::class, 'engineers'])->name('analytics.engineers');
-    Route::get('analytics/parts', [AnalyticsController::class, 'parts'])->name('analytics.parts');
-    Route::get('analytics/comparisons', [AnalyticsController::class, 'comparisons'])->name('analytics.comparisons');
+    Route::get('analytics/overview', fn() => redirect('/analytics?tab=overview'))->name('analytics.overview');
+    Route::get('analytics/trends', fn() => redirect('/analytics?tab=trends'))->name('analytics.trends');
+    Route::get('analytics/performance', fn() => redirect('/analytics?tab=performance'))->name('analytics.performance');
+    Route::get('analytics/realtime', fn() => redirect('/analytics?tab=realtime'))->name('analytics.realtime');
+
+    // Analytics API endpoints (untuk fetch data via AJAX)
+    Route::prefix('api/analytics')->group(function () {
+        Route::get('overview', [AnalyticsController::class, 'overview'])->name('api.analytics.overview');
+        Route::get('trends', [AnalyticsController::class, 'trends'])->name('api.analytics.trends');
+        Route::get('performance', [AnalyticsController::class, 'performance'])->name('api.analytics.performance');
+        Route::get('realtime', [AnalyticsController::class, 'realtime'])->name('api.analytics.realtime');
+        Route::get('tickets', [AnalyticsController::class, 'tickets'])->name('api.analytics.tickets');
+        Route::get('engineers', [AnalyticsController::class, 'engineers'])->name('api.analytics.engineers');
+        Route::get('parts', [AnalyticsController::class, 'parts'])->name('api.analytics.parts');
+        Route::get('comparisons', [AnalyticsController::class, 'comparisons'])->name('api.analytics.comparisons');
+    });
+
     Route::get('analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
 
     Route::resource('engineers', EngineerController::class)->except(['show']);

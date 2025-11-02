@@ -60,6 +60,7 @@ interface PageProps {
         start_date: string;
         end_date: string;
         period: string;
+        tab?: string;
     };
 }
 
@@ -191,7 +192,7 @@ export default function AnalyticsIndex({ filters }: PageProps) {
     const [comparisonsData, setComparisonsData] =
         useState<ComparisonsData | null>(null);
     const [autoRefresh, setAutoRefresh] = useState(false);
-    const [activeTab, setActiveTab] = useState('overview');
+    const [activeTab, setActiveTab] = useState(filters.tab || 'overview');
 
     const fetchData = async () => {
         setLoading(true);
@@ -211,20 +212,20 @@ export default function AnalyticsIndex({ filters }: PageProps) {
                 parts,
                 comparisons,
             ] = await Promise.all([
-                fetch(`/analytics/overview?${params}`).then((r) => r.json()),
-                fetch(`/analytics/trends?${params}`).then((r) => r.json()),
-                fetch(`/analytics/performance?${params}`).then((r) => r.json()),
+                fetch(`/api/analytics/overview?${params}`).then((r) => r.json()),
+                fetch(`/api/analytics/trends?${params}`).then((r) => r.json()),
+                fetch(`/api/analytics/performance?${params}`).then((r) => r.json()),
                 fetch(
-                    `/analytics/tickets?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end, group_by: period })}`,
+                    `/api/analytics/tickets?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end, group_by: period })}`,
                 ).then((r) => r.json()),
                 fetch(
-                    `/analytics/engineers?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`,
+                    `/api/analytics/engineers?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`,
                 ).then((r) => r.json()),
                 fetch(
-                    `/analytics/parts?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`,
+                    `/api/analytics/parts?${new URLSearchParams({ start_date: dateRange.start, end_date: dateRange.end })}`,
                 ).then((r) => r.json()),
                 fetch(
-                    `/analytics/comparisons?${new URLSearchParams({ current_start: dateRange.start, current_end: dateRange.end })}`,
+                    `/api/analytics/comparisons?${new URLSearchParams({ current_start: dateRange.start, current_end: dateRange.end })}`,
                 ).then((r) => r.json()),
             ]);
 

@@ -12,6 +12,7 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { resolveUrl } from '@/lib/utils';
 import { type NavItem } from '@/types';
@@ -20,6 +21,9 @@ import { ChevronRight } from 'lucide-react';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
+    const { state } = useSidebar();
+    const isCollapsed = state === 'collapsed';
+
     return (
         <SidebarGroup className="px-2 py-0">
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
@@ -34,15 +38,29 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                             )}
                         >
                             <SidebarMenuItem>
-                                <CollapsibleTrigger asChild>
+                                {isCollapsed ? (
+                                    // Collapsed mode: parent item is clickable link
                                     <SidebarMenuButton
+                                        asChild
                                         tooltip={{ children: item.title }}
                                     >
-                                        {item.icon && <item.icon />}
-                                        <span>{item.title}</span>
-                                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                        <Link href={item.href} prefetch>
+                                            {item.icon && <item.icon />}
+                                            <span>{item.title}</span>
+                                        </Link>
                                     </SidebarMenuButton>
-                                </CollapsibleTrigger>
+                                ) : (
+                                    // Expanded mode: parent item toggles submenu
+                                    <CollapsibleTrigger asChild>
+                                        <SidebarMenuButton
+                                            tooltip={{ children: item.title }}
+                                        >
+                                            {item.icon && <item.icon />}
+                                            <span>{item.title}</span>
+                                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                        </SidebarMenuButton>
+                                    </CollapsibleTrigger>
+                                )}
                                 <CollapsibleContent>
                                     <SidebarMenuSub>
                                         {item.items.map((subItem) => (
