@@ -72,7 +72,7 @@ export function KanbanBoard({ tickets, onStatusChange }: KanbanBoardProps) {
     };
 
     return (
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="scrollable-x flex gap-4 pb-4">
             {columns.map((column) => {
                 const columnTickets = getTicketsByStatus(column.id);
                 return (

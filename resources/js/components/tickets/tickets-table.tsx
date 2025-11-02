@@ -284,8 +284,7 @@ export const TicketsTable = memo(
 
                 {/* Desktop Table View */}
                 <div className="hidden md:block">
-                    <div className="w-full overflow-x-auto">
-                        <Table className="min-w-[720px]">
+                    <Table className="min-w-[720px]">
                             <TableHeader>
                                 <TableRow className="bg-muted/30">
                                     {toggleAll && (
@@ -484,15 +483,15 @@ export const TicketsTable = memo(
                                                     />
                                                 </TableCell>
                                             )}
-                                            <TableCell className="text-muted-foreground">
+                                            <TableCell className="whitespace-nowrap text-muted-foreground">
                                                 {(current_page - 1) * per_page +
                                                     index +
                                                     1}
                                             </TableCell>
-                                            <TableCell className="font-medium">
+                                            <TableCell className="whitespace-nowrap font-medium">
                                                 {ticket.ticket_number}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="whitespace-nowrap">
                                                 {ticket.case_id ? (
                                                     <span className="text-sm">
                                                         {ticket.case_id}
@@ -503,7 +502,7 @@ export const TicketsTable = memo(
                                                     </span>
                                                 )}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="whitespace-nowrap">
                                                 {ticket.company}
                                             </TableCell>
                                             <TableCell className="max-w-xs">
@@ -514,7 +513,7 @@ export const TicketsTable = memo(
                                                     {ticket.problem}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-sm">
+                                            <TableCell className="whitespace-nowrap text-sm">
                                                 {ticket.schedule ? (
                                                     <span>
                                                         {new Date(
@@ -636,7 +635,6 @@ export const TicketsTable = memo(
                                 )}
                             </TableBody>
                         </Table>
-                    </div>
                 </div>
             </div>
         );
